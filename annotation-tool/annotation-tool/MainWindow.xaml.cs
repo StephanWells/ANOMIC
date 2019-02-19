@@ -27,6 +27,7 @@ namespace AnnotationTool
 
         private void btnBrowse_Click(object sender, RoutedEventArgs e)
         {
+            cnvPianoRoll.Children.Clear();
             OpenFileDialog browseDialog = new OpenFileDialog();
             browseDialog.Filter = "MIDI files (*.mid)|*.mid|All files (*.*)|*.*";
 
@@ -37,8 +38,10 @@ namespace AnnotationTool
                 try
                 {
                     midiParse.ParseFile();
+                    NoteParser noteParse = new NoteParser(midiParse);
+                    noteParse.ParseEvents();
 
-                    string tracksText = "";
+                    /*string tracksText = "";
 
                     for (int i = 0; i < midiParse.header.trackNum; i++)
                     {
@@ -47,7 +50,22 @@ namespace AnnotationTool
                         tracksText += "\n";
                     }
 
-                    blkParseOutput.Text = midiParse.HeaderToString() + "\n\n" + tracksText;
+                    blkParseOutput.Text = midiParse.HeaderToString() + "\n\n" + tracksText;*/
+
+                    for (int i = 0; i < noteParse.notes.Count; i++)
+                    {
+                        Note currentNote = noteParse.notes.ElementAt(i);
+
+                        Rectangle noteBar = new Rectangle();
+                        noteBar.Stroke = new SolidColorBrush(Colors.Black);
+                        noteBar.Fill = new SolidColorBrush(Colors.Blue);
+                        noteBar.Width = currentNote.GetDuration();
+                        noteBar.Height = 10;
+                        Canvas.SetLeft(noteBar, currentNote.GetTime());
+                        Canvas.SetBottom(noteBar, (int)currentNote.GetPitch() * 10 - 200);
+                        cnvPianoRoll.Width += currentNote.GetDuration();
+                        cnvPianoRoll.Children.Add(noteBar);
+                    }
                 }
                 catch (InvalidOperationException)
                 {

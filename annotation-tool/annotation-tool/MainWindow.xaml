@@ -5,14 +5,18 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AnnotationTool"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="500">
+        Title="MainWindow" Height="550" Width="1000">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="791*"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Button x:Name="btnBrowse" Content="Browse" HorizontalAlignment="Left" Margin="20,200,0,199" VerticalAlignment="Center" Width="75" RenderTransformOrigin="0.259,4.613" Click="btnBrowse_Click"/>
-        <TextBlock x:Name="blkParseOutput" HorizontalAlignment="Left" TextWrapping="Wrap" Text="MIDI output goes here." VerticalAlignment="Top" Height="500" Width="300" Margin="150,30,0,0"/>
-
+        <ScrollViewer Margin="125,0,0,0" HorizontalScrollBarVisibility="Auto">
+            <Canvas x:Name="cnvPianoRoll" HorizontalAlignment="Left" Height="772" VerticalAlignment="Center" Width="875"/>
+        </ScrollViewer>
+        <!--<ScrollViewer Margin="125,0,0,0">
+            <TextBlock x:Name="blkParseOutput" HorizontalAlignment="Left" TextWrapping="Wrap" Text="MIDI output goes here." VerticalAlignment="Top" Width="330" Margin="0,28,0,0"/>
+        </ScrollViewer>-->
     </Grid>
 </Window>

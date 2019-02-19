@@ -63,6 +63,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ChannelEvent.cs" />
+    <Compile Include="Note.cs" />
+    <Compile Include="NoteParser.cs" />
     <Compile Include="Defs.cs" />
     <Compile Include="Event.cs" />
     <Compile Include="NumMetaEvent.cs" />

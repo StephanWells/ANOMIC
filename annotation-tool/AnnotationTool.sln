@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2035
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "annotation_tool", "WpfApp1\annotation_tool.csproj", "{8285EC6C-A7B8-497E-9BF7-D4708671262F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "annotation_tool", "annotation-tool\annotation_tool.csproj", "{8285EC6C-A7B8-497E-9BF7-D4708671262F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

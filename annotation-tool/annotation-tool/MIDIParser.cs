@@ -56,21 +56,21 @@ namespace AnnotationTool
             if (!(new string(chunkID)).Equals("MThd")) return -1;
 
             // Stores the chunk size - always 6 for MIDI files.
-            uint chunkSize = ByteArrayToUInt(SubArray(index, 4)); index += 4;
+            uint chunkSize = FixedLengthArrayToUInt(SubArray(index, 4)); index += 4;
 
             Console.WriteLine("- Header chunk size: " + chunkSize);
 
             if (chunkSize != 6) return -1;
 
             // Store the format type and track number. If the format type is 0, then the MIDI file will consist of only one track. Otherwise, it will consist of multiple.
-            uint formatType = ByteArrayToUInt(SubArray(index, 2)); index += 2;
-            uint trackNum = ByteArrayToUInt(SubArray(index, 2)); index += 2;
+            uint formatType = FixedLengthArrayToUInt(SubArray(index, 2)); index += 2;
+            uint trackNum = FixedLengthArrayToUInt(SubArray(index, 2)); index += 2;
 
             Console.WriteLine("- Format type: " + formatType + "; Track number: " + trackNum);
 
             if (formatType == 0 && trackNum != 1) return -1;
 
-            uint timeDiv = ByteArrayToUInt(SubArray(index, 2)); index += 2;
+            uint timeDiv = FixedLengthArrayToUInt(SubArray(index, 2)); index += 2;
             TimeDivType timeDivType;
 
             if ((timeDiv & 0x8000) == 0) timeDivType = TimeDivType.PPQ;
@@ -99,7 +99,7 @@ namespace AnnotationTool
             if (!(new string(chunkID)).Equals("MTrk")) return -1;
 
             // Stores the chunk size of the track.
-            uint chunkSize = ByteArrayToUInt(SubArray(index, 4)); index += 4;
+            uint chunkSize = FixedLengthArrayToUInt(SubArray(index, 4)); index += 4;
 
             Console.WriteLine("- Track " + (trackNum + 1) + " chunk size: " + chunkSize);
             tracks[trackNum] = new TrackChunk(chunkID, chunkSize);
@@ -118,7 +118,7 @@ namespace AnnotationTool
                 Console.WriteLine("-- Event:");
 
                 byte[] deltaTimeArray = GetVariableLengthData(index);
-                uint time = ByteArrayToUInt(deltaTimeArray);
+                uint time = VariableLengthArrayToUInt(deltaTimeArray);
                 index += deltaTimeArray.Length;
                 byte type = midi[index++];
 
@@ -275,6 +275,8 @@ namespace AnnotationTool
                     return -1;
             }
 
+            midiEvents.Add(channelEvent);
+
             return index;
         }
 
@@ -302,19 +304,40 @@ namespace AnnotationTool
         // Calculates the BPM from a byte array.
         private float CalculateBPM(byte[] tempoArray)
         {
-            uint tempo = ByteArrayToUInt(tempoArray);
+            uint tempo = FixedLengthArrayToUInt(tempoArray);
 
             return MICROSECONDS_PER_MINUTE / tempo;
         }
 
-        // Converts a byte array of any size to an unsigned integer.
-        private uint ByteArrayToUInt(byte[] byteArray)
+        // Converts a byte array of variable size to an unsigned integer.
+        private uint VariableLengthArrayToUInt(byte[] byteArray)
+        {
+            uint result = (uint)(byteArray[0] & 0x7F);
+            int i = 1;
+
+            /*for (int i = byteArray.Length - 1, j = 0; i >= 0; i--, j++)
+            {
+                result += (uint)(byteArray[i] & 0x7F) * (uint)Math.Pow(0x0100, j);
+            }*/
+
+            while (i < byteArray.Length)
+            {
+                result = result << 7;
+                result += (uint)(byteArray[i] & 0x7F);
+                i++;
+            }
+
+            return result;
+        }
+
+        // Converts a byte array of fixed size to an unsigned integer.
+        private uint FixedLengthArrayToUInt(byte[] byteArray)
         {
             uint result = 0;
 
             for (int i = byteArray.Length - 1, j = 0; i >= 0; i--, j++)
             {
-                result += byteArray[i] * (uint)Math.Pow(0x0100, j);
+                result += (uint)(byteArray[i] & 0x7F) * (uint)Math.Pow(0x0100, j);
             }
 
             return result;
