@@ -102,8 +102,6 @@ namespace AnnotationTool
 
         private void btnBrowse_Click(object sender, RoutedEventArgs e)
         {
-            ResetPianoRoll();
-
             OpenFileDialog browseDialog = new OpenFileDialog
             {
                 Filter = "MIDI files (*.mid)|*.mid|All files (*.*)|*.*"
@@ -116,9 +114,10 @@ namespace AnnotationTool
                 try
                 {
                     midiParse.ParseFile();
+                    quarterNote = (int)midiParse.header.timeDiv;
                     NoteParser noteParse = new NoteParser(midiParse);
                     noteParse.ParseEvents();
-
+                    ResetPianoRoll();
                     PopulateNotesGrid(noteParse);
                 }
                 catch (InvalidOperationException)

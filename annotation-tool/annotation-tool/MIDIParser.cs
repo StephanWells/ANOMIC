@@ -70,7 +70,7 @@ namespace AnnotationTool
 
             if (formatType == 0 && trackNum != 1) return -1;
 
-            uint timeDiv = FixedLengthArrayToUInt(SubArray(index, 2)) & 0x7FFF; index += 2;
+            uint timeDiv = FixedLengthArrayToUInt(SubArray(index, 2))/* & 0x7FFF*/; index += 2;
             TimeDivType timeDivType;
 
             if ((timeDiv & 0x8000) == 0) timeDivType = TimeDivType.PPQ;
@@ -337,7 +337,7 @@ namespace AnnotationTool
 
             for (int i = byteArray.Length - 1, j = 0; i >= 0; i--, j++)
             {
-                result += (uint)(byteArray[i] & 0x7F) * (uint)Math.Pow(0x0100, j);
+                result += (uint)(byteArray[i]) * (uint)Math.Pow(0x0100, j);
             }
 
             return result;
