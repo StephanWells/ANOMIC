@@ -27,20 +27,11 @@ namespace AnnotationTool
                 Event tempEvent = midiEvents.ElementAt(i);
                 timeElapsed += tempEvent.GetTime();
 
-                // Increase the duration of all active notes.
-                /*foreach (KeyValuePair<NotePitch, Stack<Note>> dictEntry in activeNotes)
-                {
-                    foreach (Note note in dictEntry.Value)
-                    {
-                        note.SetDuration(note.GetDuration() + tempEvent.GetTime());
-                    }
-                }*/
-
                 if (tempEvent.GetEventType() == MidiEventType.NoteOn)
                 {
                     ChannelEvent tempNoteEvent = (ChannelEvent)tempEvent;
                     Note currentNote = EventToNote(tempNoteEvent);
-                    currentNote.SetTime(timeElapsed); // Set the time to the current time of the 
+                    currentNote.SetTime(timeElapsed);
                     
                     // If there is already an active note in this pitch, add the new note to the existing stack.
                     if (activeNotes.ContainsKey(currentNote.GetPitch()))
