@@ -37,6 +37,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -55,6 +56,22 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="classes\object classes\Occurence.cs" />
+    <Compile Include="classes\object classes\Pattern.cs" />
+    <Compile Include="gui\PatternIcon.xaml.cs">
+      <DependentUpon>PatternIcon.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="views\PianoRollView.xaml.cs">
+      <DependentUpon>PianoRollView.xaml</DependentUpon>
+    </Compile>
+    <Page Include="gui\PatternIcon.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ResourceDict.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -63,18 +80,22 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ChannelEvent.cs" />
-    <Compile Include="Note.cs" />
-    <Compile Include="NoteParser.cs" />
+    <Compile Include="classes\object classes\Events\ChannelEvent.cs" />
+    <Compile Include="classes\object classes\Note.cs" />
+    <Compile Include="classes\parsers\NoteParser.cs" />
     <Compile Include="Defs.cs" />
-    <Compile Include="Event.cs" />
-    <Compile Include="NumMetaEvent.cs" />
-    <Compile Include="TextMetaEvent.cs" />
-    <Compile Include="MIDIParser.cs" />
+    <Compile Include="classes\object classes\Events\Event.cs" />
+    <Compile Include="classes\object classes\Events\NumMetaEvent.cs" />
+    <Compile Include="classes\object classes\Events\TextMetaEvent.cs" />
+    <Compile Include="classes\parsers\MIDIParser.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="views\PianoRollView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -93,6 +114,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <Resource Include="gui\fonts\Exo2-Italic.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -126,20 +148,9 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Resource Include="gui\1x\PianoNote_Left.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="gui\1x\PianoNote_Middle.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="gui\1x\PianoNote_Right.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="gui\1x\PianoNote_Black.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="gui\1x\PianoNote_White.png" />
+    <Resource Include="gui\buttons\plusbutton.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

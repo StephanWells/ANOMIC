@@ -1,0 +1,532 @@
+﻿<UserControl x:Class="AnnotationTool.views.PianoRollView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:AnnotationTool.views"
+             mc:Ignorable="d" 
+             d:DesignHeight="500" d:DesignWidth="1000">
+
+    <UserControl.Resources>
+        <ResourceDictionary Source="../ResourceDict.xaml"/>
+    </UserControl.Resources>
+
+    <Grid x:Name="MainGrid" Background="{StaticResource GridDarkColour}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="125"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <Separator Grid.Row="0" Grid.RowSpan="2" Style="{DynamicResource VerticalSeparatorStyle}" Panel.ZIndex="6" Margin="6,0,0,0" HorizontalAlignment="Right"/>
+        <Separator Grid.Row="1" Grid.ColumnSpan="2" VerticalAlignment="Top" Panel.ZIndex="6"/>
+
+        <Grid Grid.Row="0" Grid.Column="0">
+            <TextBlock x:Name="txtPatternsHeader" FontSize="16" Text="PATTERNS" HorizontalAlignment="Left" VerticalAlignment="Top" Height="20" Margin="6,0,0,0"></TextBlock>
+        </Grid>
+        <ScrollViewer Margin="0,0,0,0" Grid.Row="1">
+            <Grid Grid.Row="1" Grid.Column="0">
+                <ItemsControl x:Name="itmPatternsView" Background="Transparent"/>
+                <Button x:Name="btnAddPattern" HorizontalAlignment="Stretch" Height="50" VerticalAlignment="Top" Margin="0,0,0,0" Click="AddPattern_Click">
+                    <TextBlock FontSize="50" TextAlignment="Center" Height="50" Width="50" Margin="0,-18,0,0">+</TextBlock>
+                </Button>
+            </Grid>
+        </ScrollViewer>
+
+        <ScrollViewer x:Name="srlPianoScroll" Grid.Row="1" Grid.Column="1" Margin="0,0,0,0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+            <Canvas x:Name="cnvPianoRoll" HorizontalAlignment="Left" Height="1592" VerticalAlignment="Center" Width="132">
+                <Rectangle x:Name="PianoGridBackground" HorizontalAlignment="Left" Height="1638" VerticalAlignment="Center" Width="132" Canvas.Top="-8" Canvas.Left="{Binding ElementName=srlPianoScroll, Path=HorizontalOffset}" Panel.ZIndex="4" Fill="{StaticResource GridDarkColour}"/>
+                <Grid x:Name="grdPiano" HorizontalAlignment="Left" Height="1638" VerticalAlignment="Center" Width="{StaticResource NoteWidth}" Canvas.Top="-8" Canvas.Left="{Binding ElementName=srlPianoScroll, Path=HorizontalOffset}" Panel.ZIndex="6">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="18"/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+
+                    <Rectangle	x:Name="C8"	    Grid.Row="0"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource LeftNoteSpan}"	Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource LeftNoteMargin}"/>
+                    <TextBlock	x:Name="C8Txt"	Grid.Row="0"    Text="C8"       HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource TextSpan}"		Height="{StaticResource TextHeight}"		Width="{StaticResource TextWidth}"			Margin="{StaticResource TextMargin}" Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+
+                    <Rectangle	x:Name="B7" 	Grid.Row="2"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource RightNoteSpan}"	Height="{StaticResource RightNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource RightNoteMargin}"/>
+                    <Rectangle	x:Name="As7"	Grid.Row="3"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="A7" 	Grid.Row="3"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"	Margin="{StaticResource MiddleNoteMargin}"/>
+                    <Rectangle	x:Name="Gs7"	Grid.Row="5"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="G7"	    Grid.Row="5"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"	Margin="{StaticResource MiddleNoteMargin}"/>
+                    <Rectangle	x:Name="Fs7"	Grid.Row="7"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="F7"	    Grid.Row="7"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource LeftNoteSpan}"	Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource LeftNoteMargin}"/>
+                    <Rectangle	x:Name="E7"	    Grid.Row="9"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource RightNoteSpan}"	Height="{StaticResource RightNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource RightNoteMargin}"/>
+                    <Rectangle	x:Name="Ds7"	Grid.Row="10"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="D7"	    Grid.Row="10"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"	Margin="{StaticResource MiddleNoteMargin}"/>
+                    <Rectangle	x:Name="Cs7"	Grid.Row="12"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="C7" 	Grid.Row="12"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource LeftNoteSpan}"	Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource LeftNoteMargin}"/>
+                    <TextBlock	x:Name="C7Txt"	Grid.Row="12"   Text="C7"       HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource TextSpan}"		Height="{StaticResource TextHeight}"		Width="{StaticResource TextWidth}"			Margin="{StaticResource TextMargin}" Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+
+                    <Rectangle	x:Name="B6"	    Grid.Row="14"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource RightNoteSpan}"	Height="{StaticResource RightNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource RightNoteMargin}"/>
+                    <Rectangle	x:Name="As6"	Grid.Row="15"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="A6"	    Grid.Row="15"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"	Margin="{StaticResource MiddleNoteMargin}"/>
+                    <Rectangle	x:Name="Gs6"	Grid.Row="17"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="G6"	    Grid.Row="17"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"	Margin="{StaticResource MiddleNoteMargin}"/>
+                    <Rectangle	x:Name="Fs6"	Grid.Row="19"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="F6" 	Grid.Row="19"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource LeftNoteSpan}"	Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource LeftNoteMargin}"/>
+                    <Rectangle	x:Name="E6" 	Grid.Row="21"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource RightNoteSpan}"	Height="{StaticResource RightNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource RightNoteMargin}"/>
+                    <Rectangle	x:Name="Ds6"	Grid.Row="22"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="D6" 	Grid.Row="22"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"	Margin="{StaticResource MiddleNoteMargin}"/>
+                    <Rectangle	x:Name="Cs6"	Grid.Row="24"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="C6"	    Grid.Row="24"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource LeftNoteSpan}"	Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource LeftNoteMargin}"/>
+                    <TextBlock	x:Name="C6Txt"	Grid.Row="24"   Text="C6"       HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource TextSpan}"		Height="{StaticResource TextHeight}"		Width="{StaticResource TextWidth}"			Margin="{StaticResource TextMargin}" Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+
+                    <Rectangle	x:Name="B5"	    Grid.Row="26"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource RightNoteSpan}"	Height="{StaticResource RightNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource RightNoteMargin}"/>
+                    <Rectangle	x:Name="As5"	Grid.Row="27"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="A5"	    Grid.Row="27"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"	Margin="{StaticResource MiddleNoteMargin}"/>
+                    <Rectangle	x:Name="Gs5"	Grid.Row="29"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="G5" 	Grid.Row="29"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"	Margin="{StaticResource MiddleNoteMargin}"/>
+                    <Rectangle	x:Name="Fs5"	Grid.Row="31"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="F5"	    Grid.Row="31"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource LeftNoteSpan}"	Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource LeftNoteMargin}"/>
+                    <Rectangle	x:Name="E5" 	Grid.Row="33"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource RightNoteSpan}"	Height="{StaticResource RightNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource RightNoteMargin}"/>
+                    <Rectangle	x:Name="Ds5"	Grid.Row="34"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="D5" 	Grid.Row="34"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"	Margin="{StaticResource MiddleNoteMargin}"/>
+                    <Rectangle	x:Name="Cs5"	Grid.Row="36"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="C5" 	Grid.Row="36"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource LeftNoteSpan}"	Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource LeftNoteMargin}"/>
+                    <TextBlock	x:Name="C5Txt"	Grid.Row="36"   Text="C5"       HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource TextSpan}"		Height="{StaticResource TextHeight}"		Width="{StaticResource TextWidth}"			Margin="{StaticResource TextMargin}" Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+
+                    <Rectangle	x:Name="B4" 	Grid.Row="38"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource RightNoteSpan}"	Height="{StaticResource RightNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource RightNoteMargin}"/>
+                    <Rectangle	x:Name="As4"	Grid.Row="39"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="A4" 	Grid.Row="39"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"	Margin="{StaticResource MiddleNoteMargin}"/>
+                    <Rectangle	x:Name="Gs4"	Grid.Row="41"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="G4"	    Grid.Row="41"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"	Margin="{StaticResource MiddleNoteMargin}"/>
+                    <Rectangle	x:Name="Fs4"	Grid.Row="43"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="F4" 	Grid.Row="43"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource LeftNoteSpan}"	Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource LeftNoteMargin}"/>
+                    <Rectangle	x:Name="E4" 	Grid.Row="45"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource RightNoteSpan}"	Height="{StaticResource RightNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource RightNoteMargin}"/>
+                    <Rectangle	x:Name="Ds4"	Grid.Row="46"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="D4" 	Grid.Row="46"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"	Margin="{StaticResource MiddleNoteMargin}"/>
+                    <Rectangle	x:Name="Cs4"	Grid.Row="48"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="C4" 	Grid.Row="48"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource LeftNoteSpan}"	Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource LeftNoteMargin}"/>
+                    <TextBlock	x:Name="C4Txt"	Grid.Row="48"   Text="C4"       HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource TextSpan}"		Height="{StaticResource TextHeight}"		Width="{StaticResource TextWidth}"			Margin="{StaticResource TextMargin}" Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+
+                    <Rectangle	x:Name="B3" 	Grid.Row="50"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource RightNoteSpan}"	Height="{StaticResource RightNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource RightNoteMargin}"/>
+                    <Rectangle	x:Name="As3"	Grid.Row="51"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="A3" 	Grid.Row="51"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"	Margin="{StaticResource MiddleNoteMargin}"/>
+                    <Rectangle	x:Name="Gs3"	Grid.Row="53"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="G3"	    Grid.Row="53"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"	Margin="{StaticResource MiddleNoteMargin}"/>
+                    <Rectangle	x:Name="Fs3"	Grid.Row="55"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="F3" 	Grid.Row="55"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource LeftNoteSpan}"	Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource LeftNoteMargin}"/>
+                    <Rectangle	x:Name="E3" 	Grid.Row="57"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource RightNoteSpan}"	Height="{StaticResource RightNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource RightNoteMargin}"/>
+                    <Rectangle	x:Name="Ds3"	Grid.Row="58"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="D3" 	Grid.Row="58"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"	Margin="{StaticResource MiddleNoteMargin}"/>
+                    <Rectangle	x:Name="Cs3"	Grid.Row="60"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="C3" 	Grid.Row="60"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource LeftNoteSpan}"	Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource LeftNoteMargin}"/>
+                    <TextBlock	x:Name="C3Txt"	Grid.Row="60"   Text="C3"       HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource TextSpan}"		Height="{StaticResource TextHeight}"		Width="{StaticResource TextWidth}"			Margin="{StaticResource TextMargin}" Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+
+                    <Rectangle	x:Name="B2" 	Grid.Row="62"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource RightNoteSpan}"	Height="{StaticResource RightNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource RightNoteMargin}"/>
+                    <Rectangle	x:Name="As2"	Grid.Row="63"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="A2" 	Grid.Row="63"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"	Margin="{StaticResource MiddleNoteMargin}"/>
+                    <Rectangle	x:Name="Gs2"	Grid.Row="65"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="G2" 	Grid.Row="65"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"	Margin="{StaticResource MiddleNoteMargin}"/>
+                    <Rectangle	x:Name="Fs2"	Grid.Row="67"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="F2"	    Grid.Row="67"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource LeftNoteSpan}"	Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource LeftNoteMargin}"/>
+                    <Rectangle	x:Name="E2" 	Grid.Row="69"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource RightNoteSpan}"	Height="{StaticResource RightNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource RightNoteMargin}"/>
+                    <Rectangle	x:Name="Ds2"	Grid.Row="70"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="D2" 	Grid.Row="70"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"	Margin="{StaticResource MiddleNoteMargin}"/>
+                    <Rectangle	x:Name="Cs2"	Grid.Row="72"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="C2" 	Grid.Row="72"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource LeftNoteSpan}"	Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource LeftNoteMargin}"/>
+                    <TextBlock	x:Name="C2Txt"	Grid.Row="72"   Text="C2"       HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource TextSpan}"		Height="{StaticResource TextHeight}"		Width="{StaticResource TextWidth}"			Margin="{StaticResource TextMargin}" Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+
+                    <Rectangle	x:Name="B1" 	Grid.Row="74"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource RightNoteSpan}"	Height="{StaticResource RightNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource RightNoteMargin}"/>
+                    <Rectangle	x:Name="As1"	Grid.Row="75"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="A1" 	Grid.Row="75"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"	Margin="{StaticResource MiddleNoteMargin}"/>
+                    <Rectangle	x:Name="Gs1"	Grid.Row="77"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="G1"	    Grid.Row="77"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"	Margin="{StaticResource MiddleNoteMargin}"/>
+                    <Rectangle	x:Name="Fs1"	Grid.Row="79"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="F1"	    Grid.Row="79"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource LeftNoteSpan}"	Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource LeftNoteMargin}"/>
+                    <Rectangle	x:Name="E1" 	Grid.Row="81"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource RightNoteSpan}"	Height="{StaticResource RightNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource RightNoteMargin}"/>
+                    <Rectangle	x:Name="Ds1"	Grid.Row="82"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="D1" 	Grid.Row="82"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"	Margin="{StaticResource MiddleNoteMargin}"/>
+                    <Rectangle	x:Name="Cs1"	Grid.Row="84"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="C1" 	Grid.Row="84"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource LeftNoteSpan}"	Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource LeftNoteMargin}"/>
+                    <TextBlock	x:Name="C1Txt"	Grid.Row="84"   Text="C1"       HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource TextSpan}"		Height="{StaticResource TextHeight}"		Width="{StaticResource TextWidth}"			Margin="{StaticResource TextMargin}" Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+
+                    <Rectangle	x:Name="B0" 	Grid.Row="86"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource RightNoteSpan}"	Height="{StaticResource RightNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource RightNoteMargin}"/>
+                    <Rectangle	x:Name="As0"	Grid.Row="87"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"		Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
+                    <Rectangle	x:Name="A0"	    Grid.Row="87"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="3"	Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"	    Margin="{StaticResource MiddleNoteMargin}"/>
+                </Grid>
+                <Grid x:Name="grdGridColours" HorizontalAlignment="Left" Height="1628" VerticalAlignment="Center" Width = "0" Canvas.Top="2" Canvas.Left="133" Panel.ZIndex="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="8"/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Border	Grid.Row="0"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="1"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource BotBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="2"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="3"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="4"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="5"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="6"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="7"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="8"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="9"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="10"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="11"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="12"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="13"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="14"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="15"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="16"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="17"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="18"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="19"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="20"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="21"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="22"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="23"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="24"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="25"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="26"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="27"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="28"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="29"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="30"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="31"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="32"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="33"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="34"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="35"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="36"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="37"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="38"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="39"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="40"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="41"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="42"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="43"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="44"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="45"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="46"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="47"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="48"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="49"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="50"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="51"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="52"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="53"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="54"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="55"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="56"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="57"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="58"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="59"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="60"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="61"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="62"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="63"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="64"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="65"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="66"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="67"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="68"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="69"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="70"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="71"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="72"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="73"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="74"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="75"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="76"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="77"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="78"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="79"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="80"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="81"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="82"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="83"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="84"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="85"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="86"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                    <Border	Grid.Row="87"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
+                    <Border	Grid.Row="88"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
+                </Grid>
+                <Canvas x:Name="cnvGridLines" HorizontalAlignment="Left" Height="1592" VerticalAlignment="Center" Width = "0" Canvas.Top="2" Canvas.Left="133" Panel.ZIndex="2"/>
+                <Canvas x:Name="cnvMouseLayer" HorizontalAlignment="Left" Height="1628" VerticalAlignment="Center" Width="0" Canvas.Left="133" Panel.ZIndex="5" PreviewMouseLeftButtonDown="PianoRoll_LeftMouseDown" PreviewMouseMove="PianoRoll_MouseMove" PreviewMouseLeftButtonUp="PianoRoll_LeftMouseUp">
+                    <Rectangle Fill="Transparent" Width="{Binding ElementName=cnvMouseLayer, Path=Width}" Height="1628"/>
+                    <!--<Canvas x:Name="dragSelectionCanvas" Visibility="Collapsed" Width="0">
+                        <Border x:Name="dragSelectionBorder" BorderBrush="Blue" BorderThickness="1" Background="LightBlue" CornerRadius="1" Opacity="0.5"/>
+                    </Canvas>-->
+                </Canvas>
+                <Grid x:Name="grdNotes" HorizontalAlignment="Left" Height="1628" VerticalAlignment="Center" Width="0" Canvas.Top="2" Canvas.Left="133" Panel.ZIndex="3">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="8"/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                </Grid>
+            </Canvas>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

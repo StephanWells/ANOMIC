@@ -315,11 +315,6 @@ namespace AnnotationTool
             uint result = (uint)(byteArray[0] & 0x7F);
             int i = 1;
 
-            /*for (int i = byteArray.Length - 1, j = 0; i >= 0; i--, j++)
-            {
-                result += (uint)(byteArray[i] & 0x7F) * (uint)Math.Pow(0x0100, j);
-            }*/
-
             while (i < byteArray.Length)
             {
                 result = result << 7;

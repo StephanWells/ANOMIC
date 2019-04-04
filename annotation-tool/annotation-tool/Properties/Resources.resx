@@ -142,19 +142,4 @@
   <data name="Exo2_ThinItalic" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\gui\fonts\Exo2-ThinItalic.ttf;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="PianoNote_Black" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\gui\1x\PianoNote_Black.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="PianoNote_Left" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\gui\1x\PianoNote_Left.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="PianoNote_Middle" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\gui\1x\PianoNote_Middle.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="PianoNote_Right" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\gui\1x\PianoNote_Right.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="PianoNote_White" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\gui\1x\PianoNote_White.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
 </root>
