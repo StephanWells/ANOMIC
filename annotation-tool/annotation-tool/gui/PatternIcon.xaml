@@ -29,7 +29,9 @@
                     <Border Grid.Row ="0" Grid.Column="0" Background="{StaticResource GridDarkColour}" BorderThickness="0" BorderBrush="{StaticResource GridDarkColour}">
                         <Button Style="{DynamicResource TextDeleteButton}"/>
                     </Border>
-                    <Border Grid.Row ="1" Grid.Column="0" Background="{StaticResource GridDarkColour}" BorderThickness="0" BorderBrush="{StaticResource GridDarkColour}"/>
+                    <Border Grid.Row ="1" Grid.Column="0" Background="{StaticResource GridDarkColour}" BorderThickness="0" BorderBrush="{StaticResource GridDarkColour}">
+                        <ToggleButton Style="{DynamicResource TextViewButton}"/>
+                    </Border>
                     <Border Grid.Row="2" Grid.Column="0" Background="{StaticResource GridDarkColour}" BorderThickness="0" BorderBrush="{StaticResource GridDarkColour}">
                         <ToggleButton Style="{DynamicResource TextArrowButton}"/>
                     </Border>

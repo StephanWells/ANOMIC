@@ -116,13 +116,46 @@
         </Setter>
     </Style>
 
-    <Style x:Key="TextArrowButton" TargetType="{x:Type ToggleButton}">
+    <Style x:Key="TextToggleButton" TargetType="{x:Type ToggleButton}">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{StaticResource ButtonColour}"/>
         <Setter Property="FontSize" Value="10"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
+    </Style>
 
+    <Style x:Key="TextArrowButton" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource TextToggleButton}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ToggleButton}">
+                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Foreground" Value="{StaticResource ButtonMouseOverColour}"/>
+                        </Trigger>
+
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Foreground" Value="{StaticResource ButtonPressedColour}"/>
+                        </Trigger>
+                        
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter Property="Content" Value="&#xE96E;"/>
+                        </Trigger>
+
+                        <Trigger Property="IsChecked" Value="False">
+                            <Setter Property="Content" Value="&#xE970;"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="TextViewButton" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource TextToggleButton}">
+        <Setter Property="Content" Value="&#xE890;"/>
+        <Setter Property="FontSize" Value="13"/>
+        
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ToggleButton}">
@@ -136,13 +169,13 @@
                         <Trigger Property="IsPressed" Value="True">
                             <Setter Property="Foreground" Value="{StaticResource ButtonPressedColour}"/>
                         </Trigger>
-
+                        
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter Property="Content" Value="&#xE96E;"/>
+                            <Setter Property="Foreground" Value="{StaticResource ButtonMouseOverColour}"/>
                         </Trigger>
 
                         <Trigger Property="IsChecked" Value="False">
-                            <Setter Property="Content" Value="&#xE970;"/>
+                            <Setter Property="Foreground" Value="{StaticResource ButtonColour}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

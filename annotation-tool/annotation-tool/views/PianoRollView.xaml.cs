@@ -17,6 +17,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.IO;
 using Microsoft.Win32;
+using System.Text.RegularExpressions;
 
 namespace AnnotationTool.views
 {
@@ -29,6 +30,8 @@ namespace AnnotationTool.views
 
         private MIDIParser midiParse;
         private NoteParser noteParse;
+
+        private string quantisedSong;
 
         private List<Pattern> patterns;
         private List<PatternIcon> patternIcons;
@@ -78,6 +81,66 @@ namespace AnnotationTool.views
 
             ResetPianoRoll();
             PopulateNotesGrid(noteParse);
+
+            quantisedSong = ConcatenateList(Quantise(0, (int)grdNotes.Width));
+        }
+
+        private List<String> Quantise(double start, double end)
+        {
+            List<String> quantisedSection = new List<string>();
+
+            for (int i = 0; i < (end - start) / snapLength; i++)
+            {
+                quantisedSection.Add(" ");
+            }
+
+            for (int i = 0; i < noteParse.notes.Count; i++)
+            {
+                int j = 0;
+                Note currentNote = noteParse.notes[i];
+
+                if (((currentNote.GetTime() >= start) && (currentNote.GetTime() <= end)))
+                {
+                    int quantisedIndex = 0;
+
+                    while (j < currentNote.GetDuration() && ((j + currentNote.GetTime() - start) / snapLength) < quantisedSection.Count)
+                    {
+                        quantisedIndex = (int)((j + currentNote.GetTime() - start) / snapLength);
+
+                        if (quantisedSection[quantisedIndex].Equals(" "))
+                        {
+                            quantisedSection[quantisedIndex] = currentNote.GetPitch().ToString();
+                        }
+                        else
+                        {
+                            quantisedSection[quantisedIndex] += currentNote.GetPitch().ToString();
+                        }
+
+                        j += snapLength;
+                    }               
+                }
+            }
+
+            return quantisedSection;
+        }
+
+        private int SimilarOccurrences(List<String> quantisedSection)
+        {
+            string concatenatedSection = ConcatenateList(quantisedSection);
+
+            return Regex.Matches(quantisedSong, concatenatedSection).Count;
+        }
+
+        private string ConcatenateList(List<String> stringList)
+        {
+            string result = "";
+
+            for (int i = 0; i < stringList.Count; i++)
+            {
+                result += stringList[i] + ";";
+            }
+
+            return result;
         }
 
         private void AddPattern_Click(object sender, RoutedEventArgs e)
@@ -140,8 +203,25 @@ namespace AnnotationTool.views
         {
             isLeftMouseButtonDownOnPianoRoll = false;
             isDraggingPatternRect = false;
-
             Mouse.Capture(null);
+
+            if (currentPattern != -1)
+            {
+                Border currentPatternRect = (Border)(patternRects[currentPattern][patterns[currentPattern].GetOccurrences().Count - 1].Children[0]);
+
+                Console.WriteLine(Canvas.GetLeft(currentPatternRect) + " - " + (Canvas.GetLeft(currentPatternRect) + currentPatternRect.Width));
+
+                TextBlock textBlock = new TextBlock
+                {
+                    Text = "" + SimilarOccurrences(Quantise(Canvas.GetLeft(currentPatternRect), Canvas.GetLeft(currentPatternRect) + currentPatternRect.Width)),
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    FontSize = 30
+                };
+
+                Canvas.SetTop(textBlock, srlPianoScroll.VerticalOffset);
+
+                cnvMouseLayer.Children.Add(textBlock);
+            }
         }
 
         private void PianoRoll_MouseMove(object sender, MouseEventArgs e)
