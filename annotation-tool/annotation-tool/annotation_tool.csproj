@@ -56,14 +56,22 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="classes\object classes\Occurence.cs" />
+    <Compile Include="classes\object classes\Occurrence.cs" />
     <Compile Include="classes\object classes\Pattern.cs" />
+    <Compile Include="gui\MenuItemExensions.cs" />
+    <Compile Include="gui\OccurrenceIcon.xaml.cs">
+      <DependentUpon>OccurrenceIcon.xaml</DependentUpon>
+    </Compile>
     <Compile Include="gui\PatternIcon.xaml.cs">
       <DependentUpon>PatternIcon.xaml</DependentUpon>
     </Compile>
     <Compile Include="views\PianoRollView.xaml.cs">
       <DependentUpon>PianoRollView.xaml</DependentUpon>
     </Compile>
+    <Page Include="gui\OccurrenceIcon.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="gui\PatternIcon.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

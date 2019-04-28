@@ -21,6 +21,14 @@ namespace AnnotationTool
     // Interaction logic for MainWindow.xaml
     public partial class MainWindow : Window
     {
+        public static event EventHandler SnapChange;
+        public static event EventHandler ZoomChange;
+        public static event EventHandler ExpandAll;
+        public static event EventHandler CollapseAll;
+        public static event EventHandler ShowAll;
+        public static event EventHandler HideAll;
+        public static event EventHandler AddPattern;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -45,6 +53,8 @@ namespace AnnotationTool
                     noteParse.ParseEvents();
 
                     DataContext = new PianoRollView(midiParse, noteParse);
+                    mnuView.Visibility = Visibility.Visible;
+                    mnuPatterns.Visibility = Visibility.Visible;
                 }
                 catch (InvalidOperationException)
                 {
@@ -53,9 +63,44 @@ namespace AnnotationTool
             }
         }
 
-        private void Exit_Click(object sender, RoutedEventArgs e)
+        private void MainWindow_Exit(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private void MainWindow_SnapChange(object sender, RoutedEventArgs e)
+        {
+            SnapChange?.Invoke(this, e);
+        }
+
+        private void MainWindow_ZoomChange(object sender, RoutedEventArgs e)
+        {
+            ZoomChange?.Invoke(this, e);
+        }
+
+        private void MainWindow_ExpandAll(object sender, RoutedEventArgs e)
+        {
+            ExpandAll?.Invoke(this, e);
+        }
+
+        private void MainWindow_CollapseAll(object sender, RoutedEventArgs e)
+        {
+            CollapseAll?.Invoke(this, e);
+        }
+
+        private void MainWindow_ShowAll(object sender, RoutedEventArgs e)
+        {
+            ShowAll?.Invoke(this, e);
+        }
+
+        private void MainWindow_HideAll(object sender, RoutedEventArgs e)
+        {
+            HideAll?.Invoke(this, e);
+        }
+
+        private void MainWindow_AddPattern(object sender, RoutedEventArgs e)
+        {
+            AddPattern?.Invoke(this, e);
         }
     }
 }

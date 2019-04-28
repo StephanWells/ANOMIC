@@ -31,7 +31,7 @@ namespace AnnotationTool
                 {
                     ChannelEvent tempNoteEvent = (ChannelEvent)tempEvent;
                     Note currentNote = EventToNote(tempNoteEvent);
-                    currentNote.SetTime(timeElapsed);
+                    currentNote.SetTime((double)timeElapsed);
                     
                     // If there is already an active note in this pitch, add the new note to the existing stack.
                     if (activeNotes.ContainsKey(currentNote.GetPitch()))
@@ -54,7 +54,7 @@ namespace AnnotationTool
                     if (activeNotes.ContainsKey(currentNote.GetPitch()))
                     {
                         Note tempNote = activeNotes[currentNote.GetPitch()].Pop();
-                        tempNote.SetDuration(timeElapsed - tempNote.GetTime());
+                        tempNote.SetDuration((double)timeElapsed - tempNote.GetTime());
                         notes.Add(tempNote);
 
                         if (activeNotes[currentNote.GetPitch()].Count == 0) // If the stack of notes is empty, remove the entry from the dictionary of active notes.

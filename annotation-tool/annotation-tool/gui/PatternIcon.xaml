@@ -5,14 +5,15 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Controls"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="800"
+             x:Name="PatternIconButton">
     <ToggleButton.Resources>
         <ResourceDictionary Source="../ResourceDict.xaml"/>
     </ToggleButton.Resources>
 
     <ToggleButton.Template>
         <ControlTemplate TargetType="{x:Type ToggleButton}">
-            <Border Background="{StaticResource GridDarkColour}" BorderBrush="{StaticResource GridDarkColour}" BorderThickness="1">
+            <Border Background="{StaticResource GridDarkColour}" BorderBrush="{StaticResource GridLightColour}" BorderThickness="1">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition/>
@@ -27,16 +28,24 @@
                     </Grid.ColumnDefinitions>
 
                     <Border Grid.Row ="0" Grid.Column="0" Background="{StaticResource GridDarkColour}" BorderThickness="0" BorderBrush="{StaticResource GridDarkColour}">
-                        <Button Style="{DynamicResource TextDeleteButton}"/>
+                        <Button x:Name="DeleteButton" Style="{DynamicResource TextDeleteButton}" Click="PatternIcon_DeleteClick"/>
                     </Border>
                     <Border Grid.Row ="1" Grid.Column="0" Background="{StaticResource GridDarkColour}" BorderThickness="0" BorderBrush="{StaticResource GridDarkColour}">
-                        <ToggleButton Style="{DynamicResource TextViewButton}"/>
+                        <ToggleButton x:Name="ViewButton"  Style="{DynamicResource TextViewButton}" IsChecked="{Binding Path=View, ElementName=PatternIconButton}" Click="PatternIcon_ViewToggle" MouseRightButtonUp="PatternIcon_ViewSolo"/>
                     </Border>
                     <Border Grid.Row="2" Grid.Column="0" Background="{StaticResource GridDarkColour}" BorderThickness="0" BorderBrush="{StaticResource GridDarkColour}">
-                        <ToggleButton Style="{DynamicResource TextArrowButton}"/>
+                        <ToggleButton x:Name="CollExpButton" Style="{DynamicResource TextArrowButton}" IsChecked="{Binding Path=CollExp, ElementName=PatternIconButton}" Click="PatternIcon_CollExpToggle"/>
                     </Border>
                     <Border Grid.Row="0" Grid.Column="1" Grid.RowSpan="3" Background="{StaticResource GridDarkColour}" BorderThickness="0" Grid.ColumnSpan="2">
                         <TextBlock x:Name="TextContent" VerticalAlignment="Center" FontSize="20" HorizontalAlignment="Left" Margin="10,0,0,0" Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TextContent, FallbackValue='0'}" Foreground="{Binding Path=Foreground, ElementName=Toggle}"/>
+                        <Border.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Delete" Click="PatternIcon_DeleteClick"/>
+                                <MenuItem Header="Toggle Visibility" Click="PatternIcon_ViewToggle"/>
+                                <MenuItem Header="Solo Visibility" Click="PatternIcon_ViewSolo"/>
+                                <MenuItem Header="Collapse/Expand" Click="PatternIcon_CollExpToggle"/>
+                            </ContextMenu>
+                        </Border.ContextMenu>
                     </Border>
                     <Border Grid.Row="0" Grid.Column="2" Grid.RowSpan="3" BorderThickness="0" Grid.ColumnSpan="2">
                         <ToggleButton x:Name="Toggle" Background="{TemplateBinding Background}" IsChecked="{TemplateBinding IsChecked}" IsEnabled="False"/>
@@ -44,7 +53,7 @@
                 </Grid>
             </Border>
         </ControlTemplate>
-    </ToggleButton.Template>
+    </ToggleButton.Template>i
 </ToggleButton>
 
     
