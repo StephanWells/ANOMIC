@@ -20,7 +20,7 @@
         <DockPanel Grid.Row="0" Background="{StaticResource GridDarkColour}">
             <Menu x:Name="mnuMain" Background="{StaticResource GridLightColour}" DockPanel.Dock="Top">
                 <MenuItem Header="File" Width="40">
-                    <MenuItem Header="_New" Width="200" Click="MIDIBrowse_Click"/>
+                    <MenuItem Header="_New" Width="200" Click="MainWindow_MIDIBrowseClick"/>
                     <MenuItem Header="_Open" Width="200"/>
                     <MenuItem Header="_Save" Width="200"/>
                     <Separator Background="{StaticResource MenuButtonMouseOverColour}" Margin="-22,3,0,3" Width="220" HorizontalAlignment="Left"/>
@@ -42,6 +42,11 @@
                         <MenuItem Header="_Show All" Width="200" Click="MainWindow_ShowAll"/>
                         <MenuItem Header="_Hide All" Width="200" Click="MainWindow_HideAll"/>
                     </MenuItem>
+                    <MenuItem Header="_Key Names" Width="200">
+                        <MenuItem Header="_All Keys" Width="200" local:MenuItemExtensions.GroupName="keyVisibilitySettings" IsCheckable="True" IsChecked="False" Checked="MainWindow_KeyVisibilityChange"/>
+                        <MenuItem Header="_Only Octaves" Width="200" local:MenuItemExtensions.GroupName="keyVisibilitySettings" IsCheckable="True" IsChecked="True" Checked="MainWindow_KeyVisibilityChange"/>
+                        <MenuItem Header="_None" Width="200" local:MenuItemExtensions.GroupName="keyVisibilitySettings" IsCheckable="True" IsChecked="False" Checked="MainWindow_KeyVisibilityChange"/>
+                    </MenuItem>
                 </MenuItem>
 
                 <MenuItem x:Name="mnuPatterns" Header="Patterns" Width="70" Visibility="Hidden">
@@ -59,7 +64,7 @@
 
         <Grid Grid.Row="1" Background="{StaticResource GridDarkColour}">
             <Image x:Name="imgBrowse" Source="gui/buttons/plusbutton.png" Height="200" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="40,-180,0,0"/>
-            <Button x:Name="btnBrowse" Height="30" Width="100" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,150,0,0" Content="Browse" Click="MIDIBrowse_Click"></Button>
+            <Button x:Name="btnBrowse" Height="30" Width="100" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,150,0,0" Content="Browse" Click="MainWindow_MIDIBrowseClick"></Button>
             <ContentControl Content="{Binding}"/>
         </Grid>
     </Grid>

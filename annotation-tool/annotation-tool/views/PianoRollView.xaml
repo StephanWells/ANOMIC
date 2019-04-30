@@ -29,6 +29,28 @@
             <TextBlock x:Name="txtPatternsHeader" FontSize="16" Text="PATTERNS" HorizontalAlignment="Left" VerticalAlignment="Top" Height="20" Margin="6,0,0,0"></TextBlock>
         </Grid>
 
+        <Grid Grid.Row="0" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="4*"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="4*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock x:Name="txtFileName" Grid.Column="0" Margin="5,1,0,0"></TextBlock>
+
+            <Grid Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <Button x:Name="btnPlay" Grid.Column="0" FontFamily="Segoe MDL2 Assets" Content="&#xF5B0;" FontSize="16" Margin="0,0,0,0" Click="Play_Click"/>
+                <Button x:Name="btnPause" Grid.Column="1" FontFamily="Segoe MDL2 Assets" Content="&#xE769;" FontSize="18" Margin="0,0,0,0" Click="Pause_Click"/>
+                <Button x:Name="btnStop" Grid.Column="2" FontFamily="Segoe MDL2 Assets" Content="&#xE747;" FontSize="12" Margin="0,0,0,0" Click="Stop_Click"/>
+            </Grid>
+        </Grid>
+
         <ScrollViewer Margin="0,0,0,0" Grid.Row="1">
             <Grid Grid.Row="1" Grid.Column="0">
                 <ItemsControl x:Name="itmPatternsView" Background="Transparent"/>
@@ -38,13 +60,15 @@
             </Grid>
         </ScrollViewer>
 
-        <ScrollViewer x:Name="srlPianoScroll" Grid.Row="1" Grid.Column="1" Margin="0,0,0,0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" PreviewMouseDown="PianoScroll_MouseDown" PreviewMouseUp="PianoScroll_MouseUp" PreviewMouseMove="PianoScroll_MouseMove">
+        <ScrollViewer x:Name="srlPianoScroll" Grid.Row="1" Grid.Column="1" Margin="0,0,0,0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" PreviewMouseDown="PianoScroll_MouseDown" PreviewMouseUp="PianoScroll_MouseUp" PreviewMouseMove="PianoScroll_MouseMove" MouseEnter="PianoScroll_MouseEnter" KeyDown="PianoRoll_OnKeyDown">
             <Border BorderBrush="{StaticResource GridExtraDarkColour}" BorderThickness="0,0,1.5,0">
-                <Canvas x:Name="cnvPianoRoll" HorizontalAlignment="Left" Height="1592" VerticalAlignment="Center" Width="132">
-                    <Border Background="{StaticResource GridExtraDarkColour}" Grid.Row="0" Grid.Column="1" Canvas.Top="{Binding ElementName=srlPianoScroll, Path=VerticalOffset}" BorderThickness="0,2,0,1" BorderBrush="{StaticResource GridDarkColour}" Panel.ZIndex="7">
-                        <Grid x:Name="grdTimeline" HorizontalAlignment="Left" Width="2" Margin="130,0,0,0"/>
+                <Canvas x:Name="cnvPianoRoll" HorizontalAlignment="Left" Height="1612" VerticalAlignment="Center" Width="132">
+                    <Border Background="{StaticResource GridExtraDarkColour}" Grid.Row="0" Grid.Column="1" Canvas.Top="{Binding ElementName=srlPianoScroll, Path=VerticalOffset}" BorderThickness="0,2,0,1" BorderBrush="{StaticResource GridDarkColour}" Panel.ZIndex="8">
+                        <Grid x:Name="grdTimeline" HorizontalAlignment="Left" Width="8" Margin="126,0,0,0" Height="22" PreviewMouseDown="Timeline_MouseDown">
+                            <TextBlock x:Name="txtTrackerTriangle" FontSize="15" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource ButtonMouseOverColour}" Text="&#xEDDC;" Margin="0,11,0,0" Panel.ZIndex="1"/>
+                        </Grid>
                     </Border>
-                    <Rectangle x:Name="PianoGridBackground" HorizontalAlignment="Left" Height="1638" VerticalAlignment="Center" Width="132" Canvas.Top="-8" Canvas.Left="{Binding ElementName=srlPianoScroll, Path=HorizontalOffset}" Panel.ZIndex="4" Fill="{StaticResource GridDarkColour}"/>
+                    <Rectangle x:Name="PianoGridBackground" HorizontalAlignment="Left" Height="1638" VerticalAlignment="Center" Width="132" Canvas.Top="-8" Canvas.Left="{Binding ElementName=srlPianoScroll, Path=HorizontalOffset}" Panel.ZIndex="5" Fill="{StaticResource GridDarkColour}"/>
                     <Grid x:Name="grdPiano" HorizontalAlignment="Left" Height="1638" VerticalAlignment="Center" Width="{DynamicResource NoteWidth}" Canvas.Top="8" Canvas.Left="{Binding ElementName=srlPianoScroll, Path=HorizontalOffset}" Panel.ZIndex="6">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="18"/>
@@ -141,7 +165,6 @@
                         </Grid.RowDefinitions>
 
                         <Rectangle	x:Name="C8"	    Grid.Row="0"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource LeftNoteSpan}"	Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource LeftNoteMargin}"/>
-                        <TextBlock	x:Name="C8Txt"	Grid.Row="0"    Text="C8"       HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource TextSpan}"		Height="{StaticResource TextHeight}"		Width="{StaticResource TextWidth}"		Margin="{StaticResource TextMargin}" Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
 
                         <Rectangle	x:Name="B7" 	Grid.Row="2"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource RightNoteSpan}"	Height="{StaticResource RightNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource RightNoteMargin}"/>
                         <Rectangle	x:Name="As7"	Grid.Row="3"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"	Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
@@ -155,7 +178,6 @@
                         <Rectangle	x:Name="D7"	    Grid.Row="10"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"	    Margin="{StaticResource MiddleNoteMargin}"/>
                         <Rectangle	x:Name="Cs7"	Grid.Row="12"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"	Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
                         <Rectangle	x:Name="C7" 	Grid.Row="12"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource LeftNoteSpan}"	Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource LeftNoteMargin}"/>
-                        <TextBlock	x:Name="C7Txt"	Grid.Row="12"   Text="C7"       HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource TextSpan}"		Height="{StaticResource TextHeight}"		Width="{StaticResource TextWidth}"		Margin="{StaticResource TextMargin}" Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
 
                         <Rectangle	x:Name="B6"	    Grid.Row="14"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource RightNoteSpan}"	Height="{StaticResource RightNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource RightNoteMargin}"/>
                         <Rectangle	x:Name="As6"	Grid.Row="15"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"	Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
@@ -169,7 +191,6 @@
                         <Rectangle	x:Name="D6" 	Grid.Row="22"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"	    Margin="{StaticResource MiddleNoteMargin}"/>
                         <Rectangle	x:Name="Cs6"	Grid.Row="24"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"	Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
                         <Rectangle	x:Name="C6"	    Grid.Row="24"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource LeftNoteSpan}"	Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource LeftNoteMargin}"/>
-                        <TextBlock	x:Name="C6Txt"	Grid.Row="24"   Text="C6"       HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource TextSpan}"		Height="{StaticResource TextHeight}"		Width="{StaticResource TextWidth}"		Margin="{StaticResource TextMargin}" Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
 
                         <Rectangle	x:Name="B5"	    Grid.Row="26"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource RightNoteSpan}"	Height="{StaticResource RightNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource RightNoteMargin}"/>
                         <Rectangle	x:Name="As5"	Grid.Row="27"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"	Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
@@ -183,7 +204,6 @@
                         <Rectangle	x:Name="D5" 	Grid.Row="34"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"	    Margin="{StaticResource MiddleNoteMargin}"/>
                         <Rectangle	x:Name="Cs5"	Grid.Row="36"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"	Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
                         <Rectangle	x:Name="C5" 	Grid.Row="36"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource LeftNoteSpan}"	Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource LeftNoteMargin}"/>
-                        <TextBlock	x:Name="C5Txt"	Grid.Row="36"   Text="C5"       HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource TextSpan}"		Height="{StaticResource TextHeight}"		Width="{StaticResource TextWidth}"		Margin="{StaticResource TextMargin}" Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
 
                         <Rectangle	x:Name="B4" 	Grid.Row="38"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource RightNoteSpan}"	Height="{StaticResource RightNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource RightNoteMargin}"/>
                         <Rectangle	x:Name="As4"	Grid.Row="39"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"	Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
@@ -197,7 +217,6 @@
                         <Rectangle	x:Name="D4" 	Grid.Row="46"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"  	Margin="{StaticResource MiddleNoteMargin}"/>
                         <Rectangle	x:Name="Cs4"	Grid.Row="48"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"	Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
                         <Rectangle	x:Name="C4" 	Grid.Row="48"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource LeftNoteSpan}"	Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource LeftNoteMargin}"/>
-                        <TextBlock	x:Name="C4Txt"	Grid.Row="48"   Text="C4"       HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource TextSpan}"		Height="{StaticResource TextHeight}"		Width="{StaticResource TextWidth}"		Margin="{StaticResource TextMargin}" Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
 
                         <Rectangle	x:Name="B3" 	Grid.Row="50"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource RightNoteSpan}"	Height="{StaticResource RightNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource RightNoteMargin}"/>
                         <Rectangle	x:Name="As3"	Grid.Row="51"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"	Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
@@ -211,7 +230,6 @@
                         <Rectangle	x:Name="D3" 	Grid.Row="58"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"	    Margin="{StaticResource MiddleNoteMargin}"/>
                         <Rectangle	x:Name="Cs3"	Grid.Row="60"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"	Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
                         <Rectangle	x:Name="C3" 	Grid.Row="60"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource LeftNoteSpan}"	Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource LeftNoteMargin}"/>
-                        <TextBlock	x:Name="C3Txt"	Grid.Row="60"   Text="C3"       HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource TextSpan}"		Height="{StaticResource TextHeight}"		Width="{StaticResource TextWidth}"		Margin="{StaticResource TextMargin}" Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
 
                         <Rectangle	x:Name="B2" 	Grid.Row="62"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource RightNoteSpan}"	Height="{StaticResource RightNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource RightNoteMargin}"/>
                         <Rectangle	x:Name="As2"	Grid.Row="63"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"	Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
@@ -225,7 +243,6 @@
                         <Rectangle	x:Name="D2" 	Grid.Row="70"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"	    Margin="{StaticResource MiddleNoteMargin}"/>
                         <Rectangle	x:Name="Cs2"	Grid.Row="72"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"	Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
                         <Rectangle	x:Name="C2" 	Grid.Row="72"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource LeftNoteSpan}"	Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource LeftNoteMargin}"/>
-                        <TextBlock	x:Name="C2Txt"	Grid.Row="72"   Text="C2"       HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource TextSpan}"		Height="{StaticResource TextHeight}"		Width="{StaticResource TextWidth}"		Margin="{StaticResource TextMargin}" Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
 
                         <Rectangle	x:Name="B1" 	Grid.Row="74"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource RightNoteSpan}"	Height="{StaticResource RightNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource RightNoteMargin}"/>
                         <Rectangle	x:Name="As1"	Grid.Row="75"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"	Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
@@ -239,11 +256,194 @@
                         <Rectangle	x:Name="D1" 	Grid.Row="82"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource MiddleNoteSpan}"	Height="{StaticResource MiddleNoteHeight}"	Width="{StaticResource NoteWidth}"	    Margin="{StaticResource MiddleNoteMargin}"/>
                         <Rectangle	x:Name="Cs1"	Grid.Row="84"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"	Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
                         <Rectangle	x:Name="C1" 	Grid.Row="84"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource LeftNoteSpan}"	Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource LeftNoteMargin}"/>
-                        <TextBlock	x:Name="C1Txt"	Grid.Row="84"   Text="C1"       HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource TextSpan}"		Height="{StaticResource TextHeight}"		Width="{StaticResource TextWidth}"		Margin="{StaticResource TextMargin}" Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
 
                         <Rectangle	x:Name="B0" 	Grid.Row="86"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource RightNoteSpan}"	Height="{StaticResource RightNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource RightNoteMargin}"/>
                         <Rectangle	x:Name="As0"	Grid.Row="87"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"	Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
                         <Rectangle	x:Name="A0"	    Grid.Row="87"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="3"	                            Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"	    Margin="{StaticResource MiddleNoteMargin}"/>
+                    </Grid>
+                    <Grid x:Name="grdKeyNames" HorizontalAlignment="Left" Height="1638" VerticalAlignment="Center" Width="{DynamicResource NoteWidth}" Canvas.Top="8" Canvas.Left="{Binding ElementName=srlPianoScroll, Path=HorizontalOffset}" Panel.ZIndex="7">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="18"/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock	x:Name="C8Txt"  Grid.Row="0"    Text="C8"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextLeftNoteMargin}"    Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="B7Txt"  Grid.Row="1"    Text="B7"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextRightNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="As7Txt" Grid.Row="2"    Text="A#7"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="A7Txt"  Grid.Row="3"    Text="A7"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextMiddleNoteMargin}"  Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Gs7Txt" Grid.Row="4"    Text="G#7"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="G7Txt"  Grid.Row="5"    Text="G7"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextMiddleNoteMargin}"  Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Fs7Txt" Grid.Row="6"    Text="F#7"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="F7Txt"	Grid.Row="7"    Text="F7"    HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource TextSpan}"	Height="{StaticResource TextHeight}"	Width="{StaticResource TextWidth}"	Margin="{StaticResource TextLeftNoteMargin}"    Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="E7Txt"  Grid.Row="8"    Text="E7"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextRightNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Ds7Txt" Grid.Row="9"    Text="D#7"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="D7Txt"  Grid.Row="10"   Text="D7"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextMiddleNoteMargin}"  Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Cs7Txt" Grid.Row="11"   Text="C#7"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="C7Txt"	Grid.Row="12"   Text="C7"    HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource TextSpan}"	Height="{StaticResource TextHeight}"	Width="{StaticResource TextWidth}"	Margin="{StaticResource TextLeftNoteMargin}"    Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="B6Txt"  Grid.Row="13"   Text="B6"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextRightNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="As6Txt" Grid.Row="14"   Text="A#6"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="A6Txt"  Grid.Row="15"   Text="A6"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextMiddleNoteMargin}"  Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Gs6Txt" Grid.Row="16"   Text="G#6"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="G6Txt"  Grid.Row="17"   Text="G6"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextMiddleNoteMargin}"  Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Fs6Txt" Grid.Row="18"   Text="F#6"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="F6Txt"	Grid.Row="19"   Text="F6"    HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource TextSpan}"	Height="{StaticResource TextHeight}"	Width="{StaticResource TextWidth}"	Margin="{StaticResource TextLeftNoteMargin}"    Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="E6Txt"  Grid.Row="20"   Text="E6"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextRightNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Ds6Txt" Grid.Row="21"   Text="D#6"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="D6Txt"  Grid.Row="22"   Text="D6"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextMiddleNoteMargin}"  Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Cs6Txt" Grid.Row="23"   Text="C#6"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="C6Txt"  Grid.Row="24"   Text="C6"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextLeftNoteMargin}"    Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="B5Txt"  Grid.Row="25"   Text="B5"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextRightNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="As5Txt" Grid.Row="26"   Text="A#5"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="A5Txt"  Grid.Row="27"   Text="A5"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextMiddleNoteMargin}"  Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Gs5Txt" Grid.Row="28"   Text="G#5"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="G5Txt"  Grid.Row="29"   Text="G5"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextMiddleNoteMargin}"  Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Fs5Txt" Grid.Row="30"   Text="F#5"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="F5Txt"	Grid.Row="31"   Text="F5"    HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource TextSpan}"	Height="{StaticResource TextHeight}"	Width="{StaticResource TextWidth}"	Margin="{StaticResource TextLeftNoteMargin}"    Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="E5Txt"  Grid.Row="32"   Text="E5"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextRightNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Ds5Txt" Grid.Row="33"   Text="D#5"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="D5Txt"  Grid.Row="34"   Text="D5"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextMiddleNoteMargin}"  Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Cs5Txt" Grid.Row="35"   Text="C#5"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="C5Txt"	Grid.Row="36"   Text="C5"    HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource TextSpan}"	Height="{StaticResource TextHeight}"	Width="{StaticResource TextWidth}"	Margin="{StaticResource TextLeftNoteMargin}"    Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="B4Txt"  Grid.Row="37"   Text="B4"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextRightNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="As4Txt" Grid.Row="38"   Text="A#4"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="A4Txt"  Grid.Row="39"   Text="A4"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextMiddleNoteMargin}"  Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Gs4Txt" Grid.Row="40"   Text="G#4"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="G4Txt"  Grid.Row="41"   Text="G4"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextMiddleNoteMargin}"  Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Fs4Txt" Grid.Row="42"   Text="F#4"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="F4Txt"	Grid.Row="43"   Text="F4"    HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource TextSpan}"	Height="{StaticResource TextHeight}"	Width="{StaticResource TextWidth}"	Margin="{StaticResource TextLeftNoteMargin}"    Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="E4Txt"  Grid.Row="44"   Text="E4"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextRightNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Ds4Txt" Grid.Row="45"   Text="D#4"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="D4Txt"  Grid.Row="46"   Text="D4"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextMiddleNoteMargin}"  Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Cs4Txt" Grid.Row="47"   Text="C#4"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="C4Txt"  Grid.Row="48"   Text="C4"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextLeftNoteMargin}"    Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="B3Txt"  Grid.Row="49"   Text="B3"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextRightNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="As3Txt" Grid.Row="50"   Text="A#3"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="A3Txt"  Grid.Row="51"   Text="A3"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextMiddleNoteMargin}"  Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Gs3Txt" Grid.Row="52"   Text="G#3"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="G3Txt"  Grid.Row="53"   Text="G3"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextMiddleNoteMargin}"  Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Fs3Txt" Grid.Row="54"   Text="F#3"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="F3Txt"	Grid.Row="55"   Text="F3"    HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource TextSpan}"	Height="{StaticResource TextHeight}"	Width="{StaticResource TextWidth}"	Margin="{StaticResource TextLeftNoteMargin}"    Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="E3Txt"  Grid.Row="56"   Text="E3"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextRightNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Ds3Txt" Grid.Row="57"   Text="D#3"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="D3Txt"  Grid.Row="58"   Text="D3"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextMiddleNoteMargin}"  Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Cs3Txt" Grid.Row="59"   Text="C#3"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="C3Txt"	Grid.Row="60"   Text="C3"    HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource TextSpan}"	Height="{StaticResource TextHeight}"	Width="{StaticResource TextWidth}"	Margin="{StaticResource TextLeftNoteMargin}"    Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="B2Txt"  Grid.Row="61"   Text="B2"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextRightNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="As2Txt" Grid.Row="62"   Text="A#2"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="A2Txt"  Grid.Row="63"   Text="A2"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextMiddleNoteMargin}"  Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Gs2Txt" Grid.Row="64"   Text="G#2"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="G2Txt"  Grid.Row="65"   Text="G2"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextMiddleNoteMargin}"  Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Fs2Txt" Grid.Row="66"   Text="F#2"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="F2Txt"	Grid.Row="67"   Text="F2"    HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource TextSpan}"	Height="{StaticResource TextHeight}"	Width="{StaticResource TextWidth}"	Margin="{StaticResource TextLeftNoteMargin}"    Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="E2Txt"  Grid.Row="68"   Text="E2"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextRightNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Ds2Txt" Grid.Row="69"   Text="D#2"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="D2Txt"  Grid.Row="70"   Text="D2"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextMiddleNoteMargin}"  Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Cs2Txt" Grid.Row="71"   Text="C#2"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="C2Txt"  Grid.Row="72"   Text="C2"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextLeftNoteMargin}"    Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="B1Txt"  Grid.Row="73"   Text="B1"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextRightNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="As1Txt" Grid.Row="74"   Text="A#1"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="A1Txt"  Grid.Row="75"   Text="A1"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextMiddleNoteMargin}"  Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Gs1Txt" Grid.Row="76"   Text="G#1"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="G1Txt"  Grid.Row="77"   Text="G1"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextMiddleNoteMargin}"  Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Fs1Txt" Grid.Row="78"   Text="F#1"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="F1Txt"	Grid.Row="79"   Text="F1"    HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource TextSpan}"	Height="{StaticResource TextHeight}"	Width="{StaticResource TextWidth}"	Margin="{StaticResource TextLeftNoteMargin}"    Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="E1Txt"  Grid.Row="80"   Text="E1"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextRightNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Ds1Txt" Grid.Row="81"   Text="D#1"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="D1Txt"  Grid.Row="82"   Text="D1"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextMiddleNoteMargin}"  Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="Cs1Txt" Grid.Row="83"   Text="C#1"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="C1Txt"	Grid.Row="84"   Text="C1"    HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource TextSpan}"	Height="{StaticResource TextHeight}"	Width="{StaticResource TextWidth}"	Margin="{StaticResource TextLeftNoteMargin}"    Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="B0Txt"  Grid.Row="85"   Text="B0"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextRightNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="As0Txt" Grid.Row="86"   Text="A#0"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
+                        <TextBlock	x:Name="A0Txt"  Grid.Row="87"   Text="A0"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextMiddleNoteMargin}"  Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
                     </Grid>
                     <Grid x:Name="grdGridColours" HorizontalAlignment="Left" Height="1628" VerticalAlignment="Center" Width = "0" Canvas.Top="18" Canvas.Left="133" Panel.ZIndex="1">
                         <Grid.RowDefinitions>
@@ -430,7 +630,8 @@
                         <Border	Grid.Row="88"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
                     </Grid>
                     <Canvas x:Name="cnvGridLines" HorizontalAlignment="Left" Height="1592" VerticalAlignment="Center" Width = "0" Canvas.Top="18" Canvas.Left="133" Panel.ZIndex="2"/>
-                    <Canvas x:Name="cnvMouseLayer" HorizontalAlignment="Left" Height="1628" VerticalAlignment="Center" Width="0" Canvas.Top="18" Canvas.Left="133" Panel.ZIndex="5" PreviewMouseLeftButtonDown="PianoRoll_LeftMouseDown" PreviewMouseMove="PianoRoll_MouseMove" PreviewMouseLeftButtonUp="PianoRoll_LeftMouseUp">
+                    <Canvas x:Name="cnvMouseLayer" HorizontalAlignment="Left" Height="1628" VerticalAlignment="Center" Width="0" Canvas.Top="18" Canvas.Left="133" Panel.ZIndex="4" PreviewMouseLeftButtonDown="PianoRoll_LeftMouseDown" PreviewMouseMove="PianoRoll_MouseMove" PreviewMouseLeftButtonUp="PianoRoll_LeftMouseUp">
+                        <Line x:Name="linTrackerLine" X1="0" X2="0" Y1="0" Y2="1628" Margin="0,6,0,0" Stroke="{StaticResource ButtonMouseOverColour}" Opacity="1" StrokeThickness="1"></Line>
                         <Rectangle Fill="Transparent" Width="{Binding ElementName=cnvMouseLayer, Path=Width}" Height="1628"/>
                     </Canvas>
                     <Grid x:Name="grdNotes" HorizontalAlignment="Left" Height="1628" VerticalAlignment="Center" Width="0" Canvas.Top="18" Canvas.Left="133" Panel.ZIndex="3">

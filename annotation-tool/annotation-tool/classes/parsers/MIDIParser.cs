@@ -8,12 +8,11 @@ namespace AnnotationTool
 {
     public class MIDIParser
     {
-        public const int MICROSECONDS_PER_MINUTE = 60000000;
-
         private byte[] midi;
         public HeaderChunk header;
         public TrackChunk[] tracks;
         public List<Event> midiEvents = new List<Event>();
+        public string fileName;
 
         public MIDIParser(byte[] file)
         {
@@ -301,14 +300,6 @@ namespace AnnotationTool
             return data;
         }
 
-        // Calculates the BPM from a byte array.
-        private float CalculateBPM(byte[] tempoArray)
-        {
-            uint tempo = FixedLengthArrayToUInt(tempoArray);
-
-            return MICROSECONDS_PER_MINUTE / tempo;
-        }
-
         // Converts a byte array of variable size to an unsigned integer.
         private uint VariableLengthArrayToUInt(byte[] byteArray)
         {
@@ -326,7 +317,7 @@ namespace AnnotationTool
         }
 
         // Converts a byte array of fixed size to an unsigned integer.
-        private uint FixedLengthArrayToUInt(byte[] byteArray)
+        public static uint FixedLengthArrayToUInt(byte[] byteArray)
         {
             uint result = 0;
 

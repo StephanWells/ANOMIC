@@ -31,9 +31,12 @@
     <core:Double x:Key="BlackNoteWidth">75</core:Double>
     <core:Int32 x:Key="BlackNoteSpan">1</core:Int32>
 
-    <Thickness x:Key="TextMargin">113,15,0,0</Thickness>
+    <Thickness x:Key="TextLeftNoteMargin">113,15,0,0</Thickness>
+    <Thickness x:Key="TextRightNoteMargin">113,23,0,0</Thickness>
+    <Thickness x:Key="TextBlackNoteMargin">46,19,0,0</Thickness>
+    <Thickness x:Key="TextMiddleNoteMargin">113,19,0,0</Thickness>
     <core:Double x:Key="TextHeight">15</core:Double>
-    <core:Double x:Key="TextWidth">20</core:Double>
+    <core:Double x:Key="TextWidth">25</core:Double>
     <core:Int32 x:Key="TextSpan">2</core:Int32>
     <Brush x:Key="TextColour">#8B8E9C</Brush>
 

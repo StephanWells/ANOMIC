@@ -18,14 +18,24 @@ using System.Windows.Shapes;
 using System.IO;
 using Microsoft.Win32;
 using System.Text.RegularExpressions;
+using Midi;
+using System.Threading;
+using System.Windows.Threading;
 
 namespace AnnotationTool.views
 {
     public partial class PianoRollView : UserControl
     {
+        private static OutputDevice outputDevice;
+        private Midi.Clock scheduler;
+        private TranslateTransform trackerTransform = new TranslateTransform();
+        private static IList<DispatcherTimer> timers = new List<DispatcherTimer>();
+        private List<Note> currentNotes = new List<Note>();
+
         private const int pianoRollRows = 88;
         private const int occurrenceIconHeight = 20;
         private const double resolution = 96;
+        private const double barNumOffset = 4;
 
         private double zoom = 1;
         private double timeDivRatio;
@@ -45,6 +55,7 @@ namespace AnnotationTool.views
         bool isDraggingPatternRect = false;
         bool isDraggingScroll = false;
         bool isUIMoving = false;
+        bool isPlaying = false;
 
         Point origMouseDownPoint;
         Point prevMouseDownPoint;
@@ -81,6 +92,23 @@ namespace AnnotationTool.views
 
             timeDivRatio = resolution / midiParse.header.timeDiv;
             snapLength = (zoom * resolution) / 8;
+            scheduler = new Midi.Clock(noteParse.bpm);
+
+            try
+            {
+                outputDevice = !outputDevice.IsOpen ? OutputDevice.InstalledDevices[0] : outputDevice;
+            }
+            catch (NullReferenceException)
+            {
+                outputDevice = OutputDevice.InstalledDevices[0];
+            }
+            catch (InvalidOperationException)
+            {
+                
+            }
+            
+            scheduler.Reset();
+            ScheduleNotes();
 
             foreach (Note note in noteParse.notes)
             {
@@ -88,6 +116,15 @@ namespace AnnotationTool.views
                 note.SetDuration(note.GetDuration() * timeDivRatio);
             }
 
+            txtFileName.Text = midiParse.fileName.Length >= 30 ? midiParse.fileName.Substring(0, 30) + "..." : midiParse.fileName;
+
+            foreach (UIElement textBlock in grdKeyNames.Children)
+            {
+                textBlock.Visibility = ((TextBlock)textBlock).Text.Contains("C") && !((TextBlock)textBlock).Text.Contains("#") ? Visibility.Visible : Visibility.Collapsed;
+            }
+
+            MainWindow.MIDIBrowseClick += new EventHandler(MainWindow_MIDIBrowseClick);
+            MainWindow.Exit += new EventHandler(MainWindow_Exit);
             MainWindow.SnapChange += new EventHandler(MainWindow_SnapChange);
             MainWindow.ZoomChange += new EventHandler(MainWindow_ZoomChange);
             MainWindow.ExpandAll += new EventHandler(MainWindow_ExpandAll);
@@ -95,6 +132,7 @@ namespace AnnotationTool.views
             MainWindow.ShowAll += new EventHandler(MainWindow_ShowAll);
             MainWindow.HideAll += new EventHandler(MainWindow_HideAll);
             MainWindow.AddPattern += new EventHandler(MainWindow_AddPattern);
+            MainWindow.KeyVisibilityChange += new EventHandler(MainWindow_KeyVisibilityChange);
 
             Loaded += OnLoaded;
         }
@@ -108,6 +146,170 @@ namespace AnnotationTool.views
 
             MainWindow.SnapChange += new EventHandler(MainWindow_SnapChange);
             Loaded += OnLoaded;
+        }
+
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            double centre = srlPianoScroll.ScrollableHeight / 2.0;
+
+            if (noteParse.notes.Count > 0)
+            {
+                double test = (double)PitchToRow((int)noteParse.notes[0].GetPitch()) / 87 * srlPianoScroll.ScrollableHeight;
+
+                srlPianoScroll.ScrollToVerticalOffset(test);
+            }
+
+            srlPianoScroll.Focus();
+
+            ResetPianoRoll();
+            PopulateNotesGrid(noteParse);
+
+            quantisedSong = Quantise(0, (int)grdNotes.Width);
+
+            try
+            {
+                outputDevice.Open();
+            }
+            catch (InvalidOperationException)
+            {
+
+            }
+        }
+
+        private void ScheduleNotes()
+        {
+            foreach (Note note in noteParse.notes)
+            {
+                scheduler.Schedule(new NoteOnMessage(outputDevice, Channel.Channel1, (Midi.Pitch)note.GetPitch(), note.GetVelocity(), (float)(note.GetTime() / resolution)));
+                scheduler.Schedule(new NoteOffMessage(outputDevice, Channel.Channel1, (Midi.Pitch)note.GetPitch(), note.GetVelocity(), (float)((note.GetTime() + note.GetDuration()) / resolution)));
+            }
+        }
+
+        private void ScheduleNotes(double start, double end)
+        {
+            foreach (Note note in noteParse.notes)
+            {
+                if (note.GetTime() >= start && note.GetTime() <= end)
+                {
+                    scheduler.Schedule(new NoteOnMessage(outputDevice, (Channel)note.GetChannel(), (Midi.Pitch)note.GetPitch(), note.GetVelocity(), (float)((note.GetTime() - start) / resolution)));
+                    scheduler.Schedule(new NoteOffMessage(outputDevice, (Channel)note.GetChannel(), (Midi.Pitch)note.GetPitch(), note.GetVelocity(), (float)((note.GetTime() - start + note.GetDuration()) / resolution)));
+                }
+            }
+        }
+
+        private void HighlightNoteRects()
+        {
+            double bpmFactor = 60 / noteParse.bpm;
+
+            foreach (Note note in noteParse.notes)
+            {
+                DelayedExecute(() => HighlightNoteRect(note), bpmFactor * note.GetTime() / resolution);
+                DelayedExecute(() => RemoveHighlight(note), (bpmFactor * (note.GetTime() + note.GetDuration())) / resolution);
+            }
+        }
+
+        private void HighlightNoteRects(double start, double end)
+        {
+            double bpmFactor = 60 / noteParse.bpm;
+
+            foreach (Note note in noteParse.notes)
+            {
+                if (note.GetTime() >= start && note.GetTime() <= end)
+                {
+                    DelayedExecute(() => HighlightNoteRect(note), bpmFactor * (note.GetTime() - start) / resolution);
+                    DelayedExecute(() => RemoveHighlight(note), (bpmFactor * (note.GetTime() - start + note.GetDuration())) / resolution);
+                }
+            }
+        }
+
+        private void CancelHighlights()
+        {
+            foreach (Note note in currentNotes)
+            {
+                note.noteRect.Fill = new SolidColorBrush(Colors.LightGray);
+            }
+
+            currentNotes.Clear();
+            
+            foreach (DispatcherTimer timer in timers)
+            {
+                timer.Stop();
+            }
+        }
+
+        private void HighlightNoteRect(Note note)
+        {
+            note.noteRect.Fill = (Brush)this.Resources["ButtonMouseOverColour"];
+            currentNotes.Add(note);
+        }
+
+        private void RemoveHighlight(Note note)
+        {
+            note.noteRect.Fill = new SolidColorBrush(Colors.LightGray);
+            currentNotes.Remove(note);
+        }
+
+        public static void DelayedExecute(Action action, double delay)
+        {
+            DispatcherTimer dispatcherTimer = new DispatcherTimer();
+
+            timers.Add(dispatcherTimer);
+
+            EventHandler handler = null;
+            handler = (sender, e) =>
+            {
+                dispatcherTimer.Tick -= handler;
+                dispatcherTimer.Stop();
+                timers.Remove(dispatcherTimer);
+                action();
+            };
+
+            dispatcherTimer.Tick += handler;
+            dispatcherTimer.Interval = TimeSpan.FromSeconds(delay);
+            dispatcherTimer.Start();
+        }
+
+        private void MainWindow_MIDIBrowseClick(object sender, EventArgs e)
+        {
+            Stop_Click(sender, (RoutedEventArgs)e);
+        }
+
+        private void MainWindow_Exit(object sender, EventArgs e)
+        {
+            Stop_Click(sender, (RoutedEventArgs)e);
+        }
+
+        private void PianoRoll_OnKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Space)
+            {
+                if (isPlaying)
+                {
+                    Pause_Click(sender, e);
+                }
+                else
+                {
+                    Play_Click(sender, e);
+                }
+            }
+        }
+
+        private void StopMusic()
+        {
+            if (scheduler.IsRunning)
+            {
+                MuteCurrentNotes();
+                scheduler.Stop();
+                scheduler.Reset();
+            }
+        }
+        
+        private void MuteCurrentNotes()
+        {
+            foreach (Note note in currentNotes)
+            {
+                outputDevice.SendNoteOff((Channel)note.GetChannel(), (Midi.Pitch)note.GetPitch(), note.GetVelocity());
+            }
         }
 
         private void MainWindow_SnapChange(object sender, EventArgs e)
@@ -152,23 +354,52 @@ namespace AnnotationTool.views
             {
                 case "100%":
                     UpdateZoom(1);
-                    break;
+                break;
 
                 case "80%":
                     UpdateZoom(0.8);
-                    break;
+                break;
 
                 case "60%":
                     UpdateZoom(0.6);
-                    break;
+                break;
 
                 case "40%":
                     UpdateZoom(0.4);
-                    break;
+                break;
 
                 case "20%":
                     UpdateZoom(0.2);
-                    break;
+                break;
+            }
+        }
+
+        private void MainWindow_KeyVisibilityChange(object sender, EventArgs e)
+        {
+            string keyVisibilityMenuChoice = ((MenuItem)(((RoutedEventArgs)e).Source)).Header.ToString();
+
+            switch (keyVisibilityMenuChoice)
+            {
+                case "_All Keys":
+                    foreach (UIElement textBlock in grdKeyNames.Children)
+                    {
+                        textBlock.Visibility = Visibility.Visible;
+                    }
+                break;
+
+                case "_Only Octaves":
+                    foreach (UIElement textBlock in grdKeyNames.Children)
+                    {
+                        textBlock.Visibility = ((TextBlock)textBlock).Text.Contains("C") && !((TextBlock)textBlock).Text.Contains("s") ? Visibility.Visible : Visibility.Collapsed;
+                    }
+                break;
+
+                case "_None":
+                    foreach (UIElement textBlock in grdKeyNames.Children)
+                    {
+                        textBlock.Visibility = Visibility.Collapsed;
+                    }
+                break;
             }
         }
 
@@ -249,6 +480,7 @@ namespace AnnotationTool.views
 
         private void UpdateZoom(double zoomSetting)
         {
+            double oldZoom = zoom;
             zoom = zoomSetting;
             double thirtySecondNote = Math.Round(zoom * (resolution / 8), 2);
             double width = Math.Round(barNumbers.Count * zoom * resolution * 4, 2);
@@ -258,7 +490,7 @@ namespace AnnotationTool.views
             cnvGridLines.Width = width;
             cnvMouseLayer.Width = width;
             grdNotes.Width = width;
-            grdTimeline.Width = width + 2;
+            grdTimeline.Width = width + barNumOffset * 2;
 
             for (int i = 0; i < gridLines.Count; i++)
             {
@@ -273,7 +505,7 @@ namespace AnnotationTool.views
 
             for (int i = 0; i < barNumbers.Count; i++)
             {
-                barNumbers[i].Margin = new Thickness(Math.Round(i * zoom * resolution * 4, 2), 0, 0, 0);
+                barNumbers[i].Margin = new Thickness(Math.Round((i * resolution * 4) * zoom + barNumOffset, 2), 0, 0, 10);
             }
 
             foreach (Pattern pattern in patterns)
@@ -288,23 +520,13 @@ namespace AnnotationTool.views
             }
 
             snapLength = Math.Round((zoom * resolution) / 8, 2);
-        }
 
-        private void OnLoaded(object sender, RoutedEventArgs e)
-        {
-            double centre = srlPianoScroll.ScrollableHeight / 2.0;
+            UpdateTrackerPosition(Math.Round(((linTrackerLine.Margin.Left + linTrackerLine.RenderTransform.Value.OffsetX) / oldZoom) * zoom, 2));
 
-            if (noteParse.notes.Count > 0)
+            if (isPlaying)
             {
-                double test = (double)PitchToRow((int)noteParse.notes[0].GetPitch()) / 87 * srlPianoScroll.ScrollableHeight;
-
-                srlPianoScroll.ScrollToVerticalOffset(test);
+                MoveTracker();
             }
-            
-            ResetPianoRoll();
-            PopulateNotesGrid(noteParse);
-
-            quantisedSong = Quantise(0, (int)grdNotes.Width);
         }
 
         // Adds a bar to the piano roll to make space for MIDI notes.
@@ -327,7 +549,7 @@ namespace AnnotationTool.views
             {
                 FontSize = 12,
                 Text = "" + (barNumbers.Count),
-                Margin = new Thickness(barStart, 2, 0, 0),
+                Margin = new Thickness(barStart + barNumOffset, 0, 0, 10),
                 Height = 20
             };
 
@@ -560,6 +782,94 @@ namespace AnnotationTool.views
             }
 
             return result;
+        }
+
+        private void Play_Click(object sender, RoutedEventArgs e)
+        {
+            isPlaying = true;
+
+            if (!scheduler.IsRunning)
+            {
+                scheduler.Start();
+                MoveTracker();
+                HighlightNoteRects(linTrackerLine.Margin.Left / zoom, grdNotes.Width / zoom);
+            }
+            else
+            {
+                scheduler.Stop();
+                scheduler.Reset();
+                ScheduleNotes();
+                CancelHighlights();
+                scheduler.Start();
+                UpdateTrackerPosition(0);
+                MoveTracker();
+                HighlightNoteRects(linTrackerLine.Margin.Left / zoom, grdNotes.Width / zoom);
+            }
+        }
+
+        private void Pause_Click(object sender, RoutedEventArgs e)
+        {
+            isPlaying = false;
+
+            if (scheduler.IsRunning)
+            {
+                scheduler.Stop();
+                PauseTracker();
+                CancelHighlights();
+            }
+        }
+
+        private void Stop_Click(object sender, RoutedEventArgs e)
+        {
+            isPlaying = false;
+            UpdateTrackerPosition(0);
+
+            if (scheduler.IsRunning)
+            {
+                MuteCurrentNotes();
+                scheduler.Stop();
+                scheduler.Reset();
+                ScheduleNotes();
+                CancelHighlights();
+            }
+            else
+            {
+                scheduler.Reset();
+                ScheduleNotes();
+            }
+        }
+
+        private void MoveTracker()
+        {
+            txtTrackerTriangle.RenderTransform = trackerTransform;
+            linTrackerLine.RenderTransform = trackerTransform;
+
+            double distance = cnvMouseLayer.Width - linTrackerLine.Margin.Left;
+            TimeSpan duration = TimeSpan.FromSeconds(((60 / noteParse.bpm) * ((grdNotes.Width - linTrackerLine.Margin.Left) / resolution)) / zoom);
+
+            DoubleAnimation horizAnim = new DoubleAnimation { By = distance, Duration = duration };
+
+            trackerTransform.BeginAnimation(TranslateTransform.XProperty, horizAnim);
+        }
+
+        private void UpdateTrackerPosition(double pos)
+        {
+            txtTrackerTriangle.Margin = new Thickness(pos, txtTrackerTriangle.Margin.Top, txtTrackerTriangle.Margin.Right, txtTrackerTriangle.Margin.Bottom);
+            linTrackerLine.Margin = new Thickness(pos, linTrackerLine.Margin.Top, linTrackerLine.Margin.Right, linTrackerLine.Margin.Bottom);
+            trackerTransform = new TranslateTransform();
+            txtTrackerTriangle.RenderTransform = trackerTransform;
+            linTrackerLine.RenderTransform = trackerTransform;
+
+            trackerTransform.BeginAnimation(TranslateTransform.XProperty, null);
+        }
+
+        private void PauseTracker()
+        {
+            txtTrackerTriangle.Margin = new Thickness(txtTrackerTriangle.Margin.Left + txtTrackerTriangle.RenderTransform.Value.OffsetX, txtTrackerTriangle.Margin.Top, txtTrackerTriangle.Margin.Right, txtTrackerTriangle.Margin.Bottom);
+            linTrackerLine.Margin = new Thickness(linTrackerLine.Margin.Left + linTrackerLine.RenderTransform.Value.OffsetX, linTrackerLine.Margin.Top, linTrackerLine.Margin.Right, linTrackerLine.Margin.Bottom);
+            trackerTransform = new TranslateTransform();
+            txtTrackerTriangle.RenderTransform = trackerTransform;
+            linTrackerLine.RenderTransform = trackerTransform;
         }
 
         private void AddPattern_Click(object sender, RoutedEventArgs e)
@@ -1028,6 +1338,28 @@ namespace AnnotationTool.views
             }
         }
 
+        private void Timeline_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            Point mouseDown = GetCurrentMousePosition(e);
+            UpdateTrackerPosition(mouseDown.X);
+
+            if (scheduler.IsRunning)
+            {
+                scheduler.Stop();
+                scheduler.Reset();
+                ScheduleNotes(mouseDown.X / zoom, grdNotes.Width / zoom);
+                scheduler.Start();
+                CancelHighlights();
+                HighlightNoteRects(mouseDown.X / zoom, grdNotes.Width / zoom);
+                MoveTracker();
+            }
+            else
+            {
+                scheduler.Reset();
+                ScheduleNotes(mouseDown.X / zoom, grdNotes.Width / zoom);
+            }
+        }
+
         private void PianoScroll_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Middle && e.ButtonState == MouseButtonState.Pressed)
@@ -1056,6 +1388,11 @@ namespace AnnotationTool.views
                 sv.ScrollToHorizontalOffset(scrollHorOff + (scrollMousePoint.X - e.GetPosition(sv).X));
                 sv.ScrollToVerticalOffset(scrollVerOff + (scrollMousePoint.Y - e.GetPosition(sv).Y));
             }
+        }
+
+        private void PianoScroll_MouseEnter(object sender, MouseEventArgs e)
+        {
+            srlPianoScroll.Focus();
         }
 
         private void PianoRoll_LeftMouseDown(object sender, MouseButtonEventArgs e)

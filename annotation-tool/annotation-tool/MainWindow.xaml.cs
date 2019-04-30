@@ -21,6 +21,8 @@ namespace AnnotationTool
     // Interaction logic for MainWindow.xaml
     public partial class MainWindow : Window
     {
+        public static event EventHandler MIDIBrowseClick;
+        public static event EventHandler Exit;
         public static event EventHandler SnapChange;
         public static event EventHandler ZoomChange;
         public static event EventHandler ExpandAll;
@@ -28,6 +30,7 @@ namespace AnnotationTool
         public static event EventHandler ShowAll;
         public static event EventHandler HideAll;
         public static event EventHandler AddPattern;
+        public static event EventHandler KeyVisibilityChange;
 
         public MainWindow()
         {
@@ -35,8 +38,10 @@ namespace AnnotationTool
             //this.Loaded += OnLoaded;
         }
 
-        private void MIDIBrowse_Click(object sender, RoutedEventArgs e)
+        private void MainWindow_MIDIBrowseClick(object sender, RoutedEventArgs e)
         {
+            MIDIBrowseClick?.Invoke(this, e);
+
             OpenFileDialog browseDialog = new OpenFileDialog
             {
                 Filter = "MIDI files (*.mid)|*.mid|All files (*.*)|*.*"
@@ -48,6 +53,7 @@ namespace AnnotationTool
                 {
                     MIDIParser midiParse = new MIDIParser(File.ReadAllBytes(browseDialog.FileName));
 
+                    midiParse.fileName = browseDialog.SafeFileName;
                     midiParse.ParseFile();
                     NoteParser noteParse = new NoteParser(midiParse);
                     noteParse.ParseEvents();
@@ -65,6 +71,7 @@ namespace AnnotationTool
 
         private void MainWindow_Exit(object sender, RoutedEventArgs e)
         {
+            Exit?.Invoke(this, e);
             Close();
         }
 
@@ -101,6 +108,11 @@ namespace AnnotationTool
         private void MainWindow_AddPattern(object sender, RoutedEventArgs e)
         {
             AddPattern?.Invoke(this, e);
+        }
+
+        private void MainWindow_KeyVisibilityChange(object sender, RoutedEventArgs e)
+        {
+            KeyVisibilityChange?.Invoke(this, e);
         }
     }
 }
