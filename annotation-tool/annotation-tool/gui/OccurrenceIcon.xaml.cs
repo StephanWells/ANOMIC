@@ -12,6 +12,7 @@ namespace Controls
         public event EventHandler MouseOut;
         public event EventHandler MouseLeftClick;
         public event EventHandler FindSimilar;
+        public event EventHandler ConfidenceChange;
 
         public OccurrenceIcon()
         {
@@ -68,6 +69,11 @@ namespace Controls
         private void OccurrenceIcon_FindSimilar(object sender, RoutedEventArgs e)
         {
             FindSimilar?.Invoke(this, e);
+        }
+
+        private void OccurrenceIcon_ConfidenceChange(object sender, RoutedEventArgs e)
+        {
+            ConfidenceChange?.Invoke(this, e);
         }
     }
 }

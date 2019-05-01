@@ -47,17 +47,20 @@
                         <MenuItem Header="_Only Octaves" Width="200" local:MenuItemExtensions.GroupName="keyVisibilitySettings" IsCheckable="True" IsChecked="True" Checked="MainWindow_KeyVisibilityChange"/>
                         <MenuItem Header="_None" Width="200" local:MenuItemExtensions.GroupName="keyVisibilitySettings" IsCheckable="True" IsChecked="False" Checked="MainWindow_KeyVisibilityChange"/>
                     </MenuItem>
+                    <MenuItem Header="_Show Grid Lines" Width="200" IsCheckable="True" IsChecked="True" Click="MainWindow_GridVisibilityChange"/>
                 </MenuItem>
 
-                <MenuItem x:Name="mnuPatterns" Header="Patterns" Width="70" Visibility="Hidden">
-                    <MenuItem Header="Add Pattern" Width="200" Click="MainWindow_AddPattern"/>
-                    <MenuItem Header="Snap" Width="200">
+                <MenuItem x:Name="mnuPatterns" Header="_Patterns" Width="70" Visibility="Hidden">
+                    <MenuItem Header="_Add Pattern" Width="200" Click="MainWindow_AddPattern"/>
+                    <MenuItem Header="_Delete Selected Pattern" Width="200" Click="MainWindow_DeletePattern"/>
+                    <MenuItem Header="_Snap" Width="200">
                         <MenuItem Header="Step" Width="200" local:MenuItemExtensions.GroupName="snapSettings" IsCheckable="True" Checked="MainWindow_SnapChange"/>
                         <MenuItem Header="1/2 Step" Width="200" local:MenuItemExtensions.GroupName="snapSettings" IsCheckable="True" Checked="MainWindow_SnapChange"/>
                         <MenuItem Header="1/3 Step" Width="200" local:MenuItemExtensions.GroupName="snapSettings" IsCheckable="True" Checked="MainWindow_SnapChange"/>
                         <MenuItem Header="1/4 Step" Width="200" local:MenuItemExtensions.GroupName="snapSettings" IsCheckable="True" IsChecked="True" Checked="MainWindow_SnapChange"/>
                         <MenuItem Header="1/8 Step" Width="200" local:MenuItemExtensions.GroupName="snapSettings" IsCheckable="True" Checked="MainWindow_SnapChange"/>
                     </MenuItem>
+                    <MenuItem Header="_Note Select Mode" Width="200" IsCheckable="True" IsChecked="False" Click="MainWindow_NoteSelect"/>
                 </MenuItem>
             </Menu>
         </DockPanel>

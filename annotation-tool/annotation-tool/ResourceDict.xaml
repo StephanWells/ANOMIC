@@ -217,171 +217,13 @@
         <Setter Property="Content" Value="&#xE894;"/>
     </Style>
 
-    <!--<Style TargetType="{x:Type MenuItem}">
-        <Setter Property="Background" Value="{StaticResource GridLightColour}"/>
-        <Setter Property="Foreground" Value="White"/>
-        <Setter Property="BorderBrush" Value="Transparent"/>
-        <Setter Property="FontSize" Value="15"/>
-        <Setter Property="FontFamily" Value="{StaticResource Exo2Light}"/>
-        <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="ScrollViewer.PanningMode" Value="Both"/>
-
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type MenuItem}">
-                    <Grid SnapsToDevicePixels="true">
-                        <DockPanel>
-                            <Border x:Name="ContentBorder" BorderThickness="1" BorderBrush="{StaticResource GridLightColour}" Background="{StaticResource GridLightColour}">
-                                <ContentPresenter x:Name="Content" ContentSource="Header" Margin="7,0,0,0" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
-                            </Border>
-                        </DockPanel>
-                        <Popup x:Name="Popup" AllowsTransparency="true" Focusable="false" HorizontalOffset="0" IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}" PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}" Placement="Bottom" VerticalOffset="-1">
-                            <Border BorderThickness="0" BorderBrush="{StaticResource ButtonColour}" Background="{StaticResource GridLightColour}">
-                                <ScrollViewer x:Name="SubMenuScrollViewer" CanContentScroll="true" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuScrollViewer, TypeInTargetAssembly={x:Type FrameworkElement}}}">
-                                    <Grid RenderOptions.ClearTypeHint="Enabled">
-                                        <ItemsPresenter x:Name="ItemsPresenter" Grid.Column="0" KeyboardNavigation.DirectionalNavigation="Cycle" Grid.IsSharedSizeScope="true" Margin="3" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" KeyboardNavigation.TabNavigation="Cycle"/>
-                                    </Grid>
-                                </ScrollViewer>
-                            </Border>
-                        </Popup>
-                    </Grid>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="{StaticResource MenuButtonMouseOverColour}" TargetName="ContentBorder"/>
-                        </Trigger>
-                        <Trigger Property="IsChecked" Value="True">
-                            <Setter Property="Foreground" Value="{StaticResource ButtonMouseOverColour}"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>-->
-    
-    <!--_____________________________________________________________________________________________________________________________________________-->
-
-    <!--<Style TargetType="{x:Type MenuItem}">
-        <Setter Property="Background" Value="{StaticResource GridLightColour}"/>
-        <Setter Property="Foreground" Value="White"/>
-        <Setter Property="BorderBrush" Value="Transparent"/>
-        <Setter Property="FontSize" Value="15"/>
-        <Setter Property="FontFamily" Value="{StaticResource Exo2Light}"/>
-        <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="ScrollViewer.PanningMode" Value="Both"/>
-        <Setter Property="OverridesDefaultStyle" Value="True" />
-        <Setter Property="SnapsToDevicePixels" Value="True"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type MenuItem}">
-                    <Border BorderThickness="0" x:Name="Border" Background="Transparent">
-                        <StackPanel ClipToBounds="True"
-                                    Orientation="Vertical"
-                                    IsItemsHost="True" />
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver"
-                                 Value="true">
-                            <Setter TargetName="Border"
-                                    Property="Background"
-                                    Value="#0f3c5a" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-        
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{StaticResource MenuButtonMouseOverColour}"/>
-            </Trigger>
-            <Trigger Property="IsChecked" Value="True">
-                <Setter Property="Foreground" Value="{StaticResource ButtonMouseOverColour}"/>
-            </Trigger>
-        </Style.Triggers>
-    </Style>
-
-    --><!-- SubmenuItem --><!--
-
-    <ControlTemplate x:Key="{x:Static MenuItem.SubmenuItemTemplateKey}" TargetType="{x:Type MenuItem}">
-        <Border Name="Border" Background="{StaticResource GridLightColour}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" SharedSizeGroup="Icon"/>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" SharedSizeGroup="Shortcut"/>
-                    <ColumnDefinition Width="13" />
-                </Grid.ColumnDefinitions>
-                <ContentPresenter Name="Icon" Margin="6,0,6,0" VerticalAlignment="Center" ContentSource="Icon"/>
-                <Border Name="Check" Width="13" Height="13" Visibility="Collapsed" Margin="6,0,6,0" Background="{StaticResource ButtonColour}" BorderThickness="1" BorderBrush="{StaticResource ButtonColour}">
-                    <Path Name="CheckMark" Width="7" Height="7" Visibility="Hidden" SnapsToDevicePixels="False" Stroke="White" StrokeThickness="2" Data="M 0 0 L 7 7 M 0 7 L 7 0" />
-                </Border>
-                <ContentPresenter Name="HeaderHost" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True"/>
-                <TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" Margin="5,2,0,2" DockPanel.Dock="Right" />
-            </Grid>
-        </Border>
-
-        <ControlTemplate.Triggers>
-            <Trigger Property="Icon" Value="{x:Null}">
-                <Setter TargetName="Icon" Property="Visibility" Value="Hidden"/>
-            </Trigger>
-            <Trigger Property="IsChecked" Value="true">
-                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
-            </Trigger>
-            <Trigger Property="IsCheckable" Value="true">
-                <Setter TargetName="Check" Property="Visibility" Value="Visible"/>
-                <Setter TargetName="Icon" Property="Visibility" Value="Hidden"/>
-            </Trigger>
-            <Trigger Property="IsHighlighted" Value="true">
-                <Setter TargetName="Border" Property="Background" Value="{StaticResource MenuButtonMouseOverColour}"/>
-            </Trigger>
-        </ControlTemplate.Triggers>
-    </ControlTemplate>
-
-    --><!-- SubmenuHeader --><!--
-
-    <ControlTemplate x:Key="{x:Static MenuItem.SubmenuHeaderTemplateKey}" TargetType="{x:Type MenuItem}">
-        <Border Name="Border">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" SharedSizeGroup="Icon"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto" SharedSizeGroup="Shortcut"/>
-                    <ColumnDefinition Width="13"/>
-                </Grid.ColumnDefinitions>
-                <ContentPresenter Name="Icon" Margin="6,0,6,0" VerticalAlignment="Center" ContentSource="Icon"/>
-                <ContentPresenter Name="HeaderHost" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True"/>
-                <TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" Margin="5,2,2,2" DockPanel.Dock="Right" />
-                <Path Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 0 7 L 4 3.5 Z" Fill="#0f3c5a"/>
-                <Popup Name="Popup" Placement="Right" HorizontalOffset="-4" IsOpen="{TemplateBinding IsSubmenuOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
-                    <Border Name="SubmenuBorder" SnapsToDevicePixels="True" Background="{StaticResource GridLightColour}" BorderBrush="{StaticResource GridLightColour}" BorderThickness="1">
-                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
-                    </Border>
-                </Popup>
-            </Grid>
-        </Border>
-
-        <ControlTemplate.Triggers>
-            <Trigger Property="Icon" Value="{x:Null}">
-                <Setter TargetName="Icon" Property="Visibility" Value="Collapsed"/>
-            </Trigger>
-            <Trigger Property="IsHighlighted" Value="true">
-                <Setter TargetName="Border" Property="Background" Value="{StaticResource MenuButtonMouseOverColour}"/>
-            </Trigger>
-            <Trigger Property="IsEnabled" Value="false">
-                <Setter Property="Foreground" Value="{StaticResource GridDarkColour}"/>
-            </Trigger>
-        </ControlTemplate.Triggers>
-    </ControlTemplate>-->
-
-    <!--_____________________________________________________________________________________________________________________________________________-->
-
     <Style x:Key="{x:Type Menu}" TargetType="{x:Type Menu}">
         <Setter Property="OverridesDefaultStyle" Value="True" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Menu}">
-                    <Border BorderThickness="0.5" BorderBrush="{StaticResource GridExtraDarkColour}" Background="{StaticResource GridLightColour}">
+                    <Border BorderThickness="1" BorderBrush="{StaticResource GridExtraDarkColour}" Background="{StaticResource GridLightColour}">
                         <StackPanel ClipToBounds="True" Orientation="Horizontal" IsItemsHost="True" />
                     </Border>
                 </ControlTemplate>
@@ -395,7 +237,7 @@
             <Grid>
                 <ContentPresenter Margin="6,3,6,3" ContentSource="Header" RecognizesAccessKey="True"/>
                 <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsSubmenuOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
-                    <Border x:Name="SubmenuBorder" SnapsToDevicePixels="True" BorderThickness="0.5" Background="{StaticResource GridLightColour}" BorderBrush="{StaticResource GridExtraDarkColour}">
+                    <Border x:Name="SubmenuBorder" SnapsToDevicePixels="True" BorderThickness="1" Background="{StaticResource GridLightColour}" BorderBrush="{StaticResource GridExtraDarkColour}">
                         <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle"/>
                     </Border>
                 </Popup>
@@ -542,7 +384,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ContextMenu}">
-                    <Border x:Name="Border" Background="{StaticResource GridLightColour}" BorderThickness="0.5" BorderBrush="{StaticResource GridExtraDarkColour}">
+                    <Border x:Name="Border" Background="{StaticResource GridLightColour}" BorderThickness="1" BorderBrush="{StaticResource GridExtraDarkColour}">
                         <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -554,8 +396,6 @@
             </Setter.Value>
         </Setter>
     </Style>
-
-    <!--_____________________________________________________________________________________________________________________________________________-->
 
     <Style TargetType="{x:Type Separator}">
         <Setter Property="Margin" Value="0,0,0,0"/>

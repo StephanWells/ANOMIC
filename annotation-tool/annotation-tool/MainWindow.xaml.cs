@@ -30,7 +30,10 @@ namespace AnnotationTool
         public static event EventHandler ShowAll;
         public static event EventHandler HideAll;
         public static event EventHandler AddPattern;
+        public static event EventHandler DeletePattern;
         public static event EventHandler KeyVisibilityChange;
+        public static event EventHandler GridVisibilityChange;
+        public static event EventHandler NoteSelect;
 
         public MainWindow()
         {
@@ -110,9 +113,24 @@ namespace AnnotationTool
             AddPattern?.Invoke(this, e);
         }
 
+        private void MainWindow_DeletePattern(object sender, RoutedEventArgs e)
+        {
+            DeletePattern?.Invoke(this, e);
+        }
+
         private void MainWindow_KeyVisibilityChange(object sender, RoutedEventArgs e)
         {
             KeyVisibilityChange?.Invoke(this, e);
+        }
+
+        private void MainWindow_GridVisibilityChange(object sender, RoutedEventArgs e)
+        {
+            GridVisibilityChange?.Invoke(this, e);
+        }
+
+        private void MainWindow_NoteSelect(object sender, RoutedEventArgs e)
+        {
+            NoteSelect?.Invoke(this, e);
         }
     }
 }
