@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using System.IO;
 using Microsoft.Win32;
 using AnnotationTool.views;
+using System.ComponentModel;
 
 namespace AnnotationTool
 {
@@ -32,8 +33,11 @@ namespace AnnotationTool
         public static event EventHandler AddPattern;
         public static event EventHandler DeletePattern;
         public static event EventHandler KeyVisibilityChange;
-        public static event EventHandler GridVisibilityChange;
-        public static event EventHandler NoteSelect;
+        public static event EventHandler GridVisibilityOn;
+        public static event EventHandler GridVisibilityOff;
+        public static event EventHandler NoteSelectOn;
+        public static event EventHandler NoteSelectOff;
+        public static event EventHandler Closing;
 
         public MainWindow()
         {
@@ -60,6 +64,7 @@ namespace AnnotationTool
                     midiParse.ParseFile();
                     NoteParser noteParse = new NoteParser(midiParse);
                     noteParse.ParseEvents();
+                    SetDefaults();
 
                     DataContext = new PianoRollView(midiParse, noteParse);
                     mnuView.Visibility = Visibility.Visible;
@@ -70,6 +75,15 @@ namespace AnnotationTool
                     MessageBox.Show("Error parsing MIDI file!", "Error");
                 }
             }
+        }
+
+        private void SetDefaults()
+        {
+            mnuDefaultKeyNames.IsChecked = true;
+            mnuDefaultSnap.IsChecked = true;
+            mnuDefaultZoom.IsChecked = true;
+            mnuNoteSelect.IsChecked = false;
+            mnuGridLines.IsChecked = true;
         }
 
         private void MainWindow_Exit(object sender, RoutedEventArgs e)
@@ -123,14 +137,29 @@ namespace AnnotationTool
             KeyVisibilityChange?.Invoke(this, e);
         }
 
-        private void MainWindow_GridVisibilityChange(object sender, RoutedEventArgs e)
+        private void MainWindow_GridVisibilityOn(object sender, RoutedEventArgs e)
         {
-            GridVisibilityChange?.Invoke(this, e);
+            GridVisibilityOn?.Invoke(this, e);
         }
 
-        private void MainWindow_NoteSelect(object sender, RoutedEventArgs e)
+        private void MainWindow_GridVisibilityOff(object sender, RoutedEventArgs e)
         {
-            NoteSelect?.Invoke(this, e);
+            GridVisibilityOff?.Invoke(this, e);
+        }
+
+        private void MainWindow_NoteSelectOn(object sender, RoutedEventArgs e)
+        {
+            NoteSelectOn?.Invoke(this, e);
+        }
+
+        private void MainWindow_NoteSelectOff(object sender, RoutedEventArgs e)
+        {
+            NoteSelectOff?.Invoke(this, e);
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            Closing?.Invoke(this, e);
         }
     }
 }

@@ -29,7 +29,7 @@
 
                 <MenuItem x:Name="mnuView" Header="View" Width="45" Visibility="Hidden">
                     <MenuItem Header="_Zoom" Width="200">
-                        <MenuItem Header="100%" Width="200" local:MenuItemExtensions.GroupName="zoomSettings" IsCheckable="True" IsChecked="True" Checked="MainWindow_ZoomChange"/>
+                        <MenuItem x:Name="mnuDefaultZoom" Header="100%" Width="200" local:MenuItemExtensions.GroupName="zoomSettings" IsCheckable="True" IsChecked="True" Checked="MainWindow_ZoomChange"/>
                         <MenuItem Header="80%" Width="200" local:MenuItemExtensions.GroupName="zoomSettings" IsCheckable="True" Checked="MainWindow_ZoomChange"/>
                         <MenuItem Header="60%" Width="200" local:MenuItemExtensions.GroupName="zoomSettings" IsCheckable="True" Checked="MainWindow_ZoomChange"/>
                         <MenuItem Header="40%" Width="200" local:MenuItemExtensions.GroupName="zoomSettings" IsCheckable="True" Checked="MainWindow_ZoomChange"/>
@@ -43,11 +43,11 @@
                         <MenuItem Header="_Hide All" Width="200" Click="MainWindow_HideAll"/>
                     </MenuItem>
                     <MenuItem Header="_Key Names" Width="200">
-                        <MenuItem Header="_All Keys" Width="200" local:MenuItemExtensions.GroupName="keyVisibilitySettings" IsCheckable="True" IsChecked="False" Checked="MainWindow_KeyVisibilityChange"/>
+                        <MenuItem x:Name="mnuDefaultKeyNames" Header="_All Keys" Width="200" local:MenuItemExtensions.GroupName="keyVisibilitySettings" IsCheckable="True" IsChecked="False" Checked="MainWindow_KeyVisibilityChange"/>
                         <MenuItem Header="_Only Octaves" Width="200" local:MenuItemExtensions.GroupName="keyVisibilitySettings" IsCheckable="True" IsChecked="True" Checked="MainWindow_KeyVisibilityChange"/>
                         <MenuItem Header="_None" Width="200" local:MenuItemExtensions.GroupName="keyVisibilitySettings" IsCheckable="True" IsChecked="False" Checked="MainWindow_KeyVisibilityChange"/>
                     </MenuItem>
-                    <MenuItem Header="_Show Grid Lines" Width="200" IsCheckable="True" IsChecked="True" Click="MainWindow_GridVisibilityChange"/>
+                    <MenuItem x:Name="mnuGridLines" Header="_Show Grid Lines" Width="200" IsCheckable="True" IsChecked="True" Checked="MainWindow_GridVisibilityOn" Unchecked="MainWindow_GridVisibilityOff"/>
                 </MenuItem>
 
                 <MenuItem x:Name="mnuPatterns" Header="_Patterns" Width="70" Visibility="Hidden">
@@ -57,10 +57,10 @@
                         <MenuItem Header="Step" Width="200" local:MenuItemExtensions.GroupName="snapSettings" IsCheckable="True" Checked="MainWindow_SnapChange"/>
                         <MenuItem Header="1/2 Step" Width="200" local:MenuItemExtensions.GroupName="snapSettings" IsCheckable="True" Checked="MainWindow_SnapChange"/>
                         <MenuItem Header="1/3 Step" Width="200" local:MenuItemExtensions.GroupName="snapSettings" IsCheckable="True" Checked="MainWindow_SnapChange"/>
-                        <MenuItem Header="1/4 Step" Width="200" local:MenuItemExtensions.GroupName="snapSettings" IsCheckable="True" IsChecked="True" Checked="MainWindow_SnapChange"/>
+                        <MenuItem x:Name="mnuDefaultSnap" Header="1/4 Step" Width="200" local:MenuItemExtensions.GroupName="snapSettings" IsCheckable="True" IsChecked="True" Checked="MainWindow_SnapChange"/>
                         <MenuItem Header="1/8 Step" Width="200" local:MenuItemExtensions.GroupName="snapSettings" IsCheckable="True" Checked="MainWindow_SnapChange"/>
                     </MenuItem>
-                    <MenuItem Header="_Note Select Mode" Width="200" IsCheckable="True" IsChecked="False" Click="MainWindow_NoteSelect"/>
+                    <MenuItem x:Name="mnuNoteSelect" Header="_Note Select Mode" Width="200" IsCheckable="True" IsChecked="False" Checked="MainWindow_NoteSelectOn" Unchecked="MainWindow_NoteSelectOff"/>
                 </MenuItem>
             </Menu>
         </DockPanel>

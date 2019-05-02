@@ -4,6 +4,7 @@ using System.Windows.Media;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Shapes;
 
 namespace AnnotationTool
 {
@@ -37,6 +38,13 @@ namespace AnnotationTool
             chunkID = chunkIDIn;
             chunkSize = chunkSizeIn;
         }
+    }
+
+    public struct NoteRect
+    {
+        public Note note;
+        public Rectangle noteBar;
+        public List<Rectangle> noteOutlines;
     }
 
     public enum TimeDivType

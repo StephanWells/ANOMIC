@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Controls;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace AnnotationTool
 {
@@ -16,6 +17,8 @@ namespace AnnotationTool
         private double end;
         public Canvas occurrenceRect;
         public OccurrenceIcon occurrenceIcon;
+        public List<NoteRect> highlightedNotes = new List<NoteRect>();
+        public bool isNotesMode;
 
         public Occurrence() { }
 

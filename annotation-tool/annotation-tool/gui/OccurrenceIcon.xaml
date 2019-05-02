@@ -11,22 +11,23 @@
         <ResourceDictionary Source="../ResourceDict.xaml"/>
     </Button.Resources>
 
+    <Button.ContextMenu>
+        <ContextMenu>
+            <MenuItem Header="_Find Similar Occurrences" Click="OccurrenceIcon_FindSimilar"/>
+            <MenuItem Header="_Delete" Click="OccurrenceIcon_DeleteClick"/>
+            <MenuItem Header="_Set Confidence Level">
+                <MenuItem Header="5" tool:MenuItemExtensions.GroupName="confidenceSettings" IsCheckable="True" IsChecked="true" Checked="OccurrenceIcon_ConfidenceChange"/>
+                <MenuItem Header="4" tool:MenuItemExtensions.GroupName="confidenceSettings" IsCheckable="True" IsChecked="false" Checked="OccurrenceIcon_ConfidenceChange"/>
+                <MenuItem Header="3" tool:MenuItemExtensions.GroupName="confidenceSettings" IsCheckable="True" IsChecked="false" Checked="OccurrenceIcon_ConfidenceChange"/>
+                <MenuItem Header="2" tool:MenuItemExtensions.GroupName="confidenceSettings" IsCheckable="True" IsChecked="false" Checked="OccurrenceIcon_ConfidenceChange"/>
+                <MenuItem Header="1" tool:MenuItemExtensions.GroupName="confidenceSettings" IsCheckable="True" IsChecked="false" Checked="OccurrenceIcon_ConfidenceChange"/>
+            </MenuItem>
+        </ContextMenu>
+    </Button.ContextMenu>
+
     <Button.Template>
         <ControlTemplate TargetType="{x:Type Button}">
             <Border Background="{StaticResource GridDarkColour}" BorderBrush="{StaticResource GridLightColour}" BorderThickness="1" Margin="0,0,0,0" MouseEnter="OccurrenceIcon_MouseIn" MouseLeave="OccurrenceIcon_MouseOut" MouseLeftButtonDown="OccurrenceIcon_MouseLeftClick">
-                <Border.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="_Find Similar Occurrences" Click="OccurrenceIcon_FindSimilar"/>
-                        <MenuItem Header="_Delete" Click="OccurrenceIcon_DeleteClick"/>
-                        <MenuItem Header="_Set Confidence Level">
-                            <MenuItem Header="5" tool:MenuItemExtensions.GroupName="confidenceSettings" IsCheckable="True" IsChecked="true" Checked="OccurrenceIcon_ConfidenceChange"/>
-                            <MenuItem Header="4" tool:MenuItemExtensions.GroupName="confidenceSettings" IsCheckable="True" IsChecked="false" Checked="OccurrenceIcon_ConfidenceChange"/>
-                            <MenuItem Header="3" tool:MenuItemExtensions.GroupName="confidenceSettings" IsCheckable="True" IsChecked="false" Checked="OccurrenceIcon_ConfidenceChange"/>
-                            <MenuItem Header="2" tool:MenuItemExtensions.GroupName="confidenceSettings" IsCheckable="True" IsChecked="false" Checked="OccurrenceIcon_ConfidenceChange"/>
-                            <MenuItem Header="1" tool:MenuItemExtensions.GroupName="confidenceSettings" IsCheckable="True" IsChecked="false" Checked="OccurrenceIcon_ConfidenceChange"/>
-                        </MenuItem>
-                    </ContextMenu>
-                </Border.ContextMenu>
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition/>

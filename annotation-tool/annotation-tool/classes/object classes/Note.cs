@@ -14,7 +14,6 @@ namespace AnnotationTool
         private double duration;
         private uint channel;
         private int velocity;
-        public Rectangle noteRect;
 
         public Note() { }
 

@@ -72,5 +72,23 @@ namespace Controls
         {
             CollExpToggle?.Invoke(this, e);
         }
+
+        public void DisableButtons()
+        {
+            var template = Template;
+
+            ((Button)template.FindName("DeleteButton", this)).IsEnabled = false;
+            ((ToggleButton)template.FindName("ViewButton", this)).IsEnabled = false;
+            ((ToggleButton)template.FindName("CollExpButton", this)).IsEnabled = false;
+        }
+
+        public void EnableButtons()
+        {
+            var template = Template;
+
+            ((Button)template.FindName("DeleteButton", this)).IsEnabled = true;
+            ((ToggleButton)template.FindName("ViewButton", this)).IsEnabled = true;
+            ((ToggleButton)template.FindName("CollExpButton", this)).IsEnabled = true;
+        }
     }
 }

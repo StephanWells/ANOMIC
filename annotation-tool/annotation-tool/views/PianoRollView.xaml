@@ -64,13 +64,13 @@
         <ScrollViewer x:Name="srlPianoScroll" Grid.Row="1" Grid.Column="1" Margin="0,0,0,0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" PreviewMouseDown="PianoScroll_MouseDown" PreviewMouseUp="PianoScroll_MouseUp" PreviewMouseMove="PianoScroll_MouseMove" MouseEnter="PianoScroll_MouseEnter" KeyDown="PianoRoll_OnKeyDown">
             <Border BorderBrush="{StaticResource GridExtraDarkColour}" BorderThickness="0,0,1.5,0">
                 <Canvas x:Name="cnvPianoRoll" HorizontalAlignment="Left" Height="1612" VerticalAlignment="Center" Width="132">
-                    <Border Background="{StaticResource GridExtraDarkColour}" Grid.Row="0" Grid.Column="1" Canvas.Top="{Binding ElementName=srlPianoScroll, Path=VerticalOffset}" BorderThickness="0,2,0,1" BorderBrush="{StaticResource GridDarkColour}" Panel.ZIndex="8" PreviewMouseDown="Timeline_MouseDown">
+                    <Border Background="{StaticResource GridExtraDarkColour}" Grid.Row="0" Grid.Column="1" Canvas.Top="{Binding ElementName=srlPianoScroll, Path=VerticalOffset}" BorderThickness="0,2,0,1" BorderBrush="{StaticResource GridDarkColour}" Panel.ZIndex="9" PreviewMouseDown="Timeline_MouseDown">
                         <Grid x:Name="grdTimeline" HorizontalAlignment="Left" Width="8" Margin="126,0,0,0" Height="22">
                             <TextBlock x:Name="txtTrackerTriangle" FontSize="15" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource ButtonMouseOverColour}" Text="&#xEDDC;" Margin="0,11,0,0" Panel.ZIndex="1"/>
                         </Grid>
                     </Border>
-                    <Rectangle x:Name="PianoGridBackground" HorizontalAlignment="Left" Height="1638" VerticalAlignment="Center" Width="132" Canvas.Top="-8" Canvas.Left="{Binding ElementName=srlPianoScroll, Path=HorizontalOffset}" Panel.ZIndex="5" Fill="{StaticResource GridDarkColour}"/>
-                    <Grid x:Name="grdPiano" HorizontalAlignment="Left" Height="1638" VerticalAlignment="Center" Width="{DynamicResource NoteWidth}" Canvas.Top="8" Canvas.Left="{Binding ElementName=srlPianoScroll, Path=HorizontalOffset}" Panel.ZIndex="6">
+                    <Rectangle x:Name="PianoGridBackground" HorizontalAlignment="Left" Height="1638" VerticalAlignment="Center" Width="132" Canvas.Top="-8" Canvas.Left="{Binding ElementName=srlPianoScroll, Path=HorizontalOffset}" Panel.ZIndex="6" Fill="{StaticResource GridDarkColour}"/>
+                    <Grid x:Name="grdPiano" HorizontalAlignment="Left" Height="1638" VerticalAlignment="Center" Width="{DynamicResource NoteWidth}" Canvas.Top="8" Canvas.Left="{Binding ElementName=srlPianoScroll, Path=HorizontalOffset}" Panel.ZIndex="7">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="18"/>
                             <RowDefinition/>
@@ -262,7 +262,7 @@
                         <Rectangle	x:Name="As0"	Grid.Row="87"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"	Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
                         <Rectangle	x:Name="A0"	    Grid.Row="87"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="3"	                            Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"	    Margin="{StaticResource MiddleNoteMargin}"/>
                     </Grid>
-                    <Grid x:Name="grdKeyNames" HorizontalAlignment="Left" Height="1638" VerticalAlignment="Center" Width="{DynamicResource NoteWidth}" Canvas.Top="8" Canvas.Left="{Binding ElementName=srlPianoScroll, Path=HorizontalOffset}" Panel.ZIndex="7">
+                    <Grid x:Name="grdKeyNames" HorizontalAlignment="Left" Height="1638" VerticalAlignment="Center" Width="{DynamicResource NoteWidth}" Canvas.Top="8" Canvas.Left="{Binding ElementName=srlPianoScroll, Path=HorizontalOffset}" Panel.ZIndex="8">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="18"/>
                             <RowDefinition/>
