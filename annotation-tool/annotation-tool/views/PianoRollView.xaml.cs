@@ -212,8 +212,8 @@ namespace AnnotationTool.views
             {
                 if (noteRect.note.GetTime() >= start && noteRect.note.GetTime() <= end)
                 {
-                    scheduler.Schedule(new NoteOnMessage(outputDevice, Channel.Channel1, (Midi.Pitch)noteRect.note.GetPitch(), noteRect.note.GetVelocity(), (float)(noteRect.note.GetTime() / resolution)));
-                    scheduler.Schedule(new NoteOffMessage(outputDevice, Channel.Channel1, (Midi.Pitch)noteRect.note.GetPitch(), noteRect.note.GetVelocity(), (float)((noteRect.note.GetTime() + noteRect.note.GetDuration()) / resolution)));
+                    scheduler.Schedule(new NoteOnMessage(outputDevice, Channel.Channel1, (Midi.Pitch)noteRect.note.GetPitch(), noteRect.note.GetVelocity(), (float)((noteRect.note.GetTime() - start) / resolution)));
+                    scheduler.Schedule(new NoteOffMessage(outputDevice, Channel.Channel1, (Midi.Pitch)noteRect.note.GetPitch(), noteRect.note.GetVelocity(), (float)((noteRect.note.GetTime() - start + noteRect.note.GetDuration()) / resolution)));
                 }
             }
         }
@@ -263,8 +263,8 @@ namespace AnnotationTool.views
             {
                 if (noteRect.note.GetTime() >= start && noteRect.note.GetTime() <= end)
                 {
-                    DelayedExecute(() => HighlightNoteRect(noteRect), bpmFactor * noteRect.note.GetTime() / resolution);
-                    DelayedExecute(() => RemoveHighlight(noteRect), (bpmFactor * (noteRect.note.GetTime() + noteRect.note.GetDuration())) / resolution);
+                    DelayedExecute(() => HighlightNoteRect(noteRect), bpmFactor * (noteRect.note.GetTime() - start) / resolution);
+                    DelayedExecute(() => RemoveHighlight(noteRect), (bpmFactor * (noteRect.note.GetTime() - start + noteRect.note.GetDuration())) / resolution);
                 }
             }
         }
@@ -1152,7 +1152,7 @@ namespace AnnotationTool.views
             {
                 scheduler.Start();
                 MoveTracker();
-                HighlightNoteRects(linTrackerLine.Margin.Left / horizZoom, grdNotes.Width / horizZoom);
+                HighlightNoteRects((linTrackerLine.Margin.Left + linTrackerLine.RenderTransform.Value.OffsetX) / horizZoom, grdNotes.Width / horizZoom);
             }
             else
             {
@@ -1163,7 +1163,7 @@ namespace AnnotationTool.views
                 scheduler.Start();
                 UpdateTrackerPosition(0);
                 MoveTracker();
-                HighlightNoteRects(linTrackerLine.Margin.Left / horizZoom, grdNotes.Width / horizZoom);
+                HighlightNoteRects((linTrackerLine.Margin.Left + linTrackerLine.RenderTransform.Value.OffsetX) / horizZoom, grdNotes.Width / horizZoom);
             }
         }
 
