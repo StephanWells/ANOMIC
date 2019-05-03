@@ -46,6 +46,15 @@ namespace Controls
         public static readonly DependencyProperty OccurrenceNumProperty =
         DependencyProperty.Register("OccurrenceNum", typeof(int), typeof(OccurrenceIcon));
 
+        public Visibility AutomaticIcon
+        {
+            get { return (Visibility)GetValue(AutomaticIconProperty); }
+            set { SetValue(AutomaticIconProperty, value); }
+        }
+
+        public static readonly DependencyProperty AutomaticIconProperty =
+        DependencyProperty.Register("AutomaticIcon", typeof(Visibility), typeof(OccurrenceIcon));
+
         private void OccurrenceIcon_DeleteClick(object sender, RoutedEventArgs e)
         {
             DeleteClick?.Invoke(this, e);

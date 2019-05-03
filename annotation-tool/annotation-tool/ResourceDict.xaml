@@ -13,6 +13,8 @@
     <FontFamily x:Key="Exo2LightItalic">pack://application:,,,/gui/fonts/#Exo 2 Light Italic</FontFamily>
 
     <core:Double x:Key="NoteWidth">132</core:Double>
+    <core:Double x:Key="CanvasHeight">1612</core:Double>
+    <core:Double x:Key="PianoRollHeight">1638</core:Double>
     
     <Thickness x:Key="RightNoteMargin">0,1,0,0</Thickness>
     <core:Double x:Key="RightNoteHeight">25</core:Double>

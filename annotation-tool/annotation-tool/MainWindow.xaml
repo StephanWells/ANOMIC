@@ -16,10 +16,10 @@
             <RowDefinition Height="25"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-            
+
         <DockPanel Grid.Row="0" Background="{StaticResource GridDarkColour}">
             <Menu x:Name="mnuMain" Background="{StaticResource GridLightColour}" DockPanel.Dock="Top">
-                <MenuItem Header="File" Width="40">
+                <MenuItem Header="File" Width="Auto">
                     <MenuItem Header="_New" Width="200" Click="MainWindow_MIDIBrowseClick"/>
                     <MenuItem Header="_Open" Width="200"/>
                     <MenuItem Header="_Save" Width="200"/>
@@ -27,14 +27,27 @@
                     <MenuItem Header="_Exit" Width="200" Click="MainWindow_Exit"/>
                 </MenuItem>
 
-                <MenuItem x:Name="mnuView" Header="View" Width="45" Visibility="Hidden">
-                    <MenuItem Header="_Zoom" Width="200">
-                        <MenuItem x:Name="mnuDefaultZoom" Header="100%" Width="200" local:MenuItemExtensions.GroupName="zoomSettings" IsCheckable="True" IsChecked="True" Checked="MainWindow_ZoomChange"/>
-                        <MenuItem Header="80%" Width="200" local:MenuItemExtensions.GroupName="zoomSettings" IsCheckable="True" Checked="MainWindow_ZoomChange"/>
-                        <MenuItem Header="60%" Width="200" local:MenuItemExtensions.GroupName="zoomSettings" IsCheckable="True" Checked="MainWindow_ZoomChange"/>
-                        <MenuItem Header="40%" Width="200" local:MenuItemExtensions.GroupName="zoomSettings" IsCheckable="True" Checked="MainWindow_ZoomChange"/>
-                        <MenuItem Header="20%" Width="200" local:MenuItemExtensions.GroupName="zoomSettings" IsCheckable="True" Checked="MainWindow_ZoomChange"/>
+                <MenuItem x:Name="mnuView" Header="View" Width="Auto" Visibility="Hidden">
+                    <MenuItem Header="_Horizontal Zoom" Width="200">
+                        <MenuItem Header="200%" Width="200" Click="MainWindow_HorizZoomChange"/>
+                        <MenuItem Header="180%" Width="200" Click="MainWindow_HorizZoomChange"/>
+                        <MenuItem Header="160%" Width="200" Click="MainWindow_HorizZoomChange"/>
+                        <MenuItem Header="140%" Width="200" Click="MainWindow_HorizZoomChange"/>
+                        <MenuItem Header="120%" Width="200" Click="MainWindow_HorizZoomChange"/>
+                        <MenuItem Header="100%" Width="200" Click="MainWindow_HorizZoomChange"/>
+                        <MenuItem Header="80%" Width="200" Click="MainWindow_HorizZoomChange"/>
+                        <MenuItem Header="60%" Width="200" Click="MainWindow_HorizZoomChange"/>
+                        <MenuItem Header="40%" Width="200" Click="MainWindow_HorizZoomChange"/>
+                        <MenuItem Header="20%" Width="200" Click="MainWindow_HorizZoomChange"/>
                     </MenuItem>
+                    <MenuItem Header="_Vertical Zoom" Width="200">
+                        <MenuItem Header="100%" Width="200" Click="MainWindow_VertiZoomChange"/>
+                        <MenuItem Header="80%" Width="200" Click="MainWindow_VertiZoomChange"/>
+                        <MenuItem Header="60%" Width="200" Click="MainWindow_VertiZoomChange"/>
+                        <MenuItem Header="40%" Width="200" Click="MainWindow_VertiZoomChange"/>
+                        <MenuItem Header="20%" Width="200" Click="MainWindow_VertiZoomChange"/>
+                    </MenuItem>
+                    <Separator Background="{StaticResource MenuButtonMouseOverColour}" Margin="-22,3,0,3" Width="220" HorizontalAlignment="Left"/>
                     <MenuItem Header="_Occurrences" Width="200">
                         <MenuItem Header="_Expand All" Width="200" Click="MainWindow_ExpandAll"/>
                         <MenuItem Header="_Collapse All" Width="200" Click="MainWindow_CollapseAll"/>
@@ -43,16 +56,19 @@
                         <MenuItem Header="_Hide All" Width="200" Click="MainWindow_HideAll"/>
                     </MenuItem>
                     <MenuItem Header="_Key Names" Width="200">
-                        <MenuItem x:Name="mnuDefaultKeyNames" Header="_All Keys" Width="200" local:MenuItemExtensions.GroupName="keyVisibilitySettings" IsCheckable="True" IsChecked="False" Checked="MainWindow_KeyVisibilityChange"/>
-                        <MenuItem Header="_Only Octaves" Width="200" local:MenuItemExtensions.GroupName="keyVisibilitySettings" IsCheckable="True" IsChecked="True" Checked="MainWindow_KeyVisibilityChange"/>
+                        <MenuItem Header="_All Keys" Width="200" local:MenuItemExtensions.GroupName="keyVisibilitySettings" IsCheckable="True" IsChecked="False" Checked="MainWindow_KeyVisibilityChange"/>
+                        <MenuItem x:Name="mnuDefaultKeyNames" Header="_Only Octaves" Width="200" local:MenuItemExtensions.GroupName="keyVisibilitySettings" IsCheckable="True" IsChecked="True" Checked="MainWindow_KeyVisibilityChange"/>
                         <MenuItem Header="_None" Width="200" local:MenuItemExtensions.GroupName="keyVisibilitySettings" IsCheckable="True" IsChecked="False" Checked="MainWindow_KeyVisibilityChange"/>
                     </MenuItem>
+                    <Separator Background="{StaticResource MenuButtonMouseOverColour}" Margin="-22,3,0,3" Width="220" HorizontalAlignment="Left"/>
                     <MenuItem x:Name="mnuGridLines" Header="_Show Grid Lines" Width="200" IsCheckable="True" IsChecked="True" Checked="MainWindow_GridVisibilityOn" Unchecked="MainWindow_GridVisibilityOff"/>
+                    <MenuItem x:Name="mnuAutomaticIcons" Header="_Automatic Icons" Width="200" IsCheckable="True" IsChecked="True" Checked="MainWindow_AutomaticIconsOn" Unchecked="MainWindow_AutomaticIconsOff"/>
                 </MenuItem>
 
-                <MenuItem x:Name="mnuPatterns" Header="_Patterns" Width="70" Visibility="Hidden">
+                <MenuItem x:Name="mnuPatterns" Header="_Patterns" Width="Auto" Visibility="Hidden">
                     <MenuItem Header="_Add Pattern" Width="200" Click="MainWindow_AddPattern"/>
                     <MenuItem Header="_Delete Selected Pattern" Width="200" Click="MainWindow_DeletePattern"/>
+                    <Separator Background="{StaticResource MenuButtonMouseOverColour}" Margin="-22,3,0,3" Width="220" HorizontalAlignment="Left"/>
                     <MenuItem Header="_Snap" Width="200">
                         <MenuItem Header="Step" Width="200" local:MenuItemExtensions.GroupName="snapSettings" IsCheckable="True" Checked="MainWindow_SnapChange"/>
                         <MenuItem Header="1/2 Step" Width="200" local:MenuItemExtensions.GroupName="snapSettings" IsCheckable="True" Checked="MainWindow_SnapChange"/>
@@ -61,6 +77,14 @@
                         <MenuItem Header="1/8 Step" Width="200" local:MenuItemExtensions.GroupName="snapSettings" IsCheckable="True" Checked="MainWindow_SnapChange"/>
                     </MenuItem>
                     <MenuItem x:Name="mnuNoteSelect" Header="_Note Select Mode" Width="200" IsCheckable="True" IsChecked="False" Checked="MainWindow_NoteSelectOn" Unchecked="MainWindow_NoteSelectOff"/>
+                </MenuItem>
+
+                <MenuItem x:Name="mnuPlayback" Header="Play_back" Width="Auto" Visibility="Hidden">
+                    <MenuItem Header="_Play" Width="200" Click="MainWindow_Play"/>
+                    <MenuItem Header="Pau_se" Width="200" Click="MainWindow_Pause"/>
+                    <MenuItem Header="_Stop" Width="200" Click="MainWindow_Stop"/>
+                    <Separator Background="{StaticResource MenuButtonMouseOverColour}" Margin="-22,3,0,3" Width="220" HorizontalAlignment="Left"/>
+                    <MenuItem x:Name="mnuNormaliseVelocities" Header="_Normalise Velocities" Width="200" IsCheckable="True" IsChecked="False" Checked="MainWindow_NormaliseVelocitiesOn" Unchecked="MainWindow_NormaliseVelocitiesOff"/>
                 </MenuItem>
             </Menu>
         </DockPanel>

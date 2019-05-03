@@ -39,11 +39,9 @@ namespace AnnotationTool.views
         private const int occurrenceIconHeight = 20;
         private const double resolution = 96;
         private const double barNumOffset = 4;
-        private const double noteRectHeight = 18;
         private const double moveScrollThreshold = 20;
         private const double moveScrollSpeed = 0.5;
 
-        private double horizZoom = 1;
         private double timeDivRatio;
         private double horizSnap;
         private double vertiSnap;
@@ -54,18 +52,19 @@ namespace AnnotationTool.views
         private List<List<NotePitch>> quantisedSong;
 
         private List<Pattern> patterns;
+        private List<NoteRect> currentSelection = new List<NoteRect>();
         private Canvas currentOccurrenceRect;
         private Occurrence currentOccurrence;
         private int currentPattern = -1;
         private int currentSolo = -1;
 
         bool isLeftMouseButtonDownOnPianoRoll = false;
+        bool isLeftMouseButtonDownOnTimeline = false;
         bool isDraggingPatternRect = false;
         bool isSelectingOccurrence = false;
         bool isDraggingScroll = false;
         bool isUIMoving = false;
         bool isPlaying = false;
-        bool noteSelect = false;
 
         Point origMouseDownPoint;
         Point prevMouseDownPoint;
@@ -95,6 +94,10 @@ namespace AnnotationTool.views
         {
             InitializeComponent();
 
+            cnvGridLines.Visibility = MainWindow.settings.gridLines ? Visibility.Visible : Visibility.Hidden;
+            UpdateKeyNames();
+            UpdateSnap();
+
             patterns = new List<Pattern>();
             currentOccurrence = new Occurrence();
 
@@ -109,8 +112,8 @@ namespace AnnotationTool.views
                 note.SetDuration(note.GetDuration() * timeDivRatio);
             }
 
-            horizSnap = (horizZoom * resolution) / 8;
-            vertiSnap = noteRectHeight;
+            horizSnap = Math.Round((MainWindow.settings.horizZoom * resolution) / 8, 2);
+            vertiSnap = Math.Round((MainWindow.settings.vertiZoom * (double)this.Resources["PianoRollHeight"]) / grdNotes.RowDefinitions.Count, 2);
 
             scheduler = new Midi.Clock(noteParse.bpm);
 
@@ -138,7 +141,8 @@ namespace AnnotationTool.views
             MainWindow.MIDIBrowseClick += new EventHandler(MainWindow_MIDIBrowseClick);
             MainWindow.Exit += new EventHandler(MainWindow_Exit);
             MainWindow.SnapChange += new EventHandler(MainWindow_SnapChange);
-            MainWindow.ZoomChange += new EventHandler(MainWindow_ZoomChange);
+            MainWindow.HorizZoomChange += new EventHandler(MainWindow_HorizZoomChange);
+            MainWindow.VertiZoomChange += new EventHandler(MainWindow_VertiZoomChange);
             MainWindow.ExpandAll += new EventHandler(MainWindow_ExpandAll);
             MainWindow.CollapseAll += new EventHandler(MainWindow_CollapseAll);
             MainWindow.ShowAll += new EventHandler(MainWindow_ShowAll);
@@ -150,7 +154,14 @@ namespace AnnotationTool.views
             MainWindow.GridVisibilityOff += new EventHandler(MainWindow_GridVisibilityOff);
             MainWindow.NoteSelectOn += new EventHandler(MainWindow_NoteSelectOn);
             MainWindow.NoteSelectOff += new EventHandler(MainWindow_NoteSelectOff);
-            MainWindow.Closing += new EventHandler(MainWindow_Closing);
+            MainWindow.AutomaticIconsOn += new EventHandler(MainWindow_AutomaticIconsOn);
+            MainWindow.AutomaticIconsOff += new EventHandler(MainWindow_AutomaticIconsOff);
+            MainWindow.Play += new EventHandler(MainWindow_Play);
+            MainWindow.Pause += new EventHandler(MainWindow_Pause);
+            MainWindow.Stop += new EventHandler(MainWindow_Stop);
+            MainWindow.NormaliseVelocitiesOn += new EventHandler(MainWindow_NormaliseVelocitiesOn);
+            MainWindow.NormaliseVelocitiesOff += new EventHandler(MainWindow_NormaliseVelocitiesOff);
+            MainWindow.ClosingApp += new EventHandler(MainWindow_Closing);
 
             Loaded += OnLoaded;
         }
@@ -160,7 +171,7 @@ namespace AnnotationTool.views
             InitializeComponent();
 
             patterns = new List<Pattern>();
-            horizSnap = (horizZoom * resolution) / 8;
+            horizSnap = (MainWindow.settings.horizZoom * resolution) / 8;
 
             MainWindow.SnapChange += new EventHandler(MainWindow_SnapChange);
             Loaded += OnLoaded;
@@ -179,11 +190,9 @@ namespace AnnotationTool.views
 
             srlPianoScroll.Focus();
 
-            ResetPianoRoll();
             PopulateNotes(noteParse);
             scheduler.Reset();
             ScheduleNotes();
-            noteSelect = false;
 
             quantisedSong = Quantise(0, (int)grdNotes.Width);
 
@@ -201,8 +210,8 @@ namespace AnnotationTool.views
         {
             foreach (NoteRect noteRect in notes)
             {
-                scheduler.Schedule(new NoteOnMessage(outputDevice, Channel.Channel1, (Midi.Pitch)noteRect.note.GetPitch(), noteRect.note.GetVelocity(), (float)(noteRect.note.GetTime() / resolution)));
-                scheduler.Schedule(new NoteOffMessage(outputDevice, Channel.Channel1, (Midi.Pitch)noteRect.note.GetPitch(), noteRect.note.GetVelocity(), (float)((noteRect.note.GetTime() + noteRect.note.GetDuration()) / resolution)));
+                scheduler.Schedule(new NoteOnMessage(outputDevice, Channel.Channel1, (Midi.Pitch)noteRect.note.GetPitch(), MainWindow.settings.normaliseVelocities ? 100 : noteRect.note.GetVelocity(), (float)(noteRect.note.GetTime() / resolution)));
+                scheduler.Schedule(new NoteOffMessage(outputDevice, Channel.Channel1, (Midi.Pitch)noteRect.note.GetPitch(), MainWindow.settings.normaliseVelocities ? 100 : noteRect.note.GetVelocity(), (float)((noteRect.note.GetTime() + noteRect.note.GetDuration()) / resolution)));
             }
         }
 
@@ -212,8 +221,8 @@ namespace AnnotationTool.views
             {
                 if (noteRect.note.GetTime() >= start && noteRect.note.GetTime() <= end)
                 {
-                    scheduler.Schedule(new NoteOnMessage(outputDevice, Channel.Channel1, (Midi.Pitch)noteRect.note.GetPitch(), noteRect.note.GetVelocity(), (float)((noteRect.note.GetTime() - start) / resolution)));
-                    scheduler.Schedule(new NoteOffMessage(outputDevice, Channel.Channel1, (Midi.Pitch)noteRect.note.GetPitch(), noteRect.note.GetVelocity(), (float)((noteRect.note.GetTime() - start + noteRect.note.GetDuration()) / resolution)));
+                    scheduler.Schedule(new NoteOnMessage(outputDevice, Channel.Channel1, (Midi.Pitch)noteRect.note.GetPitch(), MainWindow.settings.normaliseVelocities ? 100 : noteRect.note.GetVelocity(), (float)((noteRect.note.GetTime() - start) / resolution)));
+                    scheduler.Schedule(new NoteOffMessage(outputDevice, Channel.Channel1, (Midi.Pitch)noteRect.note.GetPitch(), MainWindow.settings.normaliseVelocities ? 100 : noteRect.note.GetVelocity(), (float)((noteRect.note.GetTime() - start + noteRect.note.GetDuration()) / resolution)));
                 }
             }
         }
@@ -318,30 +327,46 @@ namespace AnnotationTool.views
 
         private void MainWindow_MIDIBrowseClick(object sender, EventArgs e)
         {
-            StopSound();
+            HaltSound();
         }
 
         private void MainWindow_Exit(object sender, EventArgs e)
         {
-            StopSound();
+            HaltSound();
         }
 
         private void PianoRoll_OnKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Space)
+            switch (e.Key)
             {
-                if (isPlaying && linTrackerLine.Margin.Left + linTrackerLine.RenderTransform.Value.OffsetX != grdNotes.Width)
-                {
-                    Pause_Click(sender, e);
-                }
-                else
-                {
-                    Play_Click(sender, e);
-                }
+                case Key.Space:
+                    if (isPlaying && linTrackerLine.Margin.Left + linTrackerLine.RenderTransform.Value.OffsetX != grdNotes.Width)
+                    {
+                        PauseMusic();
+                    }
+                    else
+                    {
+                        PlayMusic();
+                    }
+                break;
+
+                case Key.Escape:
+                    if (isSelectingOccurrence)
+                    {
+                        CancelOccurrenceCreation();
+                    }
+                break;
+
+                case Key.Enter:
+                    if (isSelectingOccurrence && !isUIMoving)
+                    {
+                        ConfirmOccurrenceCreation(currentPattern);
+                    }
+                break;
             }
         }
 
-        private void StopMusic()
+        private void HaltSound()
         {
             if (scheduler.IsRunning)
             {
@@ -361,89 +386,22 @@ namespace AnnotationTool.views
 
         private void MainWindow_SnapChange(object sender, EventArgs e)
         {
-            string snapMenuChoice = ((MenuItem)(((RoutedEventArgs)e).Source)).Header.ToString();
-
-            switch (snapMenuChoice)
-            {
-                case "Step":
-                    horizSnap = Math.Round(horizZoom * resolution, 2);
-                break;
-
-                case "1/2 Step":
-                    horizSnap = Math.Round((horizZoom * resolution) / 2, 2);
-                break;
-
-                case "1/3 Step":
-                    horizSnap = Math.Round((horizZoom * resolution) / 3, 2);
-                break;
-
-                case "1/4 Step":
-                    horizSnap = Math.Round((horizZoom * resolution) / 4, 2);
-                break;
-
-                case "1/8 Step":
-                    horizSnap = Math.Round((horizZoom * resolution) / 8, 2);
-                break;
-            }
-
-            quantisedSong = Quantise(0, (int)grdNotes.Width);
+            UpdateSnap();
         }
 
-        private void MainWindow_ZoomChange(object sender, EventArgs e)
+        private void MainWindow_HorizZoomChange(object sender, EventArgs e)
         {
-            string zoomMenuChoice = ((MenuItem)(((RoutedEventArgs)e).Source)).Header.ToString();
+            UpdateHorizZoom(MainWindow.settings.horizZoom);
+        }
 
-            switch (zoomMenuChoice)
-            {
-                case "100%":
-                    UpdateZoom(1);
-                break;
-
-                case "80%":
-                    UpdateZoom(0.8);
-                break;
-
-                case "60%":
-                    UpdateZoom(0.6);
-                break;
-
-                case "40%":
-                    UpdateZoom(0.4);
-                break;
-
-                case "20%":
-                    UpdateZoom(0.2);
-                break;
-            }
+        private void MainWindow_VertiZoomChange(object sender, EventArgs e)
+        {
+            UpdateVertiZoom(MainWindow.settings.vertiZoom);
         }
 
         private void MainWindow_KeyVisibilityChange(object sender, EventArgs e)
         {
-            string keyVisibilityMenuChoice = ((MenuItem)(((RoutedEventArgs)e).Source)).Header.ToString();
-
-            switch (keyVisibilityMenuChoice)
-            {
-                case "_All Keys":
-                    foreach (UIElement textBlock in grdKeyNames.Children)
-                    {
-                        textBlock.Visibility = Visibility.Visible;
-                    }
-                break;
-
-                case "_Only Octaves":
-                    foreach (UIElement textBlock in grdKeyNames.Children)
-                    {
-                        textBlock.Visibility = ((TextBlock)textBlock).Text.Contains("C") && !((TextBlock)textBlock).Text.Contains("s") ? Visibility.Visible : Visibility.Collapsed;
-                    }
-                break;
-
-                case "_None":
-                    foreach (UIElement textBlock in grdKeyNames.Children)
-                    {
-                        textBlock.Visibility = Visibility.Collapsed;
-                    }
-                break;
-            }
+            UpdateKeyNames();
         }
 
         private void MainWindow_GridVisibilityOn(object sender, EventArgs e)
@@ -458,14 +416,40 @@ namespace AnnotationTool.views
 
         private void MainWindow_NoteSelectOn(object sender, EventArgs e)
         {
-            noteSelect = true;
             Panel.SetZIndex(grdNotes, 5);
         }
 
         private void MainWindow_NoteSelectOff(object sender, EventArgs e)
         {
-            noteSelect = false;
             Panel.SetZIndex(grdNotes, 3);
+        }
+
+        private void MainWindow_AutomaticIconsOn(object sender, EventArgs e)
+        {
+            foreach (Pattern pattern in patterns)
+            {
+                foreach (Occurrence occurrence in pattern.GetOccurrences())
+                {
+                    if (occurrence.isAutomatic)
+                    {
+                        occurrence.occurrenceIcon.AutomaticIcon = Visibility.Visible;
+                    }
+                }
+            }
+        }
+
+        private void MainWindow_AutomaticIconsOff(object sender, EventArgs e)
+        {
+            foreach (Pattern pattern in patterns)
+            {
+                foreach (Occurrence occurrence in pattern.GetOccurrences())
+                {
+                    if (occurrence.isAutomatic)
+                    {
+                        occurrence.occurrenceIcon.AutomaticIcon = Visibility.Hidden;
+                    }
+                }
+            }
         }
 
         private void MainWindow_ExpandAll(object sender, EventArgs e)
@@ -504,7 +488,7 @@ namespace AnnotationTool.views
             }
             else
             {
-                MessageBox.Show("Cannot add pattern while currently selecting an occurrence.", "Error", MessageBoxButton.OK);
+                MessageBox.Show("Cannot add pattern while currently selecting or editing an occurrence.", "Error", MessageBoxButton.OK);
             }
         }
 
@@ -519,9 +503,91 @@ namespace AnnotationTool.views
             }
         }
 
+        private void MainWindow_Play(object sender, EventArgs e)
+        {
+            PlayMusic();
+        }
+
+        private void MainWindow_Pause(object sender, EventArgs e)
+        {
+            PauseMusic();
+        }
+
+        private void MainWindow_Stop(object sender, EventArgs e)
+        {
+            PauseMusic();
+        }
+
+        private void MainWindow_NormaliseVelocitiesOn(object sender, EventArgs e)
+        {
+            MuteCurrentNotes();
+            RefreshMusic();
+        }
+
+        private void MainWindow_NormaliseVelocitiesOff(object sender, EventArgs e)
+        {
+            MuteCurrentNotes();
+            RefreshMusic();
+        }
+
         private void MainWindow_Closing(object sender, EventArgs e)
         {
-            StopSound();
+            HaltSound();
+        }
+
+        private void UpdateKeyNames()
+        {
+            switch (MainWindow.settings.keyNames)
+            {
+                case 0:
+                    foreach (UIElement textBlock in grdKeyNames.Children)
+                    {
+                        textBlock.Visibility = Visibility.Visible;
+                    }
+                break;
+
+                case 1:
+                    foreach (UIElement textBlock in grdKeyNames.Children)
+                    {
+                        textBlock.Visibility = ((TextBlock)textBlock).Text.Contains("C") && !((TextBlock)textBlock).Text.Contains("#") ? Visibility.Visible : Visibility.Collapsed;
+                    }
+                break;
+
+                case 2:
+                    foreach (UIElement textBlock in grdKeyNames.Children)
+                    {
+                        textBlock.Visibility = Visibility.Collapsed;
+                    }
+                break;
+            }
+        }
+
+        private void UpdateSnap()
+        {
+            switch (MainWindow.settings.snap)
+            {
+                case 0:
+                    horizSnap = Math.Round(MainWindow.settings.horizZoom * resolution, 2);
+                break;
+
+                case 1:
+                    horizSnap = Math.Round((MainWindow.settings.horizZoom * resolution) / 2, 2);
+                break;
+
+                case 2:
+                    horizSnap = Math.Round((MainWindow.settings.horizZoom * resolution) / 3, 2);
+                break;
+
+                case 3:
+                    horizSnap = Math.Round((MainWindow.settings.horizZoom * resolution) / 4, 2);
+                break;
+
+                case 4:
+                    horizSnap = Math.Round((MainWindow.settings.horizZoom * resolution) / 8, 2);
+                break;
+            }
+
+            quantisedSong = Quantise(0, (int)grdNotes.Width);
         }
 
         private void ExpandAllPatternOccurrences()
@@ -572,12 +638,17 @@ namespace AnnotationTool.views
             }
         }
 
-        private void UpdateZoom(double zoomSetting)
+        private void UpdateHorizZoom(double zoomSetting)
         {
-            double oldZoom = horizZoom;
-            horizZoom = zoomSetting;
-            double thirtySecondNote = Math.Round(horizZoom * (resolution / 8), 2);
-            double width = Math.Round(barNumbers.Count * horizZoom * resolution * 4, 2);
+            double oldZoom = MainWindow.settings.horizZoom;
+            MainWindow.settings.horizZoom = zoomSetting;
+            double mousePosOnPianoRoll = Math.Round(Mouse.GetPosition(srlPianoScroll).X - grdPiano.Width < 0 ? 0 : Mouse.GetPosition(srlPianoScroll).X - grdPiano.Width, 2);
+            double scrollAnchorOffset = mousePosOnPianoRoll - (MainWindow.settings.horizZoom / oldZoom) * mousePosOnPianoRoll;
+
+            srlPianoScroll.ScrollToHorizontalOffset(Math.Round((MainWindow.settings.horizZoom / oldZoom) * (srlPianoScroll.HorizontalOffset) - scrollAnchorOffset, 2));
+
+            double thirtySecondNote = Math.Round(MainWindow.settings.horizZoom * (resolution / 8), 2);
+            double width = Math.Round(barNumbers.Count * MainWindow.settings.horizZoom * resolution * 4, 2);
 
             cnvPianoRoll.Width = width + grdPiano.Width;
             grdGridColours.Width = width;
@@ -593,8 +664,8 @@ namespace AnnotationTool.views
 
             foreach (NoteRect noteRect in notes)
             {
-                double noteWidth = Math.Round(noteRect.note.GetDuration() * horizZoom, 2);
-                Thickness noteMargin = new Thickness(Math.Round(noteRect.note.GetTime() * horizZoom, 2), 0, 0, 0);
+                double noteWidth = Math.Round(noteRect.note.GetDuration() * MainWindow.settings.horizZoom, 2);
+                Thickness noteMargin = new Thickness(Math.Round(noteRect.note.GetTime() * MainWindow.settings.horizZoom, 2), 0, 0, 0);
 
                 noteRect.noteBar.Width = noteWidth;
                 noteRect.noteBar.Margin = noteMargin;
@@ -608,7 +679,7 @@ namespace AnnotationTool.views
 
             for (int i = 0; i < barNumbers.Count; i++)
             {
-                barNumbers[i].Margin = new Thickness(Math.Round((i * resolution * 4) * horizZoom + barNumOffset, 2), 0, 0, 10);
+                barNumbers[i].Margin = new Thickness(Math.Round((i * resolution * 4) * MainWindow.settings.horizZoom + barNumOffset, 2), 0, 0, 10);
             }
 
             foreach (Pattern pattern in patterns)
@@ -618,15 +689,15 @@ namespace AnnotationTool.views
                     if (!occurrence.isNotesMode)
                     {
                         Border currentOccurrenceRect = (Border)occurrence.occurrenceRect.Children[0];
-                        Canvas.SetLeft(currentOccurrenceRect, Math.Round(occurrence.GetStart() * horizZoom, 2));
-                        currentOccurrenceRect.Width = Math.Round((occurrence.GetEnd() - occurrence.GetStart()) * horizZoom, 2);
+                        Canvas.SetLeft(currentOccurrenceRect, Math.Round(occurrence.GetStart() * MainWindow.settings.horizZoom, 2));
+                        currentOccurrenceRect.Width = Math.Round((occurrence.GetEnd() - occurrence.GetStart()) * MainWindow.settings.horizZoom, 2);
                     }
                 }
             }
 
-            horizSnap = Math.Round((horizZoom * resolution) / 8, 2);
+            horizSnap = Math.Round((MainWindow.settings.horizZoom * resolution) / 8, 2);
 
-            UpdateTrackerPosition(Math.Round(((linTrackerLine.Margin.Left + linTrackerLine.RenderTransform.Value.OffsetX) / oldZoom) * horizZoom, 2));
+            UpdateTrackerPosition(Math.Round(((linTrackerLine.Margin.Left + linTrackerLine.RenderTransform.Value.OffsetX) / oldZoom) * MainWindow.settings.horizZoom, 2));
 
             if (isPlaying)
             {
@@ -634,14 +705,40 @@ namespace AnnotationTool.views
             }
         }
 
+        private void UpdateVertiZoom(double zoomSetting)
+        {
+            double oldZoom = MainWindow.settings.vertiZoom;
+            MainWindow.settings.vertiZoom = zoomSetting;
+            double mousePosOnPianoRoll = Mouse.GetPosition(srlPianoScroll).Y;
+            double scrollAnchorOffset = Math.Round(mousePosOnPianoRoll - (MainWindow.settings.vertiZoom / oldZoom) * mousePosOnPianoRoll, 2);
+
+            srlPianoScroll.ScrollToVerticalOffset(Math.Round((MainWindow.settings.vertiZoom / oldZoom) * (srlPianoScroll.VerticalOffset) - scrollAnchorOffset, 2));
+
+            this.Resources["CanvasHeight"] = Math.Round((MainWindow.settings.vertiZoom / oldZoom) * (double)this.Resources["CanvasHeight"], 2);
+            this.Resources["PianoRollHeight"] = Math.Round((MainWindow.settings.vertiZoom / oldZoom) * (double)this.Resources["PianoRollHeight"], 2);
+
+            if (MainWindow.settings.vertiZoom < 1)
+            {
+                grdKeyNames.Visibility = Visibility.Hidden;
+                grdPianoBackground.Fill = Brushes.White;
+            }
+            else
+            {
+                grdKeyNames.Visibility = Visibility.Visible;
+                grdPianoBackground.Fill = (Brush)(this.Resources["GridDarkColour"]);
+            }
+
+            vertiSnap = Math.Round((MainWindow.settings.vertiZoom * (double)this.Resources["PianoRollHeight"]) / grdNotes.RowDefinitions.Count, 2);
+        }
+
         // Adds a bar to the piano roll to make space for MIDI notes.
         private void AddBar()
         {
             double barStart = grdNotes.Width;
-            double thirtySecondNote = horizZoom * (resolution / 8);
+            double thirtySecondNote = MainWindow.settings.horizZoom * (resolution / 8);
             double thickness;
             double height = cnvGridLines.Height - 7;
-            double barLength = horizZoom * (resolution * 4);
+            double barLength = MainWindow.settings.horizZoom * (resolution * 4);
 
             cnvPianoRoll.Width += barLength;
             grdGridColours.Width += barLength;
@@ -653,7 +750,7 @@ namespace AnnotationTool.views
             TextBlock barNumber = new TextBlock
             {
                 FontSize = 12,
-                Text = "" + (barNumbers.Count),
+                Text = "" + (barNumbers.Count + 1),
                 Margin = new Thickness(barStart + barNumOffset, 0, 0, 10),
                 Height = 20
             };
@@ -698,7 +795,7 @@ namespace AnnotationTool.views
             {
                 Note currentNote = noteParse.notes.ElementAt(i);
 
-                while (grdNotes.Width < currentNote.GetTime() + currentNote.GetDuration())
+                while (Math.Round(grdNotes.Width / MainWindow.settings.horizZoom, 2) < currentNote.GetTime() + currentNote.GetDuration())
                 {
                     AddBar();
                 }
@@ -708,10 +805,9 @@ namespace AnnotationTool.views
                     Stroke = new SolidColorBrush(Colors.Black),
                     StrokeThickness = 1,
                     Fill = new SolidColorBrush(Colors.LightGray),
-                    Width = Math.Round(currentNote.GetDuration() * horizZoom, 2),
-                    Height = noteRectHeight,
+                    Width = Math.Round(currentNote.GetDuration() * MainWindow.settings.horizZoom, 2),
                     HorizontalAlignment = HorizontalAlignment.Left,
-                    Margin = new Thickness(Math.Round(currentNote.GetTime() * horizZoom, 2), 0, 0, 0),
+                    Margin = new Thickness(Math.Round(currentNote.GetTime() * MainWindow.settings.horizZoom, 2), 0, 0, 0),
                     Name = "note" + i
                 };
 
@@ -765,7 +861,7 @@ namespace AnnotationTool.views
         {
             List<List<NotePitch>> quantisedSection = new List<List<NotePitch>>();
 
-            double zoomRobustSnapLength = Math.Round(horizSnap / horizZoom, 2);
+            double zoomRobustSnapLength = Math.Round(horizSnap / MainWindow.settings.horizZoom, 2);
 
             for (int i = 0; i < (end - start) / zoomRobustSnapLength; i++)
             {
@@ -799,53 +895,11 @@ namespace AnnotationTool.views
             return quantisedSection;
         }
 
-        // Places each snap's data into a quantised "bucket" where it can be compared for pattern similarity. The "start" and "end" parameters have to be unaffected by zoom. This excludes notes outside the vertical range.
-        //private List<List<NotePitch>> Quantise(double start, double end, double top, double bottom)
-        //{
-        //    List<List<NotePitch>> quantisedSection = new List<List<NotePitch>>();
-
-        //    double zoomRobustSnapLength = Math.Round(horizSnap / horizZoom, 2);
-
-        //    for (int i = 0; i < (end - start) / zoomRobustSnapLength; i++)
-        //    {
-        //        quantisedSection.Add(new List<NotePitch>());
-        //    }
-
-        //    for (int i = 0; i < notes.Count; i++)
-        //    {
-        //        double j = 0;
-        //        NoteRect currentNote = notes[i];
-
-        //        if (currentNote.note.GetTime() > end) break;
-
-        //        bool isInHorizontalSpace = currentNote.note.GetTime() + currentNote.note.GetDuration() >= start;
-        //        bool isInVerticalSpace = PitchToRow((int)currentNote.note.GetPitch()) >= (bottom / noteRectHeight) && PitchToRow((int)currentNote.note.GetPitch()) <= (top / noteRectHeight);
-
-        //        if (isInHorizontalSpace && isInVerticalSpace)
-        //        {
-        //            int quantisedIndex = 0;
-
-        //            while (j < currentNote.note.GetDuration() && ((j + currentNote.note.GetTime() - start) / zoomRobustSnapLength) < quantisedSection.Count)
-        //            {
-        //                if (currentNote.note.GetTime() + j >= start)
-        //                {
-        //                    quantisedIndex = (int)((j + currentNote.note.GetTime() - start) / zoomRobustSnapLength);
-        //                    quantisedSection[quantisedIndex].Add(currentNote.note.GetPitch());
-        //                }
-
-        //                j += zoomRobustSnapLength;
-        //            }
-        //        }
-        //    }
-
-        //    return quantisedSection;
-        //}
-
         private List<List<NotePitch>> Quantise(List<NoteRect> notesIn, double start, double end)
         {
             List<List<NotePitch>> quantisedSection = new List<List<NotePitch>>();
 
-            double zoomRobustSnapLength = Math.Round(horizSnap / horizZoom, 2);
+            double zoomRobustSnapLength = Math.Round(horizSnap / MainWindow.settings.horizZoom, 2);
 
             for (int i = 0; i < (end - start) / zoomRobustSnapLength; i++)
             {
@@ -895,11 +949,12 @@ namespace AnnotationTool.views
                             start = i * horizSnap;
                             end = (i + transposInvariantOccurrence.Count) * horizSnap;
 
-                            double zoomRobustStart = Math.Round(start / horizZoom, 2);
-                            double zoomRobustEnd = Math.Round(end / horizZoom, 2);
+                            double zoomRobustStart = Math.Round(start / MainWindow.settings.horizZoom, 2);
+                            double zoomRobustEnd = Math.Round(end / MainWindow.settings.horizZoom, 2);
 
                             Occurrence newOccurrence = new Occurrence(zoomRobustStart, zoomRobustEnd);
                             newOccurrence.isNotesMode = false;
+                            newOccurrence.isAutomatic = true;
 
                             similarOccurrences.Add(newOccurrence);
                         }
@@ -955,6 +1010,7 @@ namespace AnnotationTool.views
                                     newOccurrence.highlightedNotes = highlightedNotes;
                                     newOccurrence = FindStartAndEnd(newOccurrence);
                                     newOccurrence.isNotesMode = true;
+                                    newOccurrence.isAutomatic = true;
 
                                     similarOccurrences.Add(newOccurrence);
                                 }
@@ -1008,26 +1064,6 @@ namespace AnnotationTool.views
 
             return normalisedResult;
         }
-
-        //private List<List<NotePitch>> VerticalShave(List<List<NotePitch>> quantisation, double top, double bottom)
-        //{
-        //    List<List<NotePitch>> shavedQuantisation = new List<List<NotePitch>>();
-
-        //    for (int i = 0; i < quantisation.Count; i++)
-        //    {
-        //        shavedQuantisation.Add(new List<NotePitch>());
-
-        //        for (int j = 0; j < quantisation[i].Count; j++)
-        //        {
-        //            if (PitchToRow((int)quantisation[i][j]) >= (bottom / noteRectHeight) && PitchToRow((int)quantisation[i][j]) <= (top / noteRectHeight))
-        //            {
-        //                shavedQuantisation[i].Add(quantisation[i][j]);
-        //            }
-        //        }
-        //    }
-
-        //    return shavedQuantisation;
-        //}
 
         private bool PatternMatch<T>(List<List<T>> occurrence, List<List<T>> subList)
         {
@@ -1146,13 +1182,29 @@ namespace AnnotationTool.views
 
         private void Play_Click(object sender, RoutedEventArgs e)
         {
+            PlayMusic();
+        }
+
+        private void Pause_Click(object sender, RoutedEventArgs e)
+        {
+            PauseMusic();
+        }
+
+        private void Stop_Click(object sender, RoutedEventArgs e)
+        {
+            StopMusic();
+        }
+
+        private void PlayMusic()
+        {
             isPlaying = true;
+            MuteCurrentNotes();
 
             if (!scheduler.IsRunning)
             {
                 scheduler.Start();
                 MoveTracker();
-                HighlightNoteRects((linTrackerLine.Margin.Left + linTrackerLine.RenderTransform.Value.OffsetX) / horizZoom, grdNotes.Width / horizZoom);
+                HighlightNoteRects((linTrackerLine.Margin.Left + linTrackerLine.RenderTransform.Value.OffsetX) / MainWindow.settings.horizZoom, grdNotes.Width / MainWindow.settings.horizZoom);
             }
             else
             {
@@ -1163,11 +1215,11 @@ namespace AnnotationTool.views
                 scheduler.Start();
                 UpdateTrackerPosition(0);
                 MoveTracker();
-                HighlightNoteRects((linTrackerLine.Margin.Left + linTrackerLine.RenderTransform.Value.OffsetX) / horizZoom, grdNotes.Width / horizZoom);
+                HighlightNoteRects((linTrackerLine.Margin.Left + linTrackerLine.RenderTransform.Value.OffsetX) / MainWindow.settings.horizZoom, grdNotes.Width / MainWindow.settings.horizZoom);
             }
         }
 
-        private void Pause_Click(object sender, RoutedEventArgs e)
+        private void PauseMusic()
         {
             isPlaying = false;
 
@@ -1180,12 +1232,7 @@ namespace AnnotationTool.views
             }
         }
 
-        private void Stop_Click(object sender, RoutedEventArgs e)
-        {
-            StopSound();
-        }
-
-        private void StopSound()
+        private void StopMusic()
         {
             isPlaying = false;
             UpdateTrackerPosition(0);
@@ -1205,13 +1252,24 @@ namespace AnnotationTool.views
             }
         }
 
+        private void RefreshMusic()
+        {
+            if (scheduler.IsRunning)
+            {
+                scheduler.Stop();
+                scheduler.Reset();
+                ScheduleNotes(Math.Round((linTrackerLine.Margin.Left + linTrackerLine.RenderTransform.Value.OffsetX) / MainWindow.settings.horizZoom, 2), Math.Round(grdNotes.Width / MainWindow.settings.horizZoom, 2));
+                scheduler.Start();
+            }
+        }
+
         private void MoveTracker()
         {
             txtTrackerTriangle.RenderTransform = trackerTransform;
             linTrackerLine.RenderTransform = trackerTransform;
 
             double distance = cnvMouseLayer.Width - linTrackerLine.Margin.Left;
-            TimeSpan duration = TimeSpan.FromSeconds(((60 / noteParse.bpm) * ((grdNotes.Width - linTrackerLine.Margin.Left) / resolution)) / horizZoom);
+            TimeSpan duration = TimeSpan.FromSeconds(((60 / noteParse.bpm) * ((grdNotes.Width - linTrackerLine.Margin.Left) / resolution)) / MainWindow.settings.horizZoom);
 
             DoubleAnimation horizAnim = new DoubleAnimation { By = distance, Duration = duration };
 
@@ -1220,13 +1278,16 @@ namespace AnnotationTool.views
 
         private void UpdateTrackerPosition(double pos)
         {
-            txtTrackerTriangle.Margin = new Thickness(pos, txtTrackerTriangle.Margin.Top, txtTrackerTriangle.Margin.Right, txtTrackerTriangle.Margin.Bottom);
-            linTrackerLine.Margin = new Thickness(pos, linTrackerLine.Margin.Top, linTrackerLine.Margin.Right, linTrackerLine.Margin.Bottom);
-            trackerTransform = new TranslateTransform();
-            txtTrackerTriangle.RenderTransform = trackerTransform;
-            linTrackerLine.RenderTransform = trackerTransform;
+            if (pos <= grdNotes.Width)
+            {
+                txtTrackerTriangle.Margin = new Thickness(pos, txtTrackerTriangle.Margin.Top, txtTrackerTriangle.Margin.Right, txtTrackerTriangle.Margin.Bottom);
+                linTrackerLine.Margin = new Thickness(pos, linTrackerLine.Margin.Top, linTrackerLine.Margin.Right, linTrackerLine.Margin.Bottom);
+                trackerTransform = new TranslateTransform();
+                txtTrackerTriangle.RenderTransform = trackerTransform;
+                linTrackerLine.RenderTransform = trackerTransform;
 
-            trackerTransform.BeginAnimation(TranslateTransform.XProperty, null);
+                trackerTransform.BeginAnimation(TranslateTransform.XProperty, null);
+            }
         }
 
         private void PauseTracker()
@@ -1270,7 +1331,6 @@ namespace AnnotationTool.views
                     Width = notes[i].noteBar.Width,
                     Height = notes[i].noteBar.Height,
                     Margin = notes[i].noteBar.Margin,
-                    Opacity = 0.7,
                     HorizontalAlignment = HorizontalAlignment.Left,
                     Visibility = Visibility.Hidden,
                     Name = "outl" + i
@@ -1307,8 +1367,8 @@ namespace AnnotationTool.views
             newOccurrence.isNotesMode = false;
 
             Border currentPatternRect = (Border)(newOccurrence.occurrenceRect.Children[0]);
-            newOccurrence.SetStart(Math.Round(Canvas.GetLeft(currentPatternRect) / horizZoom, 2));
-            newOccurrence.SetEnd(Math.Round((Canvas.GetLeft(currentPatternRect) + currentPatternRect.Width) / horizZoom, 2));
+            newOccurrence.SetStart(Math.Round(Canvas.GetLeft(currentPatternRect) / MainWindow.settings.horizZoom, 2));
+            newOccurrence.SetEnd(Math.Round((Canvas.GetLeft(currentPatternRect) + currentPatternRect.Width) / MainWindow.settings.horizZoom, 2));
 
             return newOccurrence;
         }
@@ -1362,8 +1422,14 @@ namespace AnnotationTool.views
                 OccurrenceText = "" + (patterns[patternIndex].GetOccurrences().Count),
                 Height = occurrenceIconHeight,
                 PatternNumOfOccurrence = patternIndex,
-                OccurrenceNum = patterns[patternIndex].GetOccurrences().Count - 1
+                OccurrenceNum = patterns[patternIndex].GetOccurrences().Count - 1,
+                AutomaticIcon = Visibility.Hidden
             };
+
+            if (!patterns[patternIndex].patternIcon.CollExp)
+            {
+                occurrenceIcon.Visibility = Visibility.Collapsed;
+            }
 
             // Event handlers for the different actions of an occurrence icon.
             occurrenceIcon.DeleteClick += OccurrenceIcon_DeleteClick;
@@ -1386,7 +1452,8 @@ namespace AnnotationTool.views
                 Height = occurrenceIconHeight,
                 PatternNumOfOccurrence = patternIndex,
                 OccurrenceNum = patterns[patternIndex].GetOccurrences().Count,
-                Visibility = Visibility.Visible
+                Visibility = Visibility.Visible,
+                AutomaticIcon = Visibility.Hidden
             };
 
             currentOccurrence.occurrenceIcon = occurrenceIcon;
@@ -1411,30 +1478,30 @@ namespace AnnotationTool.views
 
         private void OccurrenceIconInProgress_DeleteClick(object sender, EventArgs e)
         {
-            if (!isUIMoving)
-            {
-                DeleteOccurrenceInProgress();
-                MoveElement(btnAddPattern, (-1) * occurrenceIconHeight);
-                isSelectingOccurrence = false;
-                
-                for (int i = 0; i < patterns.Count; i++)
-                {
-                    ShowOccurrenceVisuals(i);
-                }
-            }
+            CancelOccurrenceCreation();
         }
 
         private void OccurrenceIconInProgress_MouseLeftClick(object sender, EventArgs e)
         {
             int patternIndex = ((OccurrenceIcon)sender).PatternNumOfOccurrence;
+            ConfirmOccurrenceCreation(patternIndex);
+        }
+
+        private void ConfirmOccurrenceCreation(int patternIndex)
+        {
             isSelectingOccurrence = false;
 
             if (currentOccurrence.highlightedNotes.Count > 0)
             {
                 Occurrence newOccurrence = AddOccurrence(patternIndex, currentOccurrence.highlightedNotes);
                 DeleteOccurrenceInProgress();
-                newOccurrence.occurrenceIcon = CreateOccurrenceIcon(((OccurrenceIcon)sender).PatternNumOfOccurrence);
+                newOccurrence.occurrenceIcon = CreateOccurrenceIcon(patternIndex);
                 AddOccurrenceIcon(newOccurrence.occurrenceIcon);
+
+                if (!patterns[patternIndex].patternIcon.CollExp)
+                {
+                    MoveElement(btnAddPattern, (-1) * occurrenceIconHeight);
+                }
 
                 if (!patterns[patternIndex].patternIcon.View)
                 {
@@ -1450,6 +1517,21 @@ namespace AnnotationTool.views
             for (int i = 0; i < patterns.Count; i++)
             {
                 ShowOccurrenceVisuals(i);
+            }
+        }
+
+        private void CancelOccurrenceCreation()
+        {
+            if (!isUIMoving)
+            {
+                DeleteOccurrenceInProgress();
+                MoveElement(btnAddPattern, (-1) * occurrenceIconHeight);
+                isSelectingOccurrence = false;
+
+                for (int i = 0; i < patterns.Count; i++)
+                {
+                    ShowOccurrenceVisuals(i);
+                }
             }
         }
 
@@ -1524,9 +1606,9 @@ namespace AnnotationTool.views
                     Canvas occurrenceRect = CreateOccurrenceRect(patternIndex);
                     Border rectBorder = (Border)occurrenceRect.Children[0];
 
-                    Canvas.SetLeft(rectBorder, occurrence.GetStart() * horizZoom);
+                    Canvas.SetLeft(rectBorder, occurrence.GetStart() * MainWindow.settings.horizZoom);
                     Canvas.SetTop(rectBorder, 0);
-                    rectBorder.Width = (occurrence.GetEnd() - occurrence.GetStart()) * horizZoom;
+                    rectBorder.Width = (occurrence.GetEnd() - occurrence.GetStart()) * MainWindow.settings.horizZoom;
                     rectBorder.Height = cnvMouseLayer.Height;
 
                     cnvMouseLayer.Children.Add(occurrenceRect);
@@ -1535,6 +1617,7 @@ namespace AnnotationTool.views
 
                 patterns[patternIndex].AddOccurrence(occurrence);
                 occurrence.occurrenceIcon = CreateOccurrenceIcon(patternIndex);
+                occurrence.occurrenceIcon.AutomaticIcon = occurrence.isAutomatic && MainWindow.settings.automaticIcons ? Visibility.Visible : Visibility.Hidden;
             }
 
             for (int i = 0; i < occurrences.Count; i++)
@@ -1692,6 +1775,7 @@ namespace AnnotationTool.views
                 {
                     noteRect.noteOutlines[occurrence.occurrenceIcon.PatternNumOfOccurrence].Fill = patterns[occurrence.occurrenceIcon.PatternNumOfOccurrence].patternIcon.Background;
                     noteRect.noteOutlines[occurrence.occurrenceIcon.PatternNumOfOccurrence].Stroke = Brushes.Black;
+                    noteRect.noteOutlines[occurrence.occurrenceIcon.PatternNumOfOccurrence].StrokeThickness = 1;
                 }
             }
         }
@@ -1708,6 +1792,7 @@ namespace AnnotationTool.views
                 {
                     noteRect.noteOutlines[occurrence.occurrenceIcon.PatternNumOfOccurrence].Stroke = patterns[occurrence.occurrenceIcon.PatternNumOfOccurrence].patternIcon.Background;
                     noteRect.noteOutlines[occurrence.occurrenceIcon.PatternNumOfOccurrence].Fill = Brushes.Transparent;
+                    noteRect.noteOutlines[occurrence.occurrenceIcon.PatternNumOfOccurrence].StrokeThickness = 2;
                 }
             }
         }
@@ -1732,6 +1817,8 @@ namespace AnnotationTool.views
         private void DeletePattern(int patternIndex)
         {
             double animMove = 0;
+
+            currentPattern = -1;
 
             if (patterns[patternIndex].patternIcon.CollExp)
             {
@@ -1775,6 +1862,11 @@ namespace AnnotationTool.views
             foreach (NoteRect noteRect in notes)
             {
                 noteRect.noteOutlines.RemoveAt(patternIndex);
+            }
+
+            foreach (Pattern pattern in patterns)
+            {
+                pattern.patternIcon.IsChecked = false;
             }
         }
 
@@ -1914,9 +2006,7 @@ namespace AnnotationTool.views
         {
             if (isSelectingOccurrence)
             {
-                DeleteOccurrenceInProgress();
-                MoveElement(btnAddPattern, (-1) * occurrenceIconHeight);
-                isSelectingOccurrence = false;
+                CancelOccurrenceCreation();
             }
 
             if (((PatternIcon)sender).IsChecked == true)
@@ -1939,27 +2029,49 @@ namespace AnnotationTool.views
             }
         }
 
-        private void Timeline_MouseDown(object sender, MouseButtonEventArgs e)
+        private void Timeline_MouseDown(object sender, MouseEventArgs e)
         {
             Point mouseDown = GetCurrentMousePosition(e);
             UpdateTrackerPosition(mouseDown.X);
+            isLeftMouseButtonDownOnTimeline = true;
+            Mouse.Capture(grdTimeline);
+        }
+
+        private void Timeline_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isLeftMouseButtonDownOnTimeline)
+            {
+                Point mouseDown = GetCurrentMousePosition(e);
+                UpdateTrackerPosition(mouseDown.X);
+            }
+        }
+
+        private void Timeline_MouseUp(object sender, MouseEventArgs e)
+        {
+            Point mouseDown = GetCurrentMousePosition(e);
+            isLeftMouseButtonDownOnTimeline = false;
+
+            double start = Math.Round(mouseDown.X / MainWindow.settings.horizZoom, 2);
+            double end = Math.Round(grdNotes.Width / MainWindow.settings.horizZoom, 2);
 
             if (scheduler.IsRunning)
             {
                 MuteCurrentNotes();
                 scheduler.Stop();
                 scheduler.Reset();
-                ScheduleNotes(mouseDown.X / horizZoom, grdNotes.Width / horizZoom);
+                ScheduleNotes(start, end);
                 scheduler.Start();
                 CancelNoteRectHighlights();
-                HighlightNoteRects(mouseDown.X / horizZoom, grdNotes.Width / horizZoom);
+                HighlightNoteRects(start, end);
                 MoveTracker();
             }
             else
             {
                 scheduler.Reset();
-                ScheduleNotes(mouseDown.X / horizZoom, grdNotes.Width / horizZoom);
+                ScheduleNotes(start, end);
             }
+
+            Mouse.Capture(null);
         }
 
         private void PianoScroll_MouseDown(object sender, MouseButtonEventArgs e)
@@ -1971,6 +2083,7 @@ namespace AnnotationTool.views
                 scrollVerOff = sv.VerticalOffset;
                 scrollMousePoint = e.GetPosition(sv);
                 isDraggingScroll = true;
+                Mouse.Capture(srlPianoScroll);
             }
         }
 
@@ -1979,6 +2092,7 @@ namespace AnnotationTool.views
             if (e.ChangedButton == MouseButton.Middle && e.ButtonState == MouseButtonState.Released)
             {
                 isDraggingScroll = false;
+                Mouse.Capture(null);
             }
         }
 
@@ -2016,12 +2130,49 @@ namespace AnnotationTool.views
 
         private void PianoScroll_MouseEnter(object sender, MouseEventArgs e)
         {
-            //srlPianoScroll.Focus();
+            srlPianoScroll.Focus();
+        }
+
+        private void PianoScroll_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                e.Handled = true;
+
+                double newZoom = 1;
+
+                if (e.GetPosition(srlPianoScroll).X < grdPiano.Width)
+                {
+                    if (e.Delta > 0)
+                    {
+                        newZoom = MainWindow.settings.vertiZoom >= 1 ? 1 : Math.Round(MainWindow.settings.vertiZoom + 0.05, 2);
+                    }
+                    else if (e.Delta < 0)
+                    {
+                        newZoom = MainWindow.settings.vertiZoom <= 0.5 ? 0.5 : Math.Round(MainWindow.settings.vertiZoom - 0.05, 2);
+                    }
+
+                    UpdateVertiZoom(newZoom);
+                }
+                else
+                {
+                    if (e.Delta > 0)
+                    {
+                        newZoom = MainWindow.settings.horizZoom >= 2 ? 2 : Math.Round(MainWindow.settings.horizZoom + 0.05, 2);
+                    }
+                    else if (e.Delta < 0)
+                    {
+                        newZoom = MainWindow.settings.horizZoom <= 0.1 ? 0.1 : Math.Round(MainWindow.settings.horizZoom - 0.05, 2);
+                    }
+
+                    UpdateHorizZoom(newZoom);
+                }
+            }
         }
 
         private void NoteRect_SelectNote(object sender, MouseEventArgs e)
         {
-            if (noteSelect && !isSelectingOccurrence && !isUIMoving && currentPattern != -1)
+            if (MainWindow.settings.noteSelect && !isSelectingOccurrence && !isUIMoving && currentPattern != -1)
             {
                 CreateOccurrenceInProgress(currentPattern);
                 isSelectingOccurrence = true;
@@ -2052,7 +2203,7 @@ namespace AnnotationTool.views
                 origMouseDownPoint = GetCurrentMousePosition(e);
                 origMouseDownPoint.X = Snap(origMouseDownPoint.X, horizSnap);
 
-                if (noteSelect && !isSelectingOccurrence)
+                if (MainWindow.settings.noteSelect && !isSelectingOccurrence)
                 {
                     origMouseDownPoint.Y = Snap(origMouseDownPoint.Y, vertiSnap);
                     CreateOccurrenceInProgress(currentPattern);
@@ -2071,17 +2222,18 @@ namespace AnnotationTool.views
             isLeftMouseButtonDownOnPianoRoll = false;
             Mouse.Capture(null);
 
-            if (!noteSelect)
+            if (!MainWindow.settings.noteSelect)
             {
                 isSelectingOccurrence = false;
             }
 
             if (!isUIMoving && isDraggingPatternRect && currentPattern != -1)
             {
-                if (noteSelect)
+                if (MainWindow.settings.noteSelect)
                 {
                     currentOccurrenceRect.Visibility = Visibility.Collapsed;
                     currentOccurrenceRect = null;
+                    currentSelection.Clear();
                 }
                 else
                 {
@@ -2112,7 +2264,7 @@ namespace AnnotationTool.views
             double dragDistanceY = Math.Abs(dragDelta.Y);
             bool isDistanceFarEnough = false;
 
-            if (noteSelect)
+            if (MainWindow.settings.noteSelect)
             {
                 isDistanceFarEnough = dragDistanceX >= horizSnap || dragDistanceY >= vertiSnap;
             }
@@ -2127,7 +2279,7 @@ namespace AnnotationTool.views
                 {
                     curMouseDownPoint.X = Snap(curMouseDownPoint.X, horizSnap);
 
-                    if (noteSelect)
+                    if (MainWindow.settings.noteSelect)
                     {
                         curMouseDownPoint.Y = Snap(curMouseDownPoint.Y, vertiSnap);
                     }
@@ -2141,7 +2293,7 @@ namespace AnnotationTool.views
                 {
                     curMouseDownPoint.X = Snap(curMouseDownPoint.X, horizSnap);
 
-                    if (noteSelect)
+                    if (MainWindow.settings.noteSelect)
                     {
                         curMouseDownPoint.Y = Snap(curMouseDownPoint.Y, vertiSnap);
                     }
@@ -2180,7 +2332,7 @@ namespace AnnotationTool.views
             Canvas.SetLeft(dragBorder, x);
             dragBorder.Width = width;
 
-            if (noteSelect)
+            if (MainWindow.settings.noteSelect)
             {
                 y = (pt1.Y < pt2.Y) ? pt1.Y : pt2.Y;
                 height = Math.Abs(pt2.Y - pt1.Y);
@@ -2192,7 +2344,7 @@ namespace AnnotationTool.views
 
                 foreach (NoteRect noteRect in notes)
                 {
-                    Rect noteShape = new Rect(noteRect.noteBar.Margin.Left, Grid.GetRow(noteRect.noteBar) * noteRectHeight, noteRect.noteBar.Width, noteRect.noteBar.Height);
+                    Rect noteShape = new Rect(noteRect.noteBar.Margin.Left, Grid.GetRow(noteRect.noteBar) * vertiSnap, noteRect.noteBar.Width, vertiSnap);
 
                     if (dragRect.Contains(noteShape))
                     {
@@ -2200,20 +2352,22 @@ namespace AnnotationTool.views
                         {
                             HighlightNote(noteRect, currentPattern);
                             currentOccurrence.highlightedNotes.Add(noteRect);
+                            currentSelection.Add(noteRect);
                         }
                     }
                 }
 
-                List<NoteRect> tempNoteRects = new List<NoteRect>(currentOccurrence.highlightedNotes);
+                List<NoteRect> tempNoteRects = new List<NoteRect>(currentSelection);
 
                 foreach (NoteRect noteRect in tempNoteRects)
                 {
-                    Rect noteShape = new Rect(noteRect.noteBar.Margin.Left, Grid.GetRow(noteRect.noteBar) * noteRectHeight, noteRect.noteBar.Width, noteRect.noteBar.Height);
+                    Rect noteShape = new Rect(noteRect.noteBar.Margin.Left, Grid.GetRow(noteRect.noteBar) * vertiSnap, noteRect.noteBar.Width, vertiSnap);
 
                     if (!dragRect.Contains(noteShape))
                     {
                         CancelNoteHighlight(noteRect, currentPattern);
                         currentOccurrence.highlightedNotes.Remove(noteRect);
+                        currentSelection.Remove(noteRect);
                     }
                 }
             }

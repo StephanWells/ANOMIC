@@ -84,7 +84,7 @@ namespace AnnotationTool
             Note note = new Note();
 
             note.SetPitch((NotePitch)eventIn.GetParam1());
-            note.SetVelocity(eventIn.GetParam2() == 0 ? 100 : eventIn.GetParam2());
+            note.SetVelocity(eventIn.GetParam2());
             note.SetChannel(eventIn.GetChannel());
 
             return note;

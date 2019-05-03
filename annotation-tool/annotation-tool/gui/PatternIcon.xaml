@@ -53,7 +53,5 @@
                 </Grid>
             </Border>
         </ControlTemplate>
-    </ToggleButton.Template>i
+    </ToggleButton.Template> i
 </ToggleButton>
-
-    

@@ -47,6 +47,18 @@ namespace AnnotationTool
         public List<Rectangle> noteOutlines;
     }
 
+    public struct Settings
+    {
+        public int keyNames;
+        public int snap;
+        public double horizZoom;
+        public double vertiZoom;
+        public bool noteSelect;
+        public bool gridLines;
+        public bool automaticIcons;
+        public bool normaliseVelocities;
+    }
+
     public enum TimeDivType
     {
         PPQ,

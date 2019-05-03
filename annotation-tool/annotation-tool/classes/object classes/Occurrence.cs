@@ -19,6 +19,7 @@ namespace AnnotationTool
         public OccurrenceIcon occurrenceIcon;
         public List<NoteRect> highlightedNotes = new List<NoteRect>();
         public bool isNotesMode;
+        public bool isAutomatic = false;
 
         public Occurrence() { }
 

@@ -5,7 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:AnnotationTool.views"
              mc:Ignorable="d" 
-             d:DesignHeight="500" d:DesignWidth="1000">
+             d:DesignHeight="500" d:DesignWidth="1000"
+             KeyDown="PianoRoll_OnKeyDown">
 
     <UserControl.Resources>
         <ResourceDictionary Source="../ResourceDict.xaml"/>
@@ -61,18 +62,18 @@
             </Grid>
         </ScrollViewer>
 
-        <ScrollViewer x:Name="srlPianoScroll" Grid.Row="1" Grid.Column="1" Margin="0,0,0,0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" PreviewMouseDown="PianoScroll_MouseDown" PreviewMouseUp="PianoScroll_MouseUp" PreviewMouseMove="PianoScroll_MouseMove" MouseEnter="PianoScroll_MouseEnter" KeyDown="PianoRoll_OnKeyDown">
+        <ScrollViewer x:Name="srlPianoScroll" Grid.Row="1" Grid.Column="1" Margin="0,0,0,0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" PreviewMouseDown="PianoScroll_MouseDown" PreviewMouseUp="PianoScroll_MouseUp" PreviewMouseMove="PianoScroll_MouseMove" MouseEnter="PianoScroll_MouseEnter" PreviewMouseWheel="PianoScroll_MouseWheel">
             <Border BorderBrush="{StaticResource GridExtraDarkColour}" BorderThickness="0,0,1.5,0">
-                <Canvas x:Name="cnvPianoRoll" HorizontalAlignment="Left" Height="1612" VerticalAlignment="Center" Width="132">
-                    <Border Background="{StaticResource GridExtraDarkColour}" Grid.Row="0" Grid.Column="1" Canvas.Top="{Binding ElementName=srlPianoScroll, Path=VerticalOffset}" BorderThickness="0,2,0,1" BorderBrush="{StaticResource GridDarkColour}" Panel.ZIndex="9" PreviewMouseDown="Timeline_MouseDown">
+                <Canvas x:Name="cnvPianoRoll" HorizontalAlignment="Left" Height="{DynamicResource CanvasHeight}" VerticalAlignment="Center" Width="132">
+                    <Border Background="{StaticResource GridExtraDarkColour}" Grid.Row="0" Grid.Column="1" Canvas.Top="{Binding ElementName=srlPianoScroll, Path=VerticalOffset}" BorderThickness="0,2,0,1" BorderBrush="{StaticResource GridDarkColour}" Panel.ZIndex="9" PreviewMouseDown="Timeline_MouseDown" PreviewMouseMove="Timeline_MouseMove" PreviewMouseUp="Timeline_MouseUp">
                         <Grid x:Name="grdTimeline" HorizontalAlignment="Left" Width="8" Margin="126,0,0,0" Height="22">
                             <TextBlock x:Name="txtTrackerTriangle" FontSize="15" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource ButtonMouseOverColour}" Text="&#xEDDC;" Margin="0,11,0,0" Panel.ZIndex="1"/>
                         </Grid>
                     </Border>
-                    <Rectangle x:Name="PianoGridBackground" HorizontalAlignment="Left" Height="1638" VerticalAlignment="Center" Width="132" Canvas.Top="-8" Canvas.Left="{Binding ElementName=srlPianoScroll, Path=HorizontalOffset}" Panel.ZIndex="6" Fill="{StaticResource GridDarkColour}"/>
-                    <Grid x:Name="grdPiano" HorizontalAlignment="Left" Height="1638" VerticalAlignment="Center" Width="{DynamicResource NoteWidth}" Canvas.Top="8" Canvas.Left="{Binding ElementName=srlPianoScroll, Path=HorizontalOffset}" Panel.ZIndex="7">
+                    <Rectangle x:Name="grdPianoBackground" HorizontalAlignment="Left" Height="{DynamicResource PianoRollHeight}" VerticalAlignment="Center" Width="132" Canvas.Top="-8" Canvas.Left="{Binding ElementName=srlPianoScroll, Path=HorizontalOffset}" Panel.ZIndex="6" Fill="{StaticResource GridDarkColour}"/>
+                    <Grid x:Name="grdPiano" HorizontalAlignment="Left" Height="{DynamicResource PianoRollHeight}" VerticalAlignment="Center" Width="{DynamicResource NoteWidth}" Canvas.Top="8" Canvas.Left="{Binding ElementName=srlPianoScroll, Path=HorizontalOffset}" Panel.ZIndex="7">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="18"/>
+                            <RowDefinition/>
                             <RowDefinition/>
                             <RowDefinition/>
                             <RowDefinition/>
@@ -165,6 +166,22 @@
                             <RowDefinition/>
                         </Grid.RowDefinitions>
 
+                        <Line X1 ="0" X2="132" Y1="0" Y2="0" Stroke="{StaticResource GridDarkColour}" Grid.Row="2" Panel.ZIndex="2" StrokeThickness="1"/>
+                        <Line X1 ="0" X2="132" Y1="0" Y2="0" Stroke="{StaticResource GridDarkColour}" Grid.Row="9" Panel.ZIndex="2" StrokeThickness="1"/>
+                        <Line X1 ="0" X2="132" Y1="0" Y2="0" Stroke="{StaticResource GridDarkColour}" Grid.Row="14" Panel.ZIndex="2" StrokeThickness="1"/>
+                        <Line X1 ="0" X2="132" Y1="0" Y2="0" Stroke="{StaticResource GridDarkColour}" Grid.Row="21" Panel.ZIndex="2" StrokeThickness="1"/>
+                        <Line X1 ="0" X2="132" Y1="0" Y2="0" Stroke="{StaticResource GridDarkColour}" Grid.Row="26" Panel.ZIndex="2" StrokeThickness="1"/>
+                        <Line X1 ="0" X2="132" Y1="0" Y2="0" Stroke="{StaticResource GridDarkColour}" Grid.Row="33" Panel.ZIndex="2" StrokeThickness="1"/>
+                        <Line X1 ="0" X2="132" Y1="0" Y2="0" Stroke="{StaticResource GridDarkColour}" Grid.Row="38" Panel.ZIndex="2" StrokeThickness="1"/>
+                        <Line X1 ="0" X2="132" Y1="0" Y2="0" Stroke="{StaticResource GridDarkColour}" Grid.Row="45" Panel.ZIndex="2" StrokeThickness="1"/>
+                        <Line X1 ="0" X2="132" Y1="0" Y2="0" Stroke="{StaticResource GridDarkColour}" Grid.Row="50" Panel.ZIndex="2" StrokeThickness="1"/>
+                        <Line X1 ="0" X2="132" Y1="0" Y2="0" Stroke="{StaticResource GridDarkColour}" Grid.Row="57" Panel.ZIndex="2" StrokeThickness="1"/>
+                        <Line X1 ="0" X2="132" Y1="0" Y2="0" Stroke="{StaticResource GridDarkColour}" Grid.Row="62" Panel.ZIndex="2" StrokeThickness="1"/>
+                        <Line X1 ="0" X2="132" Y1="0" Y2="0" Stroke="{StaticResource GridDarkColour}" Grid.Row="69" Panel.ZIndex="2" StrokeThickness="1"/>
+                        <Line X1 ="0" X2="132" Y1="0" Y2="0" Stroke="{StaticResource GridDarkColour}" Grid.Row="74" Panel.ZIndex="2" StrokeThickness="1"/>
+                        <Line X1 ="0" X2="132" Y1="0" Y2="0" Stroke="{StaticResource GridDarkColour}" Grid.Row="81" Panel.ZIndex="2" StrokeThickness="1"/>
+                        <Line X1 ="0" X2="132" Y1="0" Y2="0" Stroke="{StaticResource GridDarkColour}" Grid.Row="86" Panel.ZIndex="2" StrokeThickness="1"/>
+                        
                         <Rectangle	x:Name="C8"	    Grid.Row="0"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource LeftNoteSpan}"	Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource LeftNoteMargin}"/>
 
                         <Rectangle	x:Name="B7" 	Grid.Row="2"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource RightNoteSpan}"	Height="{StaticResource RightNoteHeight}"	Width="{StaticResource NoteWidth}"		Margin="{StaticResource RightNoteMargin}"/>
@@ -262,9 +279,9 @@
                         <Rectangle	x:Name="As0"	Grid.Row="87"	Fill="Black"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="{StaticResource BlackNoteSpan}"	Height="{StaticResource BlackNoteHeight}"	Width="{StaticResource BlackNoteWidth}"	Margin="{StaticResource BlackNoteMargin}"   Panel.ZIndex="1"/>
                         <Rectangle	x:Name="A0"	    Grid.Row="87"	Fill="White"	HorizontalAlignment="Left"	VerticalAlignment="Top"	Grid.RowSpan="3"	                            Height="{StaticResource LeftNoteHeight}"	Width="{StaticResource NoteWidth}"	    Margin="{StaticResource MiddleNoteMargin}"/>
                     </Grid>
-                    <Grid x:Name="grdKeyNames" HorizontalAlignment="Left" Height="1638" VerticalAlignment="Center" Width="{DynamicResource NoteWidth}" Canvas.Top="8" Canvas.Left="{Binding ElementName=srlPianoScroll, Path=HorizontalOffset}" Panel.ZIndex="8">
+                    <Grid x:Name="grdKeyNames" HorizontalAlignment="Left" Height="{DynamicResource PianoRollHeight}" VerticalAlignment="Center" Width="{DynamicResource NoteWidth}" Canvas.Top="8" Canvas.Left="{Binding ElementName=srlPianoScroll, Path=HorizontalOffset}" Panel.ZIndex="8">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="18"/>
+                            <RowDefinition/>
                             <RowDefinition/>
                             <RowDefinition/>
                             <RowDefinition/>
@@ -446,7 +463,7 @@
                         <TextBlock	x:Name="As0Txt" Grid.Row="86"   Text="A#0"   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextBlackNoteMargin}"   Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
                         <TextBlock	x:Name="A0Txt"  Grid.Row="87"   Text="A0"    HorizontalAlignment="Left" VerticalAlignment="Top" Grid.RowSpan="{StaticResource TextSpan}"    Height="{StaticResource TextHeight}"    Width="{StaticResource TextWidth}"  Margin="{StaticResource TextMiddleNoteMargin}"  Foreground="{StaticResource TextColour}" FontFamily="{StaticResource Exo2Light}"/>
                     </Grid>
-                    <Grid x:Name="grdGridColours" HorizontalAlignment="Left" Height="1638" VerticalAlignment="Center" Width="220" Canvas.Top="8" Canvas.Left="133" Panel.ZIndex="1">
+                    <Grid x:Name="grdGridColours" HorizontalAlignment="Left" Height="{DynamicResource PianoRollHeight}" VerticalAlignment="Center" Width="0" Canvas.Top="8" Canvas.Left="133" Panel.ZIndex="1">
                         <Grid.RowDefinitions>
                             <RowDefinition/>
                             <RowDefinition/>
@@ -630,12 +647,12 @@
                         <Border	Grid.Row="87"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridDarkColour}"/>
                         <Border	Grid.Row="88"	BorderBrush="{StaticResource GridLineColour}"	BorderThickness="{StaticResource ThinBorderThickness}"	Background="{StaticResource GridLightColour}"/>
                     </Grid>
-                    <Canvas x:Name="cnvGridLines" HorizontalAlignment="Left" Height="1592" VerticalAlignment="Center" Width = "0" Canvas.Top="18" Canvas.Left="133" Panel.ZIndex="2"/>
-                    <Canvas x:Name="cnvMouseLayer" HorizontalAlignment="Left" Height="1638" VerticalAlignment="Center" Width="0" Canvas.Top="8" Canvas.Left="133" Panel.ZIndex="4" PreviewMouseLeftButtonDown="PianoRoll_LeftMouseDown" PreviewMouseMove="PianoRoll_MouseMove" PreviewMouseLeftButtonUp="PianoRoll_LeftMouseUp">
-                        <Line x:Name="linTrackerLine" X1="0" X2="0" Y1="0" Y2="1628" Margin="0,6,0,0" Stroke="{StaticResource ButtonMouseOverColour}" Opacity="1" StrokeThickness="1"></Line>
+                    <Canvas x:Name="cnvGridLines" HorizontalAlignment="Left" Height="{DynamicResource PianoRollHeight}" VerticalAlignment="Center" Width = "0" Canvas.Top="18" Canvas.Left="133" Panel.ZIndex="2"/>
+                    <Canvas x:Name="cnvMouseLayer" HorizontalAlignment="Left" Height="{DynamicResource PianoRollHeight}" VerticalAlignment="Center" Width="0" Canvas.Top="8" Canvas.Left="133" Panel.ZIndex="4" PreviewMouseLeftButtonDown="PianoRoll_LeftMouseDown" PreviewMouseMove="PianoRoll_MouseMove" PreviewMouseLeftButtonUp="PianoRoll_LeftMouseUp">
+                        <Line x:Name="linTrackerLine" X1="0" X2="0" Y1="0" Y2="{DynamicResource PianoRollHeight}" Margin="0,6,0,0" Stroke="{StaticResource ButtonMouseOverColour}" Opacity="1" StrokeThickness="1"></Line>
                         <Rectangle Fill="Transparent" Width="{Binding ElementName=cnvMouseLayer, Path=Width}" Height="1638"/>
                     </Canvas>
-                    <Grid x:Name="grdNotes" HorizontalAlignment="Left" Height="1638" VerticalAlignment="Center" Width="0" Canvas.Top="8" Canvas.Left="133" Panel.ZIndex="3">
+                    <Grid x:Name="grdNotes" HorizontalAlignment="Left" Height="{DynamicResource PianoRollHeight}" VerticalAlignment="Center" Width="0" Canvas.Top="8" Canvas.Left="133" Panel.ZIndex="3">
                         <Grid.RowDefinitions>
                             <RowDefinition/>
                             <RowDefinition/>
