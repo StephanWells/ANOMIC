@@ -33,7 +33,7 @@ namespace AnnotationTool.views
         private static IList<DispatcherTimer> timers = new List<DispatcherTimer>();
 
         private List<NoteRect> currentNotes = new List<NoteRect>();
-        private List<NoteRect> notes = new List<NoteRect>();
+        private List<NoteRect>[] notes = new List<NoteRect>[17];
 
         private const int pianoRollRows = 88;
         private const int occurrenceIconHeight = 20;
@@ -45,6 +45,8 @@ namespace AnnotationTool.views
         private double timeDivRatio;
         private double horizSnap;
         private double vertiSnap;
+        private double currentHorizZoom;
+        private double currentVertiZoom;
 
         private MIDIParser midiParse;
         private NoteParser noteParse;
@@ -57,6 +59,7 @@ namespace AnnotationTool.views
         private Occurrence currentOccurrence;
         private int currentPattern = -1;
         private int currentSolo = -1;
+        private int currentChannel = 0;
 
         bool isLeftMouseButtonDownOnPianoRoll = false;
         bool isLeftMouseButtonDownOnTimeline = false;
@@ -94,9 +97,24 @@ namespace AnnotationTool.views
         {
             InitializeComponent();
 
-            cnvGridLines.Visibility = MainWindow.settings.gridLines ? Visibility.Visible : Visibility.Hidden;
+            for (int i = 0; i < notes.Length; i++)
+            {
+                notes[i] = new List<NoteRect>();
+            }
+
+            if (MainWindow.settings.gridLines)
+            {
+                GridVisibilityOn();
+            }
+            else
+            {
+                GridVisibilityOff();
+            }
+
             UpdateKeyNames();
             UpdateSnap();
+            InitVertiZoom();
+            currentHorizZoom = MainWindow.settings.horizZoom;
 
             patterns = new List<Pattern>();
             currentOccurrence = new Occurrence();
@@ -208,7 +226,7 @@ namespace AnnotationTool.views
 
         private void ScheduleNotes()
         {
-            foreach (NoteRect noteRect in notes)
+            foreach (NoteRect noteRect in notes[currentChannel])
             {
                 scheduler.Schedule(new NoteOnMessage(outputDevice, Channel.Channel1, (Midi.Pitch)noteRect.note.GetPitch(), MainWindow.settings.normaliseVelocities ? 100 : noteRect.note.GetVelocity(), (float)(noteRect.note.GetTime() / resolution)));
                 scheduler.Schedule(new NoteOffMessage(outputDevice, Channel.Channel1, (Midi.Pitch)noteRect.note.GetPitch(), MainWindow.settings.normaliseVelocities ? 100 : noteRect.note.GetVelocity(), (float)((noteRect.note.GetTime() + noteRect.note.GetDuration()) / resolution)));
@@ -217,7 +235,7 @@ namespace AnnotationTool.views
 
         private void ScheduleNotes(double start, double end)
         {
-            foreach (NoteRect noteRect in notes)
+            foreach (NoteRect noteRect in notes[currentChannel])
             {
                 if (noteRect.note.GetTime() >= start && noteRect.note.GetTime() <= end)
                 {
@@ -237,27 +255,52 @@ namespace AnnotationTool.views
 
         private void HighlightNote(NoteRect noteRect, int patternIndex)
         {
-            noteRect.noteOutlines[patternIndex].Visibility = Visibility.Visible;
-        }
-
-        private void CancelNoteHighlights(List<NoteRect> notesIn, int patternIndex)
-        {
-            foreach (NoteRect noteRect in notesIn)
+            if (noteRect.noteOutlines.ContainsKey(patternIndex))
             {
-                CancelNoteHighlight(noteRect, patternIndex);
+                noteRect.noteOutlines[patternIndex].Visibility = Visibility.Visible;
+            }
+            else
+            {
+                Rectangle noteOutline = new Rectangle
+                {
+                    Fill = Brushes.Transparent,
+                    Stroke = patterns[patternIndex].patternIcon.Background,
+                    StrokeThickness = 2.5,
+                    Width = noteRect.noteBar.Width,
+                    Height = noteRect.noteBar.Height,
+                    Margin = noteRect.noteBar.Margin,
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                    Visibility = Visibility.Visible,
+                    Name = "outl" + GetNoteIndex(noteRect.noteBar)
+                };
+
+                Panel.SetZIndex(noteOutline, 3);
+                Grid.SetRow(noteOutline, Grid.GetRow(noteRect.noteBar));
+                noteOutline.MouseDown += NoteRect_SelectNote;
+                noteRect.noteOutlines.Add(patternIndex, noteOutline);
+                grdNotes.Children.Add(noteOutline);
             }
         }
 
-        private void CancelNoteHighlight(NoteRect noteRect, int patternIndex)
+        private void RemoveNoteHighlights(List<NoteRect> notesIn, int patternIndex)
         {
-            noteRect.noteOutlines[patternIndex].Visibility = Visibility.Hidden;
+            foreach (NoteRect noteRect in notesIn)
+            {
+                RemoveNoteHighlight(noteRect, patternIndex);
+            }
+        }
+
+        private void RemoveNoteHighlight(NoteRect noteRect, int patternIndex)
+        {
+            grdNotes.Children.Remove(noteRect.noteOutlines[patternIndex]);
+            noteRect.noteOutlines.Remove(patternIndex);
         }
 
         private void HighlightNoteRects()
         {
             double bpmFactor = 60 / noteParse.bpm;
 
-            foreach (NoteRect noteRect in notes)
+            foreach (NoteRect noteRect in notes[0])
             {
                 DelayedExecute(() => HighlightNoteRect(noteRect), bpmFactor * noteRect.note.GetTime() / resolution);
                 DelayedExecute(() => RemoveHighlight(noteRect), (bpmFactor * (noteRect.note.GetTime() + noteRect.note.GetDuration())) / resolution);
@@ -268,7 +311,7 @@ namespace AnnotationTool.views
         {
             double bpmFactor = 60 / noteParse.bpm;
 
-            foreach (NoteRect noteRect in notes)
+            foreach (NoteRect noteRect in notes[0])
             {
                 if (noteRect.note.GetTime() >= start && noteRect.note.GetTime() <= end)
                 {
@@ -406,12 +449,12 @@ namespace AnnotationTool.views
 
         private void MainWindow_GridVisibilityOn(object sender, EventArgs e)
         {
-            cnvGridLines.Visibility = Visibility.Visible;
+            GridVisibilityOn();
         }
 
         private void MainWindow_GridVisibilityOff(object sender, EventArgs e)
         {
-            cnvGridLines.Visibility = Visibility.Hidden;
+            GridVisibilityOff();
         }
 
         private void MainWindow_NoteSelectOn(object sender, EventArgs e)
@@ -488,7 +531,7 @@ namespace AnnotationTool.views
             }
             else
             {
-                MessageBox.Show("Cannot add pattern while currently selecting or editing an occurrence.", "Error", MessageBoxButton.OK);
+                MessageBox.Show("Cannot add pattern while currently selecting an occurrence.", "Error", MessageBoxButton.OK);
             }
         }
 
@@ -533,6 +576,26 @@ namespace AnnotationTool.views
         private void MainWindow_Closing(object sender, EventArgs e)
         {
             HaltSound();
+        }
+
+        private void GridVisibilityOn()
+        {
+            cnvGridLinesBar.Visibility = Visibility.Visible;
+            cnvGridLinesHalfBar.Visibility = Visibility.Visible;
+            cnvGridLinesQuarterNote.Visibility = Visibility.Visible;
+            cnvGridLinesEighthNote.Visibility = Visibility.Visible;
+            cnvGridLinesSixteenthNote.Visibility = MainWindow.settings.horizZoom < 0.3 ? Visibility.Hidden : Visibility.Visible;
+            cnvGridLinesThirtySecondNote.Visibility = MainWindow.settings.horizZoom < 0.6 ? Visibility.Hidden : Visibility.Visible;
+        }
+
+        private void GridVisibilityOff()
+        {
+            cnvGridLinesBar.Visibility = Visibility.Hidden;
+            cnvGridLinesHalfBar.Visibility = Visibility.Hidden;
+            cnvGridLinesQuarterNote.Visibility = Visibility.Hidden;
+            cnvGridLinesEighthNote.Visibility = Visibility.Hidden;
+            cnvGridLinesSixteenthNote.Visibility = Visibility.Hidden;
+            cnvGridLinesThirtySecondNote.Visibility = Visibility.Hidden;
         }
 
         private void UpdateKeyNames()
@@ -640,10 +703,10 @@ namespace AnnotationTool.views
 
         private void UpdateHorizZoom(double zoomSetting)
         {
-            double oldZoom = MainWindow.settings.horizZoom;
+            double oldZoom = currentHorizZoom;
             MainWindow.settings.horizZoom = zoomSetting;
             double mousePosOnPianoRoll = Math.Round(Mouse.GetPosition(srlPianoScroll).X - grdPiano.Width < 0 ? 0 : Mouse.GetPosition(srlPianoScroll).X - grdPiano.Width, 2);
-            double scrollAnchorOffset = mousePosOnPianoRoll - (MainWindow.settings.horizZoom / oldZoom) * mousePosOnPianoRoll;
+            double scrollAnchorOffset = Math.Round(mousePosOnPianoRoll - (MainWindow.settings.horizZoom / oldZoom) * mousePosOnPianoRoll, 2);
 
             srlPianoScroll.ScrollToHorizontalOffset(Math.Round((MainWindow.settings.horizZoom / oldZoom) * (srlPianoScroll.HorizontalOffset) - scrollAnchorOffset, 2));
 
@@ -651,18 +714,17 @@ namespace AnnotationTool.views
             double width = Math.Round(barNumbers.Count * MainWindow.settings.horizZoom * resolution * 4, 2);
 
             cnvPianoRoll.Width = width + grdPiano.Width;
-            grdGridColours.Width = width;
-            cnvGridLines.Width = width;
-            cnvMouseLayer.Width = width;
-            grdNotes.Width = width;
+            this.Resources["PianoRollWidth"] = width;
             grdTimeline.Width = width + barNumOffset * 2;
+
+            UpdateTrackerPosition(Math.Round(((linTrackerLine.Margin.Left + linTrackerLine.RenderTransform.Value.OffsetX) / oldZoom) * MainWindow.settings.horizZoom, 2));
 
             for (int i = 0; i < gridLines.Count; i++)
             {
                 Canvas.SetLeft(gridLines[i], i * thirtySecondNote + thirtySecondNote);
             }
 
-            foreach (NoteRect noteRect in notes)
+            foreach (NoteRect noteRect in notes[0])
             {
                 double noteWidth = Math.Round(noteRect.note.GetDuration() * MainWindow.settings.horizZoom, 2);
                 Thickness noteMargin = new Thickness(Math.Round(noteRect.note.GetTime() * MainWindow.settings.horizZoom, 2), 0, 0, 0);
@@ -670,10 +732,10 @@ namespace AnnotationTool.views
                 noteRect.noteBar.Width = noteWidth;
                 noteRect.noteBar.Margin = noteMargin;
 
-                foreach (Rectangle outline in noteRect.noteOutlines)
+                foreach (KeyValuePair<int, Rectangle> outline in noteRect.noteOutlines)
                 {
-                    outline.Width = noteWidth;
-                    outline.Margin = noteMargin;
+                    outline.Value.Width = noteWidth;
+                    outline.Value.Margin = noteMargin;
                 }
             }
 
@@ -697,17 +759,35 @@ namespace AnnotationTool.views
 
             horizSnap = Math.Round((MainWindow.settings.horizZoom * resolution) / 8, 2);
 
-            UpdateTrackerPosition(Math.Round(((linTrackerLine.Margin.Left + linTrackerLine.RenderTransform.Value.OffsetX) / oldZoom) * MainWindow.settings.horizZoom, 2));
+            currentHorizZoom = zoomSetting;
 
             if (isPlaying)
             {
                 MoveTracker();
             }
+
+            if (currentHorizZoom < 0.6)
+            {
+                cnvGridLinesThirtySecondNote.Visibility = Visibility.Hidden;
+            }
+            else
+            {
+                cnvGridLinesThirtySecondNote.Visibility = Visibility.Visible;
+            }
+
+            if (currentHorizZoom < 0.3)
+            {
+                cnvGridLinesSixteenthNote.Visibility = Visibility.Hidden;
+            }
+            else
+            {
+                cnvGridLinesSixteenthNote.Visibility = Visibility.Visible;
+            }
         }
 
         private void UpdateVertiZoom(double zoomSetting)
         {
-            double oldZoom = MainWindow.settings.vertiZoom;
+            double oldZoom = currentVertiZoom;
             MainWindow.settings.vertiZoom = zoomSetting;
             double mousePosOnPianoRoll = Mouse.GetPosition(srlPianoScroll).Y;
             double scrollAnchorOffset = Math.Round(mousePosOnPianoRoll - (MainWindow.settings.vertiZoom / oldZoom) * mousePosOnPianoRoll, 2);
@@ -729,6 +809,27 @@ namespace AnnotationTool.views
             }
 
             vertiSnap = Math.Round((MainWindow.settings.vertiZoom * (double)this.Resources["PianoRollHeight"]) / grdNotes.RowDefinitions.Count, 2);
+            currentVertiZoom = zoomSetting;
+        }
+
+        private void InitVertiZoom()
+        {
+            this.Resources["CanvasHeight"] = Math.Round((MainWindow.settings.vertiZoom) * (double)this.Resources["CanvasHeight"], 2);
+            this.Resources["PianoRollHeight"] = Math.Round((MainWindow.settings.vertiZoom) * (double)this.Resources["PianoRollHeight"], 2);
+            currentVertiZoom = MainWindow.settings.vertiZoom;
+
+            if (MainWindow.settings.vertiZoom < 1)
+            {
+                grdKeyNames.Visibility = Visibility.Hidden;
+                grdPianoBackground.Fill = Brushes.White;
+            }
+            else
+            {
+                grdKeyNames.Visibility = Visibility.Visible;
+                grdPianoBackground.Fill = (Brush)(this.Resources["GridDarkColour"]);
+            }
+
+            vertiSnap = Math.Round((MainWindow.settings.vertiZoom * (double)this.Resources["PianoRollHeight"]) / grdNotes.RowDefinitions.Count, 2);
         }
 
         // Adds a bar to the piano roll to make space for MIDI notes.
@@ -737,14 +838,10 @@ namespace AnnotationTool.views
             double barStart = grdNotes.Width;
             double thirtySecondNote = MainWindow.settings.horizZoom * (resolution / 8);
             double thickness;
-            double height = cnvGridLines.Height - 7;
-            double barLength = MainWindow.settings.horizZoom * (resolution * 4);
+            double barLength = MainWindow.settings.horizZoom * (resolution * noteParse.timeSig[0]);
 
             cnvPianoRoll.Width += barLength;
-            grdGridColours.Width += barLength;
-            cnvGridLines.Width += barLength;
-            cnvMouseLayer.Width += barLength;
-            grdNotes.Width += barLength;
+            this.Resources["PianoRollWidth"] = (double)this.Resources["PianoRollWidth"] + barLength;
             grdTimeline.Width += barLength;
 
             TextBlock barNumber = new TextBlock
@@ -758,15 +855,17 @@ namespace AnnotationTool.views
             barNumbers.Add(barNumber);
             grdTimeline.Children.Add(barNumber);
 
-            for (int j = 1; j <= 32; j++)
+            for (int j = 1; j <= noteParse.timeSig[0] * 8; j++)
             {
+                Canvas parent = new Canvas();
+
                 // Drawing the vertical grid lines with varying thickness.
-                if (j % 32 == 0) thickness = 2.3;
-                else if (j % 16 == 0) thickness = 1.1;
-                else if (j % 8 == 0) thickness = 0.9;
-                else if (j % 4 == 0) thickness = 0.6;
-                else if (j % 2 == 0) thickness = 0.4;
-                else thickness = 0.2;
+                if (j % (noteParse.timeSig[0] * 8) == 0)                    {   thickness = 2.3; parent = cnvGridLinesBar;              }
+                else if (j % 16 == 0 && ((noteParse.timeSig[0] % 4) == 0))  {   thickness = 1.1; parent = cnvGridLinesHalfBar;          }
+                else if (j % 8 == 0)                                        {   thickness = 0.9; parent = cnvGridLinesQuarterNote;      }
+                else if (j % 4 == 0)                                        {   thickness = 0.6; parent = cnvGridLinesEighthNote;       }
+                else if (j % 2 == 0)                                        {   thickness = 0.4; parent = cnvGridLinesSixteenthNote;    }
+                else                                                        {   thickness = 0.2; parent = cnvGridLinesThirtySecondNote; }
 
                 Line gridLine = new Line
                 {
@@ -774,7 +873,7 @@ namespace AnnotationTool.views
                     X1 = 0,
                     X2 = 0,
                     Y1 = 0,
-                    Y2 = height,
+                    Y2 = (double)this.Resources["PianoRollHeight"] * (1 / currentVertiZoom),
                     HorizontalAlignment = HorizontalAlignment.Left,
                     VerticalAlignment = VerticalAlignment.Center,
                     StrokeThickness = thickness
@@ -785,7 +884,7 @@ namespace AnnotationTool.views
                 Canvas.SetTop(gridLine, 7);
 
                 gridLines.Add(gridLine);
-                cnvGridLines.Children.Add(gridLine);
+                parent.Children.Add(gridLine);
             }
         }
 
@@ -811,7 +910,7 @@ namespace AnnotationTool.views
                     Name = "note" + i
                 };
 
-                List<Rectangle> noteOutlines = new List<Rectangle>();
+                Dictionary<int, Rectangle> noteOutlines = new Dictionary<int, Rectangle>();
 
                 Grid.SetRow(noteBar, PitchToRow((int)currentNote.GetPitch()));
                 Panel.SetZIndex(noteBar, 3);
@@ -824,7 +923,8 @@ namespace AnnotationTool.views
                 noteRect.noteBar = noteBar;
                 noteRect.noteOutlines = noteOutlines;
 
-                notes.Add(noteRect);
+                notes[0].Add(noteRect);
+                notes[noteRect.note.GetChannel() + 1].Add(noteRect);
             }
         }
 
@@ -842,13 +942,14 @@ namespace AnnotationTool.views
             }
 
             cnvPianoRoll.Width = grdPiano.Width;
-            grdGridColours.Width += 0;
-            cnvGridLines.Width += 0;
-            cnvMouseLayer.Width += 0;
-            grdNotes.Width += 0;
-            grdTimeline.Width += 0;
+            this.Resources["PianoRollWidth"] = 0;
 
-            cnvGridLines.Children.Clear();
+            cnvGridLinesBar.Children.Clear();
+            cnvGridLinesHalfBar.Children.Clear();
+            cnvGridLinesQuarterNote.Children.Clear();
+            cnvGridLinesEighthNote.Children.Clear();
+            cnvGridLinesSixteenthNote.Children.Clear();
+            cnvGridLinesThirtySecondNote.Children.Clear();
 
             AddBar();
             AddBar();
@@ -868,10 +969,10 @@ namespace AnnotationTool.views
                 quantisedSection.Add(new List<NotePitch>());
             }
 
-            for (int i = 0; i < notes.Count; i++)
+            for (int i = 0; i < notes[0].Count; i++)
             {
                 double j = 0;
-                NoteRect currentNote = notes[i];
+                NoteRect currentNote = notes[0][i];
 
                 if (currentNote.note.GetTime() > end) break;
 
@@ -971,9 +1072,9 @@ namespace AnnotationTool.views
                 NoteRect note;
                 bool found = false;
 
-                for (int i = 0; i < notes.Count; i++)
+                for (int i = 0; i < notes[0].Count; i++)
                 {
-                    note = notes[i];
+                    note = notes[0][i];
                     highlightedNotes = new List<NoteRect>();
 
                     if (note.note.GetDuration() == occurrence.highlightedNotes[0].note.GetDuration())
@@ -1027,7 +1128,7 @@ namespace AnnotationTool.views
         {
             List<NoteRect> notesAtTime = new List<NoteRect>();
 
-            foreach (NoteRect note in notes)
+            foreach (NoteRect note in notes[0])
             {
                 if (note.note.GetTime() == time)
                 {
@@ -1084,11 +1185,22 @@ namespace AnnotationTool.views
                 }
                 else
                 {
+                    unitMatch = true;
+
                     for (int j = 0; j < occurrence[i].Count; j++)
                     {
-                        if (subList[i].Contains(occurrence[i][j]))
+                        if (!subList[i].Contains(occurrence[i][j]))
                         {
-                            unitMatch = true;
+                            unitMatch = false;
+                            break;
+                        }
+                    }
+
+                    for (int j = 0; j < subList[i].Count; j++)
+                    {
+                        if (!occurrence[i].Contains(subList[i][j]))
+                        {
+                            unitMatch = false;
                             break;
                         }
                     }
@@ -1269,7 +1381,7 @@ namespace AnnotationTool.views
             linTrackerLine.RenderTransform = trackerTransform;
 
             double distance = cnvMouseLayer.Width - linTrackerLine.Margin.Left;
-            TimeSpan duration = TimeSpan.FromSeconds(((60 / noteParse.bpm) * ((grdNotes.Width - linTrackerLine.Margin.Left) / resolution)) / MainWindow.settings.horizZoom);
+            TimeSpan duration = TimeSpan.FromSeconds(Math.Round(((60 / noteParse.bpm) * ((grdNotes.Width - (linTrackerLine.Margin.Left + linTrackerLine.RenderTransform.Value.OffsetX)) / resolution)) / MainWindow.settings.horizZoom, 2));
 
             DoubleAnimation horizAnim = new DoubleAnimation { By = distance, Duration = duration };
 
@@ -1304,6 +1416,63 @@ namespace AnnotationTool.views
             AddPattern();
         }
 
+        private void ChannelSelect_SelectChannel(object sender, RoutedEventArgs e)
+        {
+            int oldChannel = currentChannel;
+            currentChannel = ((ComboBox)sender).SelectedIndex;
+
+            if (oldChannel != 0 && currentChannel == 0)
+            {
+                for (int i = 1; i < oldChannel; i++)
+                {
+                    ShowNotesInChannel(i);
+                }
+
+                for (int i = oldChannel + 1; i < notes.Length; i++)
+                {
+                    ShowNotesInChannel(i);
+                }
+            }
+            else if (oldChannel == 0 && currentChannel != 0)
+            {
+                for (int i = 1; i < currentChannel; i++)
+                {
+                    HideNotesInChannel(i);
+                }
+
+                for (int i = currentChannel + 1; i < notes.Length; i++)
+                {
+                    HideNotesInChannel(i);
+                }
+            }
+            else if (oldChannel != 0 && currentChannel != 0)
+            {
+                HideNotesInChannel(oldChannel);
+                ShowNotesInChannel(currentChannel);
+            }
+
+            if (scheduler != null)
+            {
+                RefreshMusic();
+            }
+        }
+
+        private void HideNotesInChannel(int channelIndex)
+        {
+            foreach (NoteRect noteRect in notes[channelIndex])
+            {
+                noteRect.noteBar.Visibility = Visibility.Hidden;
+            }
+        }
+
+        private void ShowNotesInChannel(int channelIndex)
+        {
+            foreach (NoteRect noteRect in notes[channelIndex])
+            {
+                noteRect.noteBar.Visibility = Visibility.Visible;
+            }
+        }
+
         private void AddPattern()
         {
             Pattern newPattern = new Pattern();
@@ -1320,28 +1489,6 @@ namespace AnnotationTool.views
                 VerticalAlignment = VerticalAlignment.Top,
                 PatternNum = patterns.Count
             };
-
-            for (int i = 0; i < notes.Count; i++)
-            {
-                Rectangle noteOutline = new Rectangle
-                {
-                    Fill = Brushes.Transparent,
-                    Stroke = newPatternButton.Background,
-                    StrokeThickness = 2.5,
-                    Width = notes[i].noteBar.Width,
-                    Height = notes[i].noteBar.Height,
-                    Margin = notes[i].noteBar.Margin,
-                    HorizontalAlignment = HorizontalAlignment.Left,
-                    Visibility = Visibility.Hidden,
-                    Name = "outl" + i
-                };
-
-                Panel.SetZIndex(noteOutline, 20);
-                Grid.SetRow(noteOutline, Grid.GetRow(notes[i].noteBar));
-                noteOutline.MouseDown += NoteRect_SelectNote;
-                notes[i].noteOutlines.Add(noteOutline);
-                grdNotes.Children.Add(noteOutline);
-            }
 
             // Event handlers for the different actions of a pattern icon.
             newPatternButton.Click += PatternIcon_Click;
@@ -1743,8 +1890,7 @@ namespace AnnotationTool.views
         private void OccurrenceIcon_FindSimilar(object sender, EventArgs e)
         {
             Occurrence occurrence = GetOccurrence((OccurrenceIcon)sender);
-            currentPattern = occurrence.occurrenceIcon.PatternNumOfOccurrence;
-            patterns[currentPattern].patternIcon.IsChecked = true;
+            SelectPattern(((OccurrenceIcon)sender).PatternNumOfOccurrence);
 
             List<Occurrence> similarOccurrences = SimilarOccurrences(occurrence);
             AddOccurrenceGraphics(similarOccurrences, currentPattern);
@@ -1859,9 +2005,9 @@ namespace AnnotationTool.views
                 }
             }
 
-            foreach (NoteRect noteRect in notes)
+            foreach (NoteRect noteRect in notes[0])
             {
-                noteRect.noteOutlines.RemoveAt(patternIndex);
+                noteRect.noteOutlines.Remove(patternIndex);
             }
 
             foreach (Pattern pattern in patterns)
@@ -1881,7 +2027,7 @@ namespace AnnotationTool.views
             else
             {
                 NormaliseOccurrence(occurrenceToRemove);
-                CancelNoteHighlights(occurrenceToRemove.highlightedNotes, patternIndex);
+                RemoveNoteHighlights(occurrenceToRemove.highlightedNotes, patternIndex);
             }
             
             patterns[patternIndex].GetOccurrences().RemoveAt(occurrenceIndex);
@@ -1900,7 +2046,7 @@ namespace AnnotationTool.views
 
         private void DeleteOccurrenceInProgress()
         {
-            CancelNoteHighlights(currentOccurrence.highlightedNotes, currentPattern);
+            RemoveNoteHighlights(currentOccurrence.highlightedNotes, currentPattern);
             itmPatternsView.Items.Remove(currentOccurrence.occurrenceIcon);
             currentOccurrence = new Occurrence();
 
@@ -1937,7 +2083,10 @@ namespace AnnotationTool.views
                 }
                 else
                 {
-                    CancelNoteHighlights(occurrence.highlightedNotes, patternIndex);
+                    foreach (NoteRect noteRect in occurrence.highlightedNotes)
+                    {
+                        noteRect.noteOutlines[patternIndex].Visibility = Visibility.Hidden;
+                    }
                 }
             }
         }
@@ -2009,23 +2158,20 @@ namespace AnnotationTool.views
                 CancelOccurrenceCreation();
             }
 
-            if (((PatternIcon)sender).IsChecked == true)
+            SelectPattern(((PatternIcon)sender).PatternNum);
+        }
+
+        private void SelectPattern(int patternIndex)
+        {
+            for (int i = 0; i < patterns.Count; i++)
             {
-                for (int i = 0; i < patterns.Count; i++)
-                {
-                    if (!patterns[i].patternIcon.Name.Equals(((PatternIcon)sender).Name))
-                    {
-                        patterns[i].patternIcon.IsChecked = false;
-                    }
-                    else
-                    {
-                        currentPattern = i;
-                    }
-                }
+                patterns[i].patternIcon.IsChecked = false;
             }
-            else
+
+            if (patternIndex < patterns.Count && patterns[patternIndex] != null)
             {
-                currentPattern = -1;
+                patterns[patternIndex].patternIcon.IsChecked = true;
+                currentPattern = patternIndex;
             }
         }
 
@@ -2181,17 +2327,17 @@ namespace AnnotationTool.views
             if (isSelectingOccurrence)
             {
                 var noteRect = sender as Rectangle;
-                int noteIndex = Int32.Parse(noteRect.Name.Remove(0, 4));
+                int noteIndex = GetNoteIndex(noteRect);
 
-                if (currentOccurrence.highlightedNotes.Contains(notes[noteIndex]))
+                if (currentOccurrence.highlightedNotes.Contains(notes[0][noteIndex]))
                 {
-                    CancelNoteHighlight(notes[noteIndex], currentPattern);
-                    currentOccurrence.highlightedNotes.Remove(notes[noteIndex]); 
+                    RemoveNoteHighlight(notes[0][noteIndex], currentPattern);
+                    currentOccurrence.highlightedNotes.Remove(notes[0][noteIndex]); 
                 }
                 else
                 {
-                    HighlightNote(notes[noteIndex], currentPattern);
-                    currentOccurrence.highlightedNotes.Add(notes[noteIndex]);
+                    HighlightNote(notes[0][noteIndex], currentPattern);
+                    currentOccurrence.highlightedNotes.Add(notes[0][noteIndex]);
                 }
             }
         }
@@ -2342,7 +2488,7 @@ namespace AnnotationTool.views
                 Rect dragRect = new Rect(x, y, width, height);
                 dragRect.Inflate(width / 10, height / 10);
 
-                foreach (NoteRect noteRect in notes)
+                foreach (NoteRect noteRect in notes[currentChannel])
                 {
                     Rect noteShape = new Rect(noteRect.noteBar.Margin.Left, Grid.GetRow(noteRect.noteBar) * vertiSnap, noteRect.noteBar.Width, vertiSnap);
 
@@ -2365,7 +2511,7 @@ namespace AnnotationTool.views
 
                     if (!dragRect.Contains(noteShape))
                     {
-                        CancelNoteHighlight(noteRect, currentPattern);
+                        RemoveNoteHighlight(noteRect, currentPattern);
                         currentOccurrence.highlightedNotes.Remove(noteRect);
                         currentSelection.Remove(noteRect);
                     }
@@ -2475,6 +2621,12 @@ namespace AnnotationTool.views
         private double Snap(double value, double multiple)
         {
             return Math.Round(value / multiple) * multiple;
+        }
+
+        // Gets a note index from its name.
+        private int GetNoteIndex(Rectangle noteRect)
+        {
+            return Int32.Parse(noteRect.Name.Remove(0, 4));
         }
 
         private void DisableUI()

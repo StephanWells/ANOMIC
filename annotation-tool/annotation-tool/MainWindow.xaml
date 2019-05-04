@@ -17,7 +17,7 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
 
-        <DockPanel Grid.Row="0" Background="{StaticResource GridDarkColour}">
+        <DockPanel Grid.Row="0" Background="{StaticResource GridDarkColour}" Panel.ZIndex="2">
             <Menu x:Name="mnuMain" Background="{StaticResource GridLightColour}" DockPanel.Dock="Top">
                 <MenuItem Header="File" Width="Auto">
                     <MenuItem Header="_New" Width="200" Click="MainWindow_MIDIBrowseClick"/>
@@ -89,9 +89,10 @@
             </Menu>
         </DockPanel>
 
-        <Grid Grid.Row="1" Background="{StaticResource GridDarkColour}">
+        <Grid Grid.Row="1" Background="{StaticResource GridDarkColour}" Panel.ZIndex="1">
             <Image x:Name="imgBrowse" Source="gui/buttons/plusbutton.png" Height="200" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="40,-180,0,0"/>
             <Button x:Name="btnBrowse" Height="30" Width="100" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,150,0,0" Content="Browse" Click="MainWindow_MIDIBrowseClick"></Button>
+            <TextBlock x:Name="txtLoading" Height="35" Width="110" FontSize="23" Text="Loading..." TextAlignment="Left" Margin="17,300,0,0" Visibility="Hidden"/>
             <ContentControl Content="{Binding}"/>
         </Grid>
     </Grid>

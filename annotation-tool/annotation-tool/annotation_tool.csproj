@@ -59,6 +59,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="classes\object classes\Events\SysExEvent.cs" />
     <Compile Include="classes\object classes\Occurrence.cs" />
     <Compile Include="classes\object classes\Pattern.cs" />
     <Compile Include="gui\MenuItemExensions.cs" />
@@ -159,7 +160,9 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="gui\assets\transparent-square-tiles.png" />
+  </ItemGroup>
   <ItemGroup>
     <Resource Include="gui\buttons\plusbutton.png" />
   </ItemGroup>

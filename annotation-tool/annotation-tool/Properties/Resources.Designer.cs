@@ -139,5 +139,15 @@ namespace AnnotationTool.Properties {
                 return ((byte[])(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap transparent_square_tiles {
+            get {
+                object obj = ResourceManager.GetObject("transparent_square_tiles", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

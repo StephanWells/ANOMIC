@@ -13,13 +13,14 @@
 
     <Button.ContextMenu>
         <ContextMenu>
-            <MenuItem Header="_Find Similar Occurrences" Click="OccurrenceIcon_FindSimilar"/>
             <MenuItem Header="_Delete" Click="OccurrenceIcon_DeleteClick"/>
             <MenuItem Header="_Set Confidence Level">
                 <MenuItem Header="3" tool:MenuItemExtensions.GroupName="confidenceSettings" IsCheckable="True" IsChecked="true" Checked="OccurrenceIcon_ConfidenceChange"/>
                 <MenuItem Header="2" tool:MenuItemExtensions.GroupName="confidenceSettings" IsCheckable="True" IsChecked="false" Checked="OccurrenceIcon_ConfidenceChange"/>
                 <MenuItem Header="1" tool:MenuItemExtensions.GroupName="confidenceSettings" IsCheckable="True" IsChecked="false" Checked="OccurrenceIcon_ConfidenceChange"/>
             </MenuItem>
+            <Separator Background="{StaticResource MenuButtonMouseOverColour}" Margin="-22,3,0,3" Width="220" HorizontalAlignment="Left"/>
+            <MenuItem Header="_Find Similar Occurrences" Click="OccurrenceIcon_FindSimilar"/>
         </ContextMenu>
     </Button.ContextMenu>
 

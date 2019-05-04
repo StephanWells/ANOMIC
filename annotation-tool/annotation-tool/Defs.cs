@@ -44,7 +44,7 @@ namespace AnnotationTool
     {
         public Note note;
         public Rectangle noteBar;
-        public List<Rectangle> noteOutlines;
+        public Dictionary<int, Rectangle> noteOutlines;
     }
 
     public struct Settings
@@ -89,6 +89,7 @@ namespace AnnotationTool
         CuePoint = 0x07,
         EndOfTrack = 0x2F,
         SetTempo = 0x51,
+        SMPTEOffset = 0x54,
         TimeSignature = 0x58,
         KeySignature = 0x59,
         SequencerSpecific = 0x7F,

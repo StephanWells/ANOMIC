@@ -12,6 +12,7 @@ namespace AnnotationTool
         public List<Event> midiEvents;
         public List<Note> notes;
         public float bpm = 120f;
+        public int[] timeSig = new int[2] { 4, 4 }; // Index 0 is numerator, index 1 is denominator;
 
         public NoteParser(MIDIParser midiParseIn)
         {
@@ -74,6 +75,14 @@ namespace AnnotationTool
                     case MidiEventType.SetTempo:
                         bpm = CalculateBPM(((NumMetaEvent)tempEvent).GetNum());
                     break;
+
+                    case MidiEventType.TimeSignature:
+                        timeSig = CalculateTimeSignature(((NumMetaEvent)tempEvent).GetNum());
+                    break;
+
+                    case MidiEventType.EndOfTrack:
+                        timeElapsed = 0;
+                    break;
                 }
             }
         }
@@ -96,6 +105,17 @@ namespace AnnotationTool
             uint tempo = MIDIParser.FixedLengthArrayToUInt(tempoArray);
 
             return MICROSECONDS_PER_MINUTE / tempo;
+        }
+
+        // Calculates the time signature from a byte array.
+        private int[] CalculateTimeSignature(byte[] timeSigArray)
+        {
+            int[] timeSig = new int[2];
+
+            timeSig[0] = timeSigArray[0];
+            timeSig[1] = (int)Math.Pow(2, timeSigArray[1]);
+
+            return timeSig;
         }
     }
 }

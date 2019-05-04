@@ -111,6 +111,7 @@ namespace AnnotationTool
         private int ParseTrackContent(int index, int trackNum)
         {
             int trackIndex = index;
+            byte runningType = 0;
 
             while (index < trackIndex + tracks[trackNum].chunkSize)
             {
@@ -121,6 +122,18 @@ namespace AnnotationTool
                 index += deltaTimeArray.Length;
                 byte type = midi[index++];
 
+                // Running status (all events after each other have the same type and channel).
+                if (type < 128)
+                {
+                    type = runningType;
+                    index--;
+                    Console.WriteLine("--- RUNNING MODE");
+                }
+                else
+                {
+                    runningType = type;
+                }
+
                 switch (type)
                 {
                     case 0xFF: // Meta event.
@@ -128,7 +141,12 @@ namespace AnnotationTool
                         index = ParseMetaEvent(index, time);
                     break;
 
-                    default:
+                    case 0xF0: // SysEx event.
+                        Console.WriteLine("--- Type: SysEx event.");
+                        index = ParseSysExEvent(index, time);
+                    break;
+
+                    default: // Channel event.
                         Console.WriteLine("--- Type: Channel event.");
                         index = ParseChannelEvent(index, time, type);
                     break;
@@ -194,6 +212,24 @@ namespace AnnotationTool
             return index;
         }
 
+        private int ParseSysExEvent(int index, uint time)
+        {
+            SysExEvent sysExEvent = new SysExEvent();
+            sysExEvent.SetTime(time);
+            sysExEvent.SetEventType(MidiEventType.System);
+            List<byte> data = new List<byte>();
+
+            while (midi[index] != 0xF7)
+            {
+                data.Add(midi[index++]);
+            }
+
+            data.Add(midi[index++]);
+            sysExEvent.SetData(data.ToArray());
+
+            return index;
+        }
+
         private int ParseChannelEvent(int index, uint time, byte type)
         {
             uint channel = (uint)(type & 0x0F);
@@ -218,6 +254,7 @@ namespace AnnotationTool
                     param2 = midi[index++];
                     channelEvent.SetParam1(param1);
                     channelEvent.SetParam2(param2);
+                    if (param2 == 0) channelEvent.SetEventType(MidiEventType.NoteOff);
                     Console.WriteLine("--- Note: " + param1);
                     Console.WriteLine("--- Velocity: " + param2);
                 break;

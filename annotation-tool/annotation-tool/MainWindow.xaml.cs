@@ -16,6 +16,8 @@ using System.IO;
 using Microsoft.Win32;
 using AnnotationTool.views;
 using System.ComponentModel;
+using System.Threading;
+using System.Windows.Threading;
 
 namespace AnnotationTool
 {
@@ -67,23 +69,31 @@ namespace AnnotationTool
             {
                 try
                 {
-                    MIDIParser midiParse = new MIDIParser(File.ReadAllBytes(browseDialog.FileName));
+                    OpenPianoRoll(browseDialog);
 
-                    midiParse.fileName = browseDialog.SafeFileName;
-                    midiParse.ParseFile();
-                    NoteParser noteParse = new NoteParser(midiParse);
-                    noteParse.ParseEvents();
-
-                    DataContext = new PianoRollView(midiParse, noteParse);
                     mnuView.Visibility = Visibility.Visible;
                     mnuPatterns.Visibility = Visibility.Visible;
                     mnuPlayback.Visibility = Visibility.Visible;
+                    txtLoading.Visibility = Visibility.Hidden;
                 }
                 catch (InvalidOperationException)
                 {
                     MessageBox.Show("Error parsing MIDI file!", "Error");
                 }
             }
+        }
+
+        private void OpenPianoRoll(OpenFileDialog browseDialog)
+        {
+            txtLoading.Visibility = Visibility.Visible;
+            MIDIParser midiParse = new MIDIParser(File.ReadAllBytes(browseDialog.FileName));
+
+            midiParse.fileName = browseDialog.SafeFileName;
+
+            midiParse.ParseFile();
+            NoteParser noteParse = new NoteParser(midiParse);
+            noteParse.ParseEvents();
+            DataContext = new PianoRollView(midiParse, noteParse);
         }
 
         private void SetDefaults()
@@ -149,43 +159,43 @@ namespace AnnotationTool
             {
                 case "200%":
                     settings.horizZoom = 2.0;
-                    break;
+                break;
 
                 case "180%":
                     settings.horizZoom = 1.8;
-                    break;
+                break;
 
                 case "160%":
                     settings.horizZoom = 1.6;
-                    break;
+                break;
 
                 case "140%":
                     settings.horizZoom = 1.4;
-                    break;
+                break;
 
                 case "120%":
                     settings.horizZoom = 1.2;
-                    break;
+                break;
 
                 case "100%":
                     settings.horizZoom = 1.0;
-                    break;
+                break;
 
                 case "80%":
                     settings.horizZoom = 0.8;
-                    break;
+                break;
 
                 case "60%":
                     settings.horizZoom = 0.6;
-                    break;
+                break;
 
                 case "40%":
                     settings.horizZoom = 0.4;
-                    break;
+                break;
 
                 case "20%":
                     settings.horizZoom = 0.2;
-                    break;
+                break;
             }
 
             HorizZoomChange?.Invoke(this, e);
@@ -199,23 +209,23 @@ namespace AnnotationTool
             {
                 case "100%":
                     settings.vertiZoom = 1;
-                    break;
+                break;
 
                 case "80%":
                     settings.vertiZoom = 0.8;
-                    break;
+                break;
 
                 case "60%":
                     settings.vertiZoom = 0.6;
-                    break;
+                break;
 
                 case "40%":
                     settings.vertiZoom = 0.4;
-                    break;
+                break;
 
                 case "20%":
                     settings.vertiZoom = 0.2;
-                    break;
+                break;
             }
 
             VertiZoomChange?.Invoke(this, e);
