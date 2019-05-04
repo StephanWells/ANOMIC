@@ -277,6 +277,8 @@ namespace AnnotationTool.views
                 Panel.SetZIndex(noteOutline, 3);
                 Grid.SetRow(noteOutline, Grid.GetRow(noteRect.noteBar));
                 noteOutline.MouseDown += NoteRect_SelectNote;
+                noteOutline.MouseEnter += NoteRect_MouseIn;
+                noteOutline.MouseLeave += NoteRect_MouseOut;
                 noteRect.noteOutlines.Add(patternIndex, noteOutline);
                 grdNotes.Children.Add(noteOutline);
             }
@@ -915,6 +917,8 @@ namespace AnnotationTool.views
                 Grid.SetRow(noteBar, PitchToRow((int)currentNote.GetPitch()));
                 Panel.SetZIndex(noteBar, 3);
                 noteBar.MouseDown += NoteRect_SelectNote;
+                noteBar.MouseEnter += NoteRect_MouseIn;
+                noteBar.MouseLeave += NoteRect_MouseOut;
 
                 grdNotes.Children.Add(noteBar);
 
@@ -1618,6 +1622,8 @@ namespace AnnotationTool.views
             // Event handlers for the different actions of an occurrence icon.
             occurrenceIcon.DeleteClick += OccurrenceIconInProgress_DeleteClick;
             occurrenceIcon.MouseLeftClick += OccurrenceIconInProgress_MouseLeftClick;
+            occurrenceIcon.MouseEnter += OccurrenceIcon_MouseIn;
+            occurrenceIcon.MouseLeave += OccurrenceIcon_MouseOut;
             occurrenceIcon.ContextMenu.Visibility = Visibility.Collapsed;
 
             return occurrenceIcon;
@@ -1864,6 +1870,8 @@ namespace AnnotationTool.views
 
         private void OccurrenceIcon_MouseIn(object sender, EventArgs e)
         {
+            Cursor = Cursors.Hand;
+
             if (patterns[((OccurrenceIcon)sender).PatternNumOfOccurrence].GetOccurrences().Count > 0)
             {
                 Occurrence occurrence = GetOccurrence((OccurrenceIcon)sender);
@@ -1873,6 +1881,8 @@ namespace AnnotationTool.views
 
         private void OccurrenceIcon_MouseOut(object sender, EventArgs e)
         {
+            Cursor = Cursors.Arrow;
+
             if (patterns[((OccurrenceIcon)sender).PatternNumOfOccurrence].GetOccurrences().Count > ((OccurrenceIcon)sender).OccurrenceNum)
             {
                 Occurrence occurrence = GetOccurrence((OccurrenceIcon)sender);
@@ -1884,16 +1894,15 @@ namespace AnnotationTool.views
         {
             Occurrence occurrence = GetOccurrence((OccurrenceIcon)sender);
 
-            srlPianoScroll.ScrollToHorizontalOffset((occurrence.GetEnd() + occurrence.GetStart() - srlPianoScroll.ViewportWidth + grdPiano.Width) / 2);
+            srlPianoScroll.ScrollToHorizontalOffset(Math.Round((((occurrence.GetEnd() + occurrence.GetStart()) * MainWindow.settings.horizZoom - srlPianoScroll.ViewportWidth + grdPiano.Width) / 2), 2));
         }
 
         private void OccurrenceIcon_FindSimilar(object sender, EventArgs e)
         {
             Occurrence occurrence = GetOccurrence((OccurrenceIcon)sender);
-            SelectPattern(((OccurrenceIcon)sender).PatternNumOfOccurrence);
 
             List<Occurrence> similarOccurrences = SimilarOccurrences(occurrence);
-            AddOccurrenceGraphics(similarOccurrences, currentPattern);
+            AddOccurrenceGraphics(similarOccurrences, ((OccurrenceIcon)sender).PatternNumOfOccurrence);
         }
 
         private void OccurrenceIcon_ConfidenceChange(object sender, EventArgs e)
@@ -2189,6 +2198,7 @@ namespace AnnotationTool.views
             {
                 Point mouseDown = GetCurrentMousePosition(e);
                 UpdateTrackerPosition(mouseDown.X);
+                Cursor = Cursors.None;
             }
         }
 
@@ -2218,6 +2228,25 @@ namespace AnnotationTool.views
             }
 
             Mouse.Capture(null);
+
+            if (grdTimeline.IsMouseOver)
+            {
+                Cursor = Cursors.ScrollWE;
+            }
+            else
+            {
+                Cursor = Cursors.Arrow;
+            }
+        }
+
+        private void Timeline_MouseIn(object sender, MouseEventArgs e)
+        {
+            Cursor = Cursors.ScrollWE;
+        }
+
+        private void Timeline_MouseOut(object sender, MouseEventArgs e)
+        {
+            Cursor = Cursors.Arrow;
         }
 
         private void PianoScroll_MouseDown(object sender, MouseButtonEventArgs e)
@@ -2230,6 +2259,7 @@ namespace AnnotationTool.views
                 scrollMousePoint = e.GetPosition(sv);
                 isDraggingScroll = true;
                 Mouse.Capture(srlPianoScroll);
+                Cursor = Cursors.ScrollAll;
             }
         }
 
@@ -2239,6 +2269,7 @@ namespace AnnotationTool.views
             {
                 isDraggingScroll = false;
                 Mouse.Capture(null);
+                Cursor = Cursors.Arrow;
             }
         }
 
@@ -2339,6 +2370,22 @@ namespace AnnotationTool.views
                     HighlightNote(notes[0][noteIndex], currentPattern);
                     currentOccurrence.highlightedNotes.Add(notes[0][noteIndex]);
                 }
+            }
+        }
+
+        private void NoteRect_MouseIn(object sender, MouseEventArgs e)
+        {
+            if (MainWindow.settings.noteSelect)
+            {
+                Cursor = Cursors.Hand;
+            }
+        }
+
+        private void NoteRect_MouseOut(object sender, MouseEventArgs e)
+        {
+            if (MainWindow.settings.noteSelect)
+            {
+                Cursor = Cursors.Arrow;
             }
         }
 
