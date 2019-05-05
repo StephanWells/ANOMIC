@@ -810,7 +810,7 @@ namespace AnnotationTool.views
                 grdPianoBackground.Fill = (Brush)(this.Resources["GridDarkColour"]);
             }
 
-            vertiSnap = Math.Round((MainWindow.settings.vertiZoom * (double)this.Resources["PianoRollHeight"]) / grdNotes.RowDefinitions.Count, 2);
+            vertiSnap = Math.Round(((double)this.Resources["PianoRollHeight"]) / grdNotes.RowDefinitions.Count, 2);
             currentVertiZoom = zoomSetting;
         }
 
@@ -831,7 +831,7 @@ namespace AnnotationTool.views
                 grdPianoBackground.Fill = (Brush)(this.Resources["GridDarkColour"]);
             }
 
-            vertiSnap = Math.Round((MainWindow.settings.vertiZoom * (double)this.Resources["PianoRollHeight"]) / grdNotes.RowDefinitions.Count, 2);
+            vertiSnap = Math.Round(((double)this.Resources["PianoRollHeight"]) / grdNotes.RowDefinitions.Count, 2);
         }
 
         // Adds a bar to the piano roll to make space for MIDI notes.
