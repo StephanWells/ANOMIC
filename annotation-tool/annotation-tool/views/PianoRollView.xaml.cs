@@ -22,6 +22,7 @@ using Midi;
 using System.Threading;
 using System.Windows.Threading;
 using System.ComponentModel;
+using System.Security;
 
 namespace AnnotationTool.views
 {
@@ -158,6 +159,8 @@ namespace AnnotationTool.views
 
             MainWindow.MIDIBrowseClick += new EventHandler(MainWindow_MIDIBrowseClick);
             MainWindow.Exit += new EventHandler(MainWindow_Exit);
+            MainWindow.OpenAnnotationsClick += new EventHandler(MainWindow_OpenAnnotationsClick);
+            MainWindow.SaveAnnotationsClick += new EventHandler(MainWindow_SaveAnnotationsClick);
             MainWindow.SnapChange += new EventHandler(MainWindow_SnapChange);
             MainWindow.HorizZoomChange += new EventHandler(MainWindow_HorizZoomChange);
             MainWindow.VertiZoomChange += new EventHandler(MainWindow_VertiZoomChange);
@@ -222,6 +225,8 @@ namespace AnnotationTool.views
             {
 
             }
+
+            Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(() => { Cursor = Cursors.Arrow; })).Wait();
         }
 
         private void ScheduleNotes()
@@ -372,12 +377,66 @@ namespace AnnotationTool.views
 
         private void MainWindow_MIDIBrowseClick(object sender, EventArgs e)
         {
-            HaltSound();
+            StopMusic();
         }
 
         private void MainWindow_Exit(object sender, EventArgs e)
         {
             HaltSound();
+        }
+
+        private void MainWindow_OpenAnnotationsClick(object sender, EventArgs e)
+        {
+
+        }
+
+        private void MainWindow_SaveAnnotationsClick(object sender, EventArgs e)
+        {
+            SaveFileDialog browseDialog = new SaveFileDialog
+            {
+                Filter = "JAMS files (*.jams)|*.jams|All files (*.*)|*.*"
+            };
+
+            if (browseDialog.ShowDialog() == true)
+            {
+                FileParser fileParser = new FileParser(patterns);
+                fileParser.midiName = browseDialog.SafeFileName;
+                fileParser.midiDuration = "" + noteParse.midiLength;
+                string[] file = fileParser.ParseToJAMS();
+
+                try
+                {
+                    File.WriteAllLines(browseDialog.FileName, file);
+                }
+                catch (ArgumentException)
+                {
+                    MessageBox.Show("Invalid filepath!", "Error");
+                }
+                catch (NotSupportedException)
+                {
+                    MessageBox.Show("Invalid filepath!", "Error");
+                }
+                catch (PathTooLongException)
+                {
+                    MessageBox.Show("Filepath too long!", "Error");
+                }
+                catch (DirectoryNotFoundException)
+                {
+                    MessageBox.Show("Directory not found!", "Error");
+                }
+                catch (IOException)
+                {
+                    MessageBox.Show("Error writing to file!", "Error");
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    MessageBox.Show("Permissions error when writing to file!", "Error");
+                }
+                catch (SecurityException)
+                {
+                    MessageBox.Show("Permissions error when writing to file!", "Error");
+                }
+            }
         }
 
         private void PianoRoll_OnKeyDown(object sender, KeyEventArgs e)
@@ -467,6 +526,11 @@ namespace AnnotationTool.views
         private void MainWindow_NoteSelectOff(object sender, EventArgs e)
         {
             Panel.SetZIndex(grdNotes, 3);
+
+            if (isSelectingOccurrence)
+            {
+                CancelOccurrenceCreation();
+            }
         }
 
         private void MainWindow_AutomaticIconsOn(object sender, EventArgs e)
@@ -1116,6 +1180,7 @@ namespace AnnotationTool.views
                                     newOccurrence = FindStartAndEnd(newOccurrence);
                                     newOccurrence.isNotesMode = true;
                                     newOccurrence.isAutomatic = true;
+                                    newOccurrence.SetConfidence(3);
 
                                     similarOccurrences.Add(newOccurrence);
                                 }
@@ -1516,6 +1581,7 @@ namespace AnnotationTool.views
             newOccurrence.occurrenceIcon = CreateOccurrenceIcon(patternIndex);
             newOccurrence.occurrenceRect = occurrenceRect;
             newOccurrence.isNotesMode = false;
+            newOccurrence.SetConfidence(3);
 
             Border currentPatternRect = (Border)(newOccurrence.occurrenceRect.Children[0]);
             newOccurrence.SetStart(Math.Round(Canvas.GetLeft(currentPatternRect) / MainWindow.settings.horizZoom, 2));
@@ -1533,13 +1599,14 @@ namespace AnnotationTool.views
             newOccurrence.highlightedNotes = highlightedNotes;
             newOccurrence = FindStartAndEnd(newOccurrence);
             newOccurrence.isNotesMode = true;
+            newOccurrence.SetConfidence(3);
 
             return newOccurrence;
         }
 
         private Occurrence FindStartAndEnd(Occurrence occurrence)
         {
-            double minTime = grdNotes.Width;
+            double minTime = Math.Round(grdNotes.Width / MainWindow.settings.horizZoom, 2);
             double maxTime = 0;
 
             foreach (NoteRect noteRect in occurrence.highlightedNotes)
@@ -1582,6 +1649,8 @@ namespace AnnotationTool.views
                 occurrenceIcon.Visibility = Visibility.Collapsed;
             }
 
+            occurrenceIcon.UpdateConfidenceGroupName();
+
             // Event handlers for the different actions of an occurrence icon.
             occurrenceIcon.DeleteClick += OccurrenceIcon_DeleteClick;
             occurrenceIcon.MouseIn += OccurrenceIcon_MouseIn;
@@ -1608,6 +1677,7 @@ namespace AnnotationTool.views
             };
 
             currentOccurrence.occurrenceIcon = occurrenceIcon;
+            currentOccurrence.isNotesMode = true;
             AddOccurrenceIconInProgress(occurrenceIcon);
             MoveElement(btnAddPattern, occurrenceIconHeight);
 
@@ -1622,8 +1692,8 @@ namespace AnnotationTool.views
             // Event handlers for the different actions of an occurrence icon.
             occurrenceIcon.DeleteClick += OccurrenceIconInProgress_DeleteClick;
             occurrenceIcon.MouseLeftClick += OccurrenceIconInProgress_MouseLeftClick;
-            occurrenceIcon.MouseEnter += OccurrenceIcon_MouseIn;
-            occurrenceIcon.MouseLeave += OccurrenceIcon_MouseOut;
+            occurrenceIcon.MouseEnter += OccurrenceIconInProgress_MouseIn;
+            occurrenceIcon.MouseLeave += OccurrenceIconInProgress_MouseOut;
             occurrenceIcon.ContextMenu.Visibility = Visibility.Collapsed;
 
             return occurrenceIcon;
@@ -1669,7 +1739,10 @@ namespace AnnotationTool.views
 
             for (int i = 0; i < patterns.Count; i++)
             {
-                ShowOccurrenceVisuals(i);
+                if (patterns[i].patternIcon.View)
+                {
+                    ShowOccurrenceVisuals(i);
+                }
             }
         }
 
@@ -1890,6 +1963,16 @@ namespace AnnotationTool.views
             }
         }
 
+        private void OccurrenceIconInProgress_MouseIn(object sender, EventArgs e)
+        {
+            Cursor = Cursors.Hand;
+        }
+
+        private void OccurrenceIconInProgress_MouseOut(object sender, EventArgs e)
+        {
+            Cursor = Cursors.Arrow;
+        }
+
         private void OccurrenceIcon_MouseLeftClick(object sender, EventArgs e)
         {
             Occurrence occurrence = GetOccurrence((OccurrenceIcon)sender);
@@ -2050,6 +2133,7 @@ namespace AnnotationTool.views
                 occurrence.occurrenceIcon.Name = "occurrenceIcon" + patternIndex + "s" + occurrence.occurrenceIcon.OccurrenceNum;
                 occurrence.occurrenceIcon.OccurrenceText = "" + (newIndex + 1);
                 occurrence.occurrenceIcon.OccurrenceNum--;
+                occurrence.occurrenceIcon.UpdateConfidenceGroupName();
             }
         }
 

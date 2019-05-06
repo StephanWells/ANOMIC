@@ -21,8 +21,8 @@
             <Menu x:Name="mnuMain" Background="{StaticResource GridLightColour}" DockPanel.Dock="Top">
                 <MenuItem Header="File" Width="Auto">
                     <MenuItem Header="_New" Width="200" Click="MainWindow_MIDIBrowseClick"/>
-                    <MenuItem Header="_Open" Width="200"/>
-                    <MenuItem Header="_Save" Width="200"/>
+                    <MenuItem Header="_Open" Width="200" Click="MainWindow_OpenAnnotationsClick"/>
+                    <MenuItem Header="_Save" Width="200" Click="MainWindow_SaveAnnotationsClick"/>
                     <Separator Background="{StaticResource MenuButtonMouseOverColour}" Margin="-22,3,0,3" Width="220" HorizontalAlignment="Left"/>
                     <MenuItem Header="_Exit" Width="200" Click="MainWindow_Exit"/>
                 </MenuItem>

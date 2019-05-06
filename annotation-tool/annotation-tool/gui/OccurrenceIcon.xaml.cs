@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using AnnotationTool;
 
 namespace Controls
 {
@@ -18,6 +19,13 @@ namespace Controls
         public OccurrenceIcon()
         {
             InitializeComponent();
+        }
+
+        public void UpdateConfidenceGroupName()
+        {
+            mnuConfidence1.SetCurrentValue(MenuItemExtensions.GroupNameProperty, "confidenceSettings" + PatternNumOfOccurrence + "," + OccurrenceNum);
+            mnuConfidence2.SetCurrentValue(MenuItemExtensions.GroupNameProperty, "confidenceSettings" + PatternNumOfOccurrence + "," + OccurrenceNum);
+            mnuConfidence3.SetCurrentValue(MenuItemExtensions.GroupNameProperty, "confidenceSettings" + PatternNumOfOccurrence + "," + OccurrenceNum);
         }
 
         public string OccurrenceText

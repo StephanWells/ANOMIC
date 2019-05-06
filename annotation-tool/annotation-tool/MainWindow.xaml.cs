@@ -26,6 +26,8 @@ namespace AnnotationTool
     {
         public static event EventHandler MIDIBrowseClick;
         public static event EventHandler Exit;
+        public static event EventHandler OpenAnnotationsClick;
+        public static event EventHandler SaveAnnotationsClick;
         public static event EventHandler SnapChange;
         public static event EventHandler HorizZoomChange;
         public static event EventHandler VertiZoomChange;
@@ -69,12 +71,16 @@ namespace AnnotationTool
             {
                 try
                 {
-                    OpenPianoRoll(browseDialog);
+                    Cursor = Cursors.AppStarting;
+
+                    Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(() => { OpenPianoRoll(browseDialog); })).Wait();
 
                     mnuView.Visibility = Visibility.Visible;
                     mnuPatterns.Visibility = Visibility.Visible;
                     mnuPlayback.Visibility = Visibility.Visible;
                     txtLoading.Visibility = Visibility.Hidden;
+
+                    Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(() => { Cursor = Cursors.Arrow; })).Wait();
                 }
                 catch (InvalidOperationException)
                 {
@@ -85,7 +91,6 @@ namespace AnnotationTool
 
         private void OpenPianoRoll(OpenFileDialog browseDialog)
         {
-            txtLoading.Visibility = Visibility.Visible;
             MIDIParser midiParse = new MIDIParser(File.ReadAllBytes(browseDialog.FileName));
 
             midiParse.fileName = browseDialog.SafeFileName;
@@ -119,6 +124,16 @@ namespace AnnotationTool
         {
             Exit?.Invoke(this, e);
             Close();
+        }
+
+        private void MainWindow_OpenAnnotationsClick(object sender, RoutedEventArgs e)
+        {
+            OpenAnnotationsClick?.Invoke(this, e);
+        }
+
+        private void MainWindow_SaveAnnotationsClick(object sender, RoutedEventArgs e)
+        {
+            SaveAnnotationsClick?.Invoke(this, e);
         }
 
         private void MainWindow_SnapChange(object sender, RoutedEventArgs e)

@@ -13,6 +13,7 @@ namespace AnnotationTool
         public List<Note> notes;
         public float bpm = 120f;
         public int[] timeSig = new int[2] { 4, 4 }; // Index 0 is numerator, index 1 is denominator;
+        public double midiLength = 0;
 
         public NoteParser(MIDIParser midiParseIn)
         {
@@ -81,6 +82,7 @@ namespace AnnotationTool
                     break;
 
                     case MidiEventType.EndOfTrack:
+                        midiLength = timeElapsed > midiLength ? timeElapsed : midiLength;
                         timeElapsed = 0;
                     break;
                 }

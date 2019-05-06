@@ -62,6 +62,7 @@
     <Compile Include="classes\object classes\Events\SysExEvent.cs" />
     <Compile Include="classes\object classes\Occurrence.cs" />
     <Compile Include="classes\object classes\Pattern.cs" />
+    <Compile Include="classes\parsers\FileParser.cs" />
     <Compile Include="gui\MenuItemExensions.cs" />
     <Compile Include="gui\OccurrenceIcon.xaml.cs">
       <DependentUpon>OccurrenceIcon.xaml</DependentUpon>
