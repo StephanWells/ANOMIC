@@ -27,13 +27,13 @@
                         <ColumnDefinition Width="2*"/>
                     </Grid.ColumnDefinitions>
 
-                    <Border Grid.Row ="0" Grid.Column="0" Background="{StaticResource GridDarkColour}" BorderThickness="0" BorderBrush="{StaticResource GridDarkColour}">
+                    <Border Grid.Row ="0" Grid.Column="0" Background="{StaticResource GridDarkColour}" BorderThickness="0" BorderBrush="{StaticResource GridDarkColour}" Panel.ZIndex="2">
                         <Button x:Name="DeleteButton" Style="{DynamicResource TextDeleteButton}" Click="PatternIcon_DeleteClick"/>
                     </Border>
-                    <Border Grid.Row ="1" Grid.Column="0" Background="{StaticResource GridDarkColour}" BorderThickness="0" BorderBrush="{StaticResource GridDarkColour}">
+                    <Border Grid.Row ="1" Grid.Column="0" Background="{StaticResource GridDarkColour}" BorderThickness="0" BorderBrush="{StaticResource GridDarkColour}" Panel.ZIndex="2">
                         <ToggleButton x:Name="ViewButton"  Style="{DynamicResource TextViewButton}" IsChecked="{Binding Path=View, ElementName=PatternIconButton}" Click="PatternIcon_ViewToggle" MouseRightButtonUp="PatternIcon_ViewSolo"/>
                     </Border>
-                    <Border Grid.Row="2" Grid.Column="0" Background="{StaticResource GridDarkColour}" BorderThickness="0" BorderBrush="{StaticResource GridDarkColour}">
+                    <Border Grid.Row="2" Grid.Column="0" Background="{StaticResource GridDarkColour}" BorderThickness="0" BorderBrush="{StaticResource GridDarkColour}" Panel.ZIndex="2">
                         <ToggleButton x:Name="CollExpButton" Style="{DynamicResource TextArrowButton}" IsChecked="{Binding Path=CollExp, ElementName=PatternIconButton}" Click="PatternIcon_CollExpToggle"/>
                     </Border>
                     <Border Grid.Row="0" Grid.Column="1" Grid.RowSpan="3" Background="{StaticResource GridDarkColour}" BorderThickness="0" Grid.ColumnSpan="2">

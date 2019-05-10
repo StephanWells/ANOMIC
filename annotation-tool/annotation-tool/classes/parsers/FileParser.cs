@@ -15,7 +15,7 @@ namespace AnnotationTool
 
         private string file;
         private JAMSObject jamsParse;
-        public List<Pattern> patterns;
+        private List<Pattern> patterns;
         public string midiName;
         public string midiDuration;
         public string curatorName;
@@ -87,6 +87,792 @@ namespace AnnotationTool
             patterns = patternsIn;
         }
 
+        public List<Pattern> ParseFile()
+        {
+            FileToJAMS();
+            JAMSToPatterns();
+
+            return patterns;
+        }
+
+        private void FileToJAMS()
+        {
+            int index = 0;
+            bool sandBoxFound = false;
+            bool fileMetaDataFound = false;
+            bool annotationsFound = false;
+
+            file = file.Replace(" ", String.Empty);
+            file = file.Replace("\n", String.Empty);
+            file = file.Replace("\r", String.Empty);
+
+            while (index < file.Length - 2)
+            {
+                Tuple<string, int> wordResults = ReadNextWord(index);
+                string nextWord = wordResults.Item1;
+                index = wordResults.Item2;
+
+                switch (nextWord)
+                {
+                    case "sandbox":
+                        if (!sandBoxFound)
+                        {
+                            sandBoxFound = true;
+                            jamsParse.sandbox = new Dictionary<string, string>();
+                            Tuple<Dictionary<string, string>, int> dictResults = ReadDictionary(index);
+
+                            foreach (KeyValuePair<string, string> dictEntry in dictResults.Item1)
+                            {
+                                jamsParse.sandbox.Add(dictEntry.Key, dictEntry.Value);
+                            }
+
+                            index = dictResults.Item2;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    case "file_metadata":
+                        if (!fileMetaDataFound)
+                        {
+                            fileMetaDataFound = true;
+                            Tuple<FileMetaData, int> fileMetaDataResults = ReadFileMetaData(index);
+                            jamsParse.fileMetaData = fileMetaDataResults.Item1;
+                            index = fileMetaDataResults.Item2;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    case "annotations":
+                        if (!annotationsFound)
+                        {
+                            annotationsFound = true;
+                            Tuple<List<Annotations>, int> annotationsListResults = ReadAnnotationsList(index);
+                            jamsParse.annotations = annotationsListResults.Item1;
+                            index = annotationsListResults.Item2;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    default:
+                        throw new InvalidOperationException("Corrupt JAMS file.");
+                }
+            }
+        }
+
+        private Tuple<FileMetaData, int> ReadFileMetaData(int index)
+        {
+            FileMetaData fileMetaData = new FileMetaData();
+            bool durationFound, titleFound, releaseFound, identifiersFound, artistFound, jams_versionFound;
+            durationFound = titleFound = releaseFound = identifiersFound = artistFound = jams_versionFound = false;
+
+            while (file[index] != '{')
+            {
+                index++;
+            }
+
+            index++;
+
+            while (file[index] != '}')
+            {
+                Tuple<string, int> wordResults = ReadNextWord(index);
+                string nextWord = wordResults.Item1;
+                index = wordResults.Item2;
+
+                switch (nextWord)
+                {
+                    case "duration":
+                        if (!durationFound)
+                        {
+                            durationFound = true;
+                            Tuple<string, int> entryResults = ReadNextEntry(index);
+                            fileMetaData.duration = entryResults.Item1;
+                            index = entryResults.Item2;
+                            midiDuration = fileMetaData.duration;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    case "title":
+                        if (!titleFound)
+                        {
+                            titleFound = true;
+                            Tuple<string, int> entryResults = ReadNextEntry(index);
+                            fileMetaData.title = entryResults.Item1;
+                            index = entryResults.Item2;
+                            midiName = fileMetaData.title;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    case "release":
+                        if (!releaseFound)
+                        {
+                            releaseFound = true;
+                            Tuple<string, int> entryResults = ReadNextEntry(index);
+                            fileMetaData.release = entryResults.Item1;
+                            index = entryResults.Item2;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    case "identifiers":
+                        if (!identifiersFound)
+                        {
+                            identifiersFound = true;
+                            fileMetaData.identifiers = new Dictionary<string, string>();
+                            Tuple<Dictionary<string, string>, int> dictResults = ReadDictionary(index);
+
+                            foreach (KeyValuePair<string, string> dictEntry in dictResults.Item1)
+                            {
+                                fileMetaData.identifiers.Add(dictEntry.Key, dictEntry.Value);
+                            }
+
+                            index = dictResults.Item2;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    case "artist":
+                        if (!artistFound)
+                        {
+                            artistFound = true;
+                            Tuple<string, int> entryResults = ReadNextEntry(index);
+                            fileMetaData.artist = entryResults.Item1;
+                            index = entryResults.Item2;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    case "jams_version":
+                        if (!jams_versionFound)
+                        {
+                            jams_versionFound = true;
+                            Tuple<string, int> entryResults = ReadNextEntry(index);
+                            fileMetaData.jams_version = entryResults.Item1;
+                            index = entryResults.Item2;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    default:
+                        throw new InvalidOperationException("Corrupt JAMS file.");
+                }
+            }
+
+            index++;
+
+            return new Tuple<FileMetaData, int>(fileMetaData, index);
+        }
+
+        private Tuple<List<Annotations>, int> ReadAnnotationsList(int index)
+        {
+            List<Annotations> annotationsList = new List<Annotations>();
+
+            while (file[index] != '[')
+            {
+                index++;
+            }
+
+            index++;
+
+            while (file[index] != ']')
+            {
+                Tuple<Annotations, int> annotationsResults = ReadAnnotations(index);
+                annotationsList.Add(annotationsResults.Item1);
+                index = annotationsResults.Item2;
+            }
+
+            return new Tuple<List<Annotations>, int>(annotationsList, index);
+        }
+
+        private Tuple<Annotations, int> ReadAnnotations(int index)
+        {
+            Annotations annotations = new Annotations();
+            bool sandBoxFound, durationFound, dataFound, namespaceFound, timeFound, annotation_metaDataFound;
+            sandBoxFound = durationFound = dataFound = namespaceFound = timeFound = annotation_metaDataFound = false;
+
+            while (file[index] != '{')
+            {
+                index++;
+            }
+
+            index++;
+
+            while (file[index] != '}')
+            {
+                Tuple<string, int> wordResults = ReadNextWord(index);
+                string nextWord = wordResults.Item1;
+                index = wordResults.Item2;
+
+                switch (nextWord)
+                {
+                    case "sandbox":
+                        if (!sandBoxFound)
+                        {
+                            sandBoxFound = true;
+                            annotations.sandbox = new Dictionary<string, string>();
+                            Tuple<Dictionary<string, string>, int> dictResults = ReadDictionary(index);
+
+                            foreach (KeyValuePair<string, string> dictEntry in dictResults.Item1)
+                            {
+                                annotations.sandbox.Add(dictEntry.Key, dictEntry.Value);
+                            }
+
+                            index = dictResults.Item2;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    case "duration":
+                        if (!durationFound)
+                        {
+                            durationFound = true;
+                            Tuple<string, int> entryResults = ReadNextEntry(index);
+                            annotations.duration = entryResults.Item1;
+                            index = entryResults.Item2;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    case "data":
+                        if (!dataFound)
+                        {
+                            dataFound = true;
+                            annotations.data = new List<Data>();
+                            Tuple<List<Data>, int> entryResults = ReadDataList(index);
+                            
+                            foreach (Data data in entryResults.Item1)
+                            {
+                                annotations.data.Add(data);
+                            }
+
+                            index = entryResults.Item2;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    case "namespace":
+                        if (!namespaceFound)
+                        {
+                            namespaceFound = true;
+                            Tuple<string, int> entryResults = ReadNextEntry(index);
+                            annotations.jamsNamespace = entryResults.Item1;
+                            index = entryResults.Item2;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    case "time":
+                        if (!timeFound)
+                        {
+                            timeFound = true;
+                            Tuple<string, int> entryResults = ReadNextEntry(index);
+                            annotations.time = entryResults.Item1;
+                            index = entryResults.Item2;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    case "annotation_metadata":
+                        if (!annotation_metaDataFound)
+                        {
+                            annotation_metaDataFound = true;
+                            Tuple<AnnotationMetaData, int> entryResults = ReadAnnotationMetaData(index);
+                            annotations.annotationMetaData = entryResults.Item1;
+                            index = entryResults.Item2;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    default:
+                        throw new InvalidOperationException("Corrupt JAMS file.");
+                }
+            }
+
+            index++;
+
+            return new Tuple<Annotations, int>(annotations, index);
+        }
+
+        private Tuple<List<Data>, int> ReadDataList(int index)
+        {
+            List<Data> dataList = new List<Data>();
+
+            while (file[index] != '[')
+            {
+                index++;
+            }
+
+            index++;
+
+            while (file[index] != ']')
+            {
+                Tuple<Data, int> dataResults = ReadData(index);
+                dataList.Add(dataResults.Item1);
+                index = dataResults.Item2;
+            }
+
+            return new Tuple<List<Data>, int>(dataList, index);
+        }
+
+        private Tuple<Data, int> ReadData(int index)
+        {
+            Data data = new Data();
+            bool timeFound, durationFound, valueFound, confidenceFound;
+            timeFound = durationFound = valueFound = confidenceFound = false;
+
+            while (file[index] != '{')
+            {
+                index++;
+            }
+
+            index++;
+
+            while (file[index] != '}')
+            {
+                Tuple<string, int> wordResults = ReadNextWord(index);
+                string nextWord = wordResults.Item1;
+                index = wordResults.Item2;
+
+                switch (nextWord)
+                {
+                    case "time":
+                        if (!timeFound)
+                        {
+                            timeFound = true;
+                            Tuple<string, int> entryResults = ReadNextEntry(index);
+                            data.time = entryResults.Item1;
+                            index = entryResults.Item2;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    case "duration":
+                        if (!durationFound)
+                        {
+                            durationFound = true;
+                            Tuple<string, int> entryResults = ReadNextEntry(index);
+                            data.duration = entryResults.Item1;
+                            index = entryResults.Item2;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    case "value":
+                        if (!valueFound)
+                        {
+                            valueFound = true;
+                            data.value = new Dictionary<string, string>();
+                            Tuple<Dictionary<string, string>, int> dictResults = ReadDictionary(index);
+
+                            foreach (KeyValuePair<string, string> dictEntry in dictResults.Item1)
+                            {
+                                data.value.Add(dictEntry.Key, dictEntry.Value);
+                            }
+
+                            index = dictResults.Item2;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    case "confidence":
+                        if (!confidenceFound)
+                        {
+                            confidenceFound = true;
+                            Tuple<string, int> entryResults = ReadNextEntry(index);
+                            data.confidence = entryResults.Item1;
+                            index = entryResults.Item2;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    default:
+                        throw new InvalidOperationException("Corrupt JAMS file.");
+                }
+            }
+
+            index++;
+
+            return new Tuple<Data, int>(data, index);
+        }
+
+        private Tuple<AnnotationMetaData, int> ReadAnnotationMetaData(int index)
+        {
+            AnnotationMetaData annotationMetaData = new AnnotationMetaData();
+            bool corpusFound, validationFound, annotation_toolsFound, versionFound, curatorFound, annotation_rulesFound, annotatorFound, data_sourceFound;
+            corpusFound = validationFound = annotation_toolsFound = versionFound = curatorFound = annotation_rulesFound = annotatorFound = data_sourceFound = false;
+
+            while (file[index] != '{')
+            {
+                index++;
+            }
+
+            index++;
+
+            while (file[index] != '}')
+            {
+                Tuple<string, int> wordResults = ReadNextWord(index);
+                string nextWord = wordResults.Item1;
+                index = wordResults.Item2;
+
+                switch (nextWord)
+                {
+                    case "corpus":
+                        if (!corpusFound)
+                        {
+                            corpusFound = true;
+                            Tuple<string, int> entryResults = ReadNextEntry(index);
+                            annotationMetaData.corpus = entryResults.Item1;
+                            index = entryResults.Item2;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    case "validation":
+                        if (!validationFound)
+                        {
+                            validationFound = true;
+                            Tuple<string, int> entryResults = ReadNextEntry(index);
+                            annotationMetaData.validation = entryResults.Item1;
+                            index = entryResults.Item2;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    case "annotation_tools":
+                        if (!annotation_toolsFound)
+                        {
+                            annotation_toolsFound = true;
+                            Tuple<string, int> entryResults = ReadNextEntry(index);
+                            annotationMetaData.annotation_tools = entryResults.Item1;
+                            index = entryResults.Item2;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    case "version":
+                        if (!versionFound)
+                        {
+                            versionFound = true;
+                            Tuple<string, int> entryResults = ReadNextEntry(index);
+                            annotationMetaData.version = entryResults.Item1;
+                            index = entryResults.Item2;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    case "curator":
+                        if (!curatorFound)
+                        {
+                            curatorFound = true;
+                            Tuple<Curator, int> entryResults = ReadCurator(index);
+                            annotationMetaData.curator = entryResults.Item1;
+                            index = entryResults.Item2;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    case "annotation_rules":
+                        if (!annotation_rulesFound)
+                        {
+                            annotation_rulesFound = true;
+                            Tuple<string, int> entryResults = ReadNextEntry(index);
+                            annotationMetaData.annotation_rules = entryResults.Item1;
+                            index = entryResults.Item2;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    case "annotator":
+                        if (!annotatorFound)
+                        {
+                            annotatorFound = true;
+                            annotationMetaData.annotator = new Dictionary<string, string>();
+                            Tuple<Dictionary<string, string>, int> dictResults = ReadDictionary(index);
+
+                            foreach (KeyValuePair<string, string> dictEntry in dictResults.Item1)
+                            {
+                                annotationMetaData.annotator.Add(dictEntry.Key, dictEntry.Value);
+                            }
+
+                            index = dictResults.Item2;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    case "data_source":
+                        if (!data_sourceFound)
+                        {
+                            data_sourceFound = true;
+                            Tuple<string, int> entryResults = ReadNextEntry(index);
+                            annotationMetaData.data_source = entryResults.Item1;
+                            index = entryResults.Item2;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    default:
+                        throw new InvalidOperationException("Corrupt JAMS file.");
+                }
+            }
+
+            index++;
+
+            return new Tuple<AnnotationMetaData, int>(annotationMetaData, index);
+        }
+
+        private Tuple<Curator, int> ReadCurator(int index)
+        {
+            Curator curator = new Curator();
+            bool nameFound, emailFound;
+            nameFound = emailFound = false;
+
+            while (file[index] != '{')
+            {
+                index++;
+            }
+
+            index++;
+
+            while (file[index] != '}')
+            {
+                Tuple<string, int> wordResults = ReadNextWord(index);
+                string nextWord = wordResults.Item1;
+                index = wordResults.Item2;
+
+                switch (nextWord)
+                {
+                    case "name":
+                        if (!nameFound)
+                        {
+                            nameFound = true;
+                            Tuple<string, int> entryResults = ReadNextEntry(index);
+                            curator.name = entryResults.Item1;
+                            index = entryResults.Item2;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+
+                    case "email":
+                        if (!emailFound)
+                        {
+                            emailFound = true;
+                            Tuple<string, int> entryResults = ReadNextEntry(index);
+                            curator.email = entryResults.Item1;
+                            index = entryResults.Item2;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Corrupt JAMS file.");
+                        }
+                    break;
+                    
+                    default:
+                        throw new InvalidOperationException("Corrupt JAMS file.");
+                }
+            }
+
+            index++;
+
+            return new Tuple<Curator, int>(curator, index);
+        }
+
+        private Tuple<Dictionary<string, string>, int> ReadDictionary(int index)
+        {
+            Dictionary<string, string> dict = new Dictionary<string, string>();
+            
+            while (file[index] != '{')
+            {
+                index++;
+            }
+
+            index++;
+
+            while (file[index] != '}')
+            {
+                Tuple<string, int> keyResults = ReadNextWord(index);
+                index = keyResults.Item2;
+                Tuple<string, int> entryResults = ReadNextEntry(index);
+                index = entryResults.Item2;
+                dict.Add(keyResults.Item1, entryResults.Item1);
+            }
+
+            index++;
+
+            return new Tuple<Dictionary<string, string>, int>(dict, index);
+        }
+
+        private Tuple<string, int> ReadNextWord(int index)
+        {
+            string word = "";
+
+            while (file[index] != '\"')
+            {
+                index++;
+            }
+
+            index++;
+
+            while (file[index] != '\"')
+            {
+                word += file[index];
+                index++;
+            }
+
+            return new Tuple<string, int>(word, index);
+        }
+
+        private Tuple<string, int> ReadNextEntry(int index)
+        {
+            string entry = "";
+
+            while (file[index] != ':')
+            {
+                index++;
+            }
+
+            index++;
+
+            while (file[index] != ',' && file[index] != '}')
+            {
+                entry += file[index];
+                index++;
+            }
+
+            entry = entry.Replace("\"", String.Empty);
+
+            return new Tuple<string, int>(entry, index);
+        }
+
+        private void JAMSToPatterns()
+        {
+            patterns = new List<Pattern>();
+
+            foreach (Annotations annotations in jamsParse.annotations)
+            {
+                foreach (Data data in annotations.data)
+                {
+                    int patternIndex = Int32.Parse(data.value["pattern_id"]);
+                    int occurrenceIndex = Int32.Parse(data.value["occurrence_id"]);
+                    int confidence = Int32.Parse(data.confidence);
+                    int start = Int32.Parse(data.time);
+                    int duration = Int32.Parse(data.duration);
+
+                    while (patternIndex >= patterns.Count)
+                    {
+                        patterns.Add(new Pattern());
+                    }
+
+                    while (occurrenceIndex >= patterns[patternIndex].GetOccurrences().Count)
+                    {
+                        patterns[patternIndex].AddOccurrence(new Occurrence());
+                    }
+
+                    patterns[patternIndex].GetOccurrences()[occurrenceIndex].SetConfidence(confidence);
+
+                    if (annotations.jamsNamespace == jamsNotesNamespace)
+                    {
+                        int pitch = Int32.Parse(data.value["midi_pitch"]);
+                        int channel = Int32.Parse(data.value["staff"]);
+
+                        NoteRect noteRect = new NoteRect();
+                        noteRect.note = new Note((NotePitch)pitch, start, duration, (uint)channel, 127);
+
+                        patterns[patternIndex].GetOccurrences()[occurrenceIndex].highlightedNotes.Add(noteRect);
+                    }
+                    else if (annotations.jamsNamespace == jamsStartEndNamespace)
+                    {
+                        patterns[patternIndex].GetOccurrences()[occurrenceIndex].SetStart(start);
+                        patterns[patternIndex].GetOccurrences()[occurrenceIndex].SetEnd(start + duration);
+                    }
+                }
+            }
+        }
+
         public string[] ParseToJAMS()
         {
             PopulateFileData();
@@ -142,7 +928,7 @@ namespace AnnotationTool
                     textLines.Add(whitespace + "  \"" + dictLine.Key + "\": \"" + dictLine.Value + "\",");
                 }
 
-                textLines.Last().Remove(textLines.Last().Count() - 1); // Removing the comma of the last value.
+                textLines[textLines.Count() - 1] = textLines.Last().Remove(textLines.Last().Count() - 1); // Removing the comma of the last value.
                 textLines.Add(whitespace +  "},");
             }
 
@@ -180,19 +966,18 @@ namespace AnnotationTool
                 foreach (Annotations annotations in jamsParse.annotations)
                 {
                     textLines.Add("    {");
-                    textLines.AddRange(AnnotationGroupToText(annotations));
+                    textLines.AddRange(AnnotationListToText(annotations));
                     textLines.Add("    },");
                 }
 
-                textLines.Last().Remove(textLines.Last().Count() - 1); // Removing the comma of the last value.
-
+                textLines[textLines.Count() - 1] = textLines.Last().Remove(textLines.Last().Count() - 1); // Removing the comma of the last value.
                 textLines.Add("  ]");
             }
 
             return textLines.ToArray();
         }
 
-        private string[] AnnotationGroupToText(Annotations annotations)
+        private string[] AnnotationListToText(Annotations annotations)
         {
             List<string> textLines = new List<string>();
 
@@ -214,7 +999,7 @@ namespace AnnotationTool
                     textLines.Add("        },");
                 }
 
-                textLines.Last().Remove(textLines.Last().Count() - 1); // Removing the comma of the last value.
+                textLines[textLines.Count() - 1] = textLines.Last().Remove(textLines.Last().Count() - 1); // Removing the comma of the last value.
                 textLines.Add("      ],");
             }
 
@@ -258,7 +1043,7 @@ namespace AnnotationTool
             textLines.Add("        \"annotation_rules\": \"" + annotationMetaData.annotation_rules + "\",");
             textLines.AddRange(DictionaryToText(annotationMetaData.annotator, "annotator", 4));
             textLines.Add("        \"data_source\": \"" + annotationMetaData.data_source + "\"");
-            textLines.Add("  }");
+            textLines.Add("      }");
 
             return textLines.ToArray();
         }

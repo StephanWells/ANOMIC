@@ -51,6 +51,7 @@ namespace AnnotationTool
         public static event EventHandler NormaliseVelocitiesOff;
         public static event EventHandler ClosingApp;
         public static Settings settings = new Settings();
+        public PianoRollView pianoRoll;
 
         public MainWindow()
         {
@@ -98,7 +99,16 @@ namespace AnnotationTool
             midiParse.ParseFile();
             NoteParser noteParse = new NoteParser(midiParse);
             noteParse.ParseEvents();
-            DataContext = new PianoRollView(midiParse, noteParse);
+
+            if (pianoRoll == null)
+            {
+                pianoRoll = new PianoRollView(midiParse, noteParse);
+                cntPianoRoll.DataContext = pianoRoll;
+            }
+            else
+            {
+                pianoRoll.Reset(midiParse, noteParse);
+            }
         }
 
         private void SetDefaults()

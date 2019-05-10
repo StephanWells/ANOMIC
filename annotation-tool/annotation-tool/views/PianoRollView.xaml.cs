@@ -77,8 +77,8 @@ namespace AnnotationTool.views
         double scrollHorOff = 1;
         double scrollVerOff = 1;
 
-        private List<Line> gridLines = new List<Line>();
-        private List<TextBlock> barNumbers = new List<TextBlock>();
+        private List<Line> gridLines;
+        private List<TextBlock> barNumbers;
 
         private List<Brush> defaultPatternColours = new List<Brush>()
         {
@@ -97,11 +97,86 @@ namespace AnnotationTool.views
         public PianoRollView(MIDIParser midiParseIn, NoteParser noteParseIn)
         {
             InitializeComponent();
+            Init(midiParseIn, noteParseIn);
 
+            MainWindow.MIDIBrowseClick += new EventHandler(MainWindow_MIDIBrowseClick);
+            MainWindow.Exit += new EventHandler(MainWindow_Exit);
+            MainWindow.OpenAnnotationsClick += new EventHandler(MainWindow_OpenAnnotationsClick);
+            MainWindow.SaveAnnotationsClick += new EventHandler(MainWindow_SaveAnnotationsClick);
+            MainWindow.SnapChange += new EventHandler(MainWindow_SnapChange);
+            MainWindow.HorizZoomChange += new EventHandler(MainWindow_HorizZoomChange);
+            MainWindow.VertiZoomChange += new EventHandler(MainWindow_VertiZoomChange);
+            MainWindow.ExpandAll += new EventHandler(MainWindow_ExpandAll);
+            MainWindow.CollapseAll += new EventHandler(MainWindow_CollapseAll);
+            MainWindow.ShowAll += new EventHandler(MainWindow_ShowAll);
+            MainWindow.HideAll += new EventHandler(MainWindow_HideAll);
+            MainWindow.AddPattern += new EventHandler(MainWindow_AddPattern);
+            MainWindow.DeletePattern += new EventHandler(MainWindow_DeletePattern);
+            MainWindow.KeyVisibilityChange += new EventHandler(MainWindow_KeyVisibilityChange);
+            MainWindow.GridVisibilityOn += new EventHandler(MainWindow_GridVisibilityOn);
+            MainWindow.GridVisibilityOff += new EventHandler(MainWindow_GridVisibilityOff);
+            MainWindow.NoteSelectOn += new EventHandler(MainWindow_NoteSelectOn);
+            MainWindow.NoteSelectOff += new EventHandler(MainWindow_NoteSelectOff);
+            MainWindow.AutomaticIconsOn += new EventHandler(MainWindow_AutomaticIconsOn);
+            MainWindow.AutomaticIconsOff += new EventHandler(MainWindow_AutomaticIconsOff);
+            MainWindow.Play += new EventHandler(MainWindow_Play);
+            MainWindow.Pause += new EventHandler(MainWindow_Pause);
+            MainWindow.Stop += new EventHandler(MainWindow_Stop);
+            MainWindow.NormaliseVelocitiesOn += new EventHandler(MainWindow_NormaliseVelocitiesOn);
+            MainWindow.NormaliseVelocitiesOff += new EventHandler(MainWindow_NormaliseVelocitiesOff);
+            MainWindow.ClosingApp += new EventHandler(MainWindow_Closing);
+
+            Loaded += OnLoaded;
+        }
+
+        public void Reset(MIDIParser midiParseIn, NoteParser noteParseIn)
+        {
+            int childrenCount = grdNotes.Children.Count - 1;
+
+            for (int i = childrenCount; i >= 0; i--)
+            {
+                if (grdNotes.Children[i].GetType() == typeof(Rectangle))
+                {
+                    Rectangle currentChild = (Rectangle)grdNotes.Children[i];
+                    grdNotes.Children.Remove(currentChild);
+                }
+            }
+
+            childrenCount = grdTimeline.Children.Count - 1;
+
+            for (int i = childrenCount; i>= 0; i--)
+            {
+                if (grdTimeline.Children[i].GetType() == typeof(TextBlock) && grdTimeline.Children[i] != txtTrackerTriangle)
+                {
+                    TextBlock currentChild = (TextBlock)grdTimeline.Children[i];
+                    grdTimeline.Children.Remove(currentChild);
+                }
+            }
+
+            cnvPianoRoll.Width = grdPiano.Width;
+            this.Resources["PianoRollWidth"] = (double)0;
+
+            cnvGridLinesBar.Children.Clear();
+            cnvGridLinesHalfBar.Children.Clear();
+            cnvGridLinesQuarterNote.Children.Clear();
+            cnvGridLinesEighthNote.Children.Clear();
+            cnvGridLinesSixteenthNote.Children.Clear();
+            cnvGridLinesThirtySecondNote.Children.Clear();
+
+            ClearPatterns();
+            cmbChannelSelect.SelectedIndex = 0;
+            Init(midiParseIn, noteParseIn);
+        }
+
+        public void Init(MIDIParser midiParseIn, NoteParser noteParseIn)
+        {
             for (int i = 0; i < notes.Length; i++)
             {
                 notes[i] = new List<NoteRect>();
             }
+
+            gridLines = new List<Line>();
+            barNumbers = new List<TextBlock>();
 
             if (MainWindow.settings.gridLines)
             {
@@ -142,13 +217,13 @@ namespace AnnotationTool.views
             }
             catch (NullReferenceException)
             {
-                
+
             }
             catch (InvalidOperationException)
             {
-                
+
             }
-            
+
             txtFileName.Text = midiParse.fileName.Length >= 30 ? midiParse.fileName.Substring(0, 30) + "..." : midiParse.fileName;
             txtBPM.Text = "BPM: " + noteParse.bpm;
 
@@ -157,59 +232,7 @@ namespace AnnotationTool.views
                 textBlock.Visibility = ((TextBlock)textBlock).Text.Contains("C") && !((TextBlock)textBlock).Text.Contains("#") ? Visibility.Visible : Visibility.Collapsed;
             }
 
-            MainWindow.MIDIBrowseClick += new EventHandler(MainWindow_MIDIBrowseClick);
-            MainWindow.Exit += new EventHandler(MainWindow_Exit);
-            MainWindow.OpenAnnotationsClick += new EventHandler(MainWindow_OpenAnnotationsClick);
-            MainWindow.SaveAnnotationsClick += new EventHandler(MainWindow_SaveAnnotationsClick);
-            MainWindow.SnapChange += new EventHandler(MainWindow_SnapChange);
-            MainWindow.HorizZoomChange += new EventHandler(MainWindow_HorizZoomChange);
-            MainWindow.VertiZoomChange += new EventHandler(MainWindow_VertiZoomChange);
-            MainWindow.ExpandAll += new EventHandler(MainWindow_ExpandAll);
-            MainWindow.CollapseAll += new EventHandler(MainWindow_CollapseAll);
-            MainWindow.ShowAll += new EventHandler(MainWindow_ShowAll);
-            MainWindow.HideAll += new EventHandler(MainWindow_HideAll);
-            MainWindow.AddPattern += new EventHandler(MainWindow_AddPattern);
-            MainWindow.DeletePattern += new EventHandler(MainWindow_DeletePattern);
-            MainWindow.KeyVisibilityChange += new EventHandler(MainWindow_KeyVisibilityChange);
-            MainWindow.GridVisibilityOn += new EventHandler(MainWindow_GridVisibilityOn);
-            MainWindow.GridVisibilityOff += new EventHandler(MainWindow_GridVisibilityOff);
-            MainWindow.NoteSelectOn += new EventHandler(MainWindow_NoteSelectOn);
-            MainWindow.NoteSelectOff += new EventHandler(MainWindow_NoteSelectOff);
-            MainWindow.AutomaticIconsOn += new EventHandler(MainWindow_AutomaticIconsOn);
-            MainWindow.AutomaticIconsOff += new EventHandler(MainWindow_AutomaticIconsOff);
-            MainWindow.Play += new EventHandler(MainWindow_Play);
-            MainWindow.Pause += new EventHandler(MainWindow_Pause);
-            MainWindow.Stop += new EventHandler(MainWindow_Stop);
-            MainWindow.NormaliseVelocitiesOn += new EventHandler(MainWindow_NormaliseVelocitiesOn);
-            MainWindow.NormaliseVelocitiesOff += new EventHandler(MainWindow_NormaliseVelocitiesOff);
-            MainWindow.ClosingApp += new EventHandler(MainWindow_Closing);
-
-            Loaded += OnLoaded;
-        }
-
-        public PianoRollView()
-        {
-            InitializeComponent();
-
-            patterns = new List<Pattern>();
-            horizSnap = (MainWindow.settings.horizZoom * resolution) / 8;
-
-            MainWindow.SnapChange += new EventHandler(MainWindow_SnapChange);
-            Loaded += OnLoaded;
-        }
-
-        private void OnLoaded(object sender, RoutedEventArgs e)
-        {
-            double centre = srlPianoScroll.ScrollableHeight / 2.0;
-
-            if (noteParse.notes.Count > 0)
-            {
-                double scroll = (double)PitchToRow((int)noteParse.notes[0].GetPitch()) / 87 * srlPianoScroll.ScrollableHeight;
-
-                srlPianoScroll.ScrollToVerticalOffset(scroll);
-            }
-
-            srlPianoScroll.Focus();
+            InitScroll();
 
             PopulateNotes(noteParse);
             scheduler.Reset();
@@ -227,6 +250,25 @@ namespace AnnotationTool.views
             }
 
             Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(() => { Cursor = Cursors.Arrow; })).Wait();
+        }
+
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            InitScroll();
+        }
+
+        private void InitScroll()
+        {
+            double centre = srlPianoScroll.ScrollableHeight / 2.0;
+
+            if (noteParse.notes.Count > 0)
+            {
+                double scroll = (double)PitchToRow((int)noteParse.notes[0].GetPitch()) / 87 * srlPianoScroll.ScrollableHeight;
+
+                srlPianoScroll.ScrollToVerticalOffset(scroll);
+            }
+
+            srlPianoScroll.Focus();
         }
 
         private void ScheduleNotes()
@@ -387,7 +429,31 @@ namespace AnnotationTool.views
 
         private void MainWindow_OpenAnnotationsClick(object sender, EventArgs e)
         {
+            OpenFileDialog browseDialog = new OpenFileDialog
+            {
+                Filter = "JAMS files (*.jams)|*.jams|All files (*.*)|*.*"
+            };
 
+            if (browseDialog.ShowDialog() == true)
+            {
+                string fileInput = "";
+
+                using (StreamReader sr = new StreamReader(browseDialog.FileName.ToString()))
+                {
+                    fileInput = sr.ReadToEnd();
+                }
+
+                FileParser fileParser = new FileParser(fileInput);
+                List<Pattern> filePatterns = fileParser.ParseFile();
+
+                if (fileParser.midiName != midiParse.fileName || Double.Parse(fileParser.midiDuration) != noteParse.midiLength)
+                {
+                    MessageBox.Show("Annotation data does not match MIDI file!", "Warning", MessageBoxButton.OK);
+                }
+
+                ClearPatterns();
+                ImportPatterns(filePatterns);
+            }
         }
 
         private void MainWindow_SaveAnnotationsClick(object sender, EventArgs e)
@@ -400,7 +466,7 @@ namespace AnnotationTool.views
             if (browseDialog.ShowDialog() == true)
             {
                 FileParser fileParser = new FileParser(patterns);
-                fileParser.midiName = browseDialog.SafeFileName;
+                fileParser.midiName = midiParse.fileName;
                 fileParser.midiDuration = "" + noteParse.midiLength;
                 string[] file = fileParser.ParseToJAMS();
 
@@ -593,7 +659,7 @@ namespace AnnotationTool.views
         {
             if (!isSelectingOccurrence)
             {
-                AddPattern();
+                MoveElement(btnAddPattern, AddPattern());
             }
             else
             {
@@ -607,7 +673,7 @@ namespace AnnotationTool.views
             {
                 if (!isSelectingOccurrence)
                 {
-                    DeletePattern(currentPattern);
+                    MoveElement(btnAddPattern, DeletePattern(currentPattern));
                 }
             }
         }
@@ -996,35 +1062,6 @@ namespace AnnotationTool.views
             }
         }
 
-        private void ResetPianoRoll()
-        {
-            int childrenCount = grdNotes.Children.Count - 1;
-
-            for (int i = childrenCount; i >= 0; i--)
-            {
-                if (grdNotes.Children[i].GetType() == typeof(Rectangle))
-                {
-                    Rectangle currentChild = (Rectangle)grdNotes.Children[i];
-                    grdNotes.Children.Remove(currentChild);
-                }
-            }
-
-            cnvPianoRoll.Width = grdPiano.Width;
-            this.Resources["PianoRollWidth"] = 0;
-
-            cnvGridLinesBar.Children.Clear();
-            cnvGridLinesHalfBar.Children.Clear();
-            cnvGridLinesQuarterNote.Children.Clear();
-            cnvGridLinesEighthNote.Children.Clear();
-            cnvGridLinesSixteenthNote.Children.Clear();
-            cnvGridLinesThirtySecondNote.Children.Clear();
-
-            AddBar();
-            AddBar();
-            AddBar();
-            AddBar();
-        }
-
         // Places each snap's data into a quantised "bucket" where it can be compared for pattern similarity. The "start" and "end" parameters have to be unaffected by zoom.
         private List<List<NotePitch>> Quantise(double start, double end)
         {
@@ -1124,6 +1161,7 @@ namespace AnnotationTool.views
                             Occurrence newOccurrence = new Occurrence(zoomRobustStart, zoomRobustEnd);
                             newOccurrence.isNotesMode = false;
                             newOccurrence.isAutomatic = true;
+                            newOccurrence.SetConfidence(3);
 
                             similarOccurrences.Add(newOccurrence);
                         }
@@ -1482,7 +1520,7 @@ namespace AnnotationTool.views
 
         private void AddPattern_Click(object sender, RoutedEventArgs e)
         {
-            AddPattern();
+            MoveElement(btnAddPattern, AddPattern());
         }
 
         private void ChannelSelect_SelectChannel(object sender, RoutedEventArgs e)
@@ -1542,7 +1580,7 @@ namespace AnnotationTool.views
             }
         }
 
-        private void AddPattern()
+        private double AddPattern()
         {
             Pattern newPattern = new Pattern();
 
@@ -1570,7 +1608,7 @@ namespace AnnotationTool.views
             patterns.Add(newPattern);
             itmPatternsView.Items.Add(newPatternButton);
 
-            MoveElement(btnAddPattern, btnAddPattern.Height);
+            return newPattern.patternIcon.Height;
         }
 
         private Occurrence AddOccurrence(int patternIndex, Canvas occurrenceRect)
@@ -1817,7 +1855,7 @@ namespace AnnotationTool.views
             itmPatternsView.Items.Insert(finalIndex, occurrenceIcon);
         }
 
-        private void AddOccurrenceGraphics(List<Occurrence> occurrences, int patternIndex)
+        private double AddOccurrenceGraphics(List<Occurrence> occurrences, int patternIndex)
         {
             double animMove = 0;
 
@@ -1869,7 +1907,7 @@ namespace AnnotationTool.views
                 itmPatternsView.Items.Insert(index, occurrences[i].occurrenceIcon);
             }
 
-            MoveElement(btnAddPattern, animMove);
+            return animMove;
         }
 
         private void PatternIcon_DeleteClick(object sender, EventArgs e)
@@ -1878,7 +1916,7 @@ namespace AnnotationTool.views
             {
                 int patternIndex = ((PatternIcon)sender).PatternNum;
 
-                DeletePattern(patternIndex);
+                MoveElement(btnAddPattern, DeletePattern(patternIndex));
             }
         }
 
@@ -1985,7 +2023,7 @@ namespace AnnotationTool.views
             Occurrence occurrence = GetOccurrence((OccurrenceIcon)sender);
 
             List<Occurrence> similarOccurrences = SimilarOccurrences(occurrence);
-            AddOccurrenceGraphics(similarOccurrences, ((OccurrenceIcon)sender).PatternNumOfOccurrence);
+            MoveElement(btnAddPattern, AddOccurrenceGraphics(similarOccurrences, ((OccurrenceIcon)sender).PatternNumOfOccurrence));
         }
 
         private void OccurrenceIcon_ConfidenceChange(object sender, EventArgs e)
@@ -2052,11 +2090,85 @@ namespace AnnotationTool.views
             return index;
         }
 
-        private void DeletePattern(int patternIndex)
+        private void ClearPatterns()
+        {
+            if (isSelectingOccurrence)
+            {
+                DeleteOccurrenceInProgress();
+                isSelectingOccurrence = false;
+            }
+
+            for (int i = patterns.Count - 1; i >= 0; i--)
+            {
+                DeletePattern(i);
+            }
+
+            btnAddPattern.Margin = new Thickness(0, 0, 0, 0);
+        }
+
+        private void ImportPatterns(List<Pattern> patternsIn)
         {
             double animMove = 0;
 
-            currentPattern = -1;
+            for (int i = 0; i < patternsIn.Count; i++)
+            {
+                animMove += AddPattern();
+                List<Occurrence> patternOccurrences = new List<Occurrence>();
+
+                for (int j = 0; j < patternsIn[i].GetOccurrences().Count; j++)
+                {
+                    Occurrence currentOccurrence = patternsIn[i].GetOccurrences()[j];
+
+                    if (currentOccurrence.highlightedNotes.Count > 0)
+                    {
+                        List<NoteRect> highlightedNotes = new List<NoteRect>();
+
+                        foreach (NoteRect highlightedNote in currentOccurrence.highlightedNotes)
+                        {
+                            foreach (NoteRect noteRect in notes[0])
+                            {
+                                if (AreTwoNotesEqual(noteRect.note, highlightedNote.note))
+                                {
+                                    highlightedNotes.Add(noteRect);
+                                }
+                            }
+                        }
+
+                        if (highlightedNotes.Count > 0)
+                        {
+                            Occurrence newOccurrence = new Occurrence();
+                            newOccurrence.highlightedNotes = highlightedNotes;
+                            newOccurrence = FindStartAndEnd(newOccurrence);
+                            newOccurrence.isNotesMode = true;
+                            newOccurrence.isAutomatic = false;
+                            newOccurrence.SetConfidence(3);
+                            patternOccurrences.Add(newOccurrence);
+                        } 
+                    }
+                    else
+                    {
+                        if (currentOccurrence.GetStart() > 0 && currentOccurrence.GetEnd() < Math.Round((double)this.Resources["PianoRollWidth"] / MainWindow.settings.horizZoom, 2))
+                        {
+                            Occurrence newOccurrence = new Occurrence(currentOccurrence.GetStart(), currentOccurrence.GetEnd());
+                            newOccurrence.isNotesMode = false;
+                            newOccurrence.isAutomatic = false;
+                            newOccurrence.SetConfidence(3);
+                            patternOccurrences.Add(newOccurrence);
+                        }
+                    }
+                }
+
+                animMove += AddOccurrenceGraphics(patternOccurrences, i);
+            }
+
+            MoveElement(btnAddPattern, animMove);
+        }
+
+        private double DeletePattern(int patternIndex)
+        {
+            double animMove = 0;
+
+            currentPattern = patternIndex == currentPattern ? -1 : currentPattern;
 
             if (patterns[patternIndex].patternIcon.CollExp)
             {
@@ -2069,7 +2181,6 @@ namespace AnnotationTool.views
             }
 
             animMove -= patterns[patternIndex].patternIcon.Height;
-            MoveElement(btnAddPattern, animMove);
             patterns.RemoveAt(patternIndex);
             itmPatternsView.Items.RemoveAt(GetPatternIndexInItemsList(patternIndex));
 
@@ -2102,10 +2213,7 @@ namespace AnnotationTool.views
                 noteRect.noteOutlines.Remove(patternIndex);
             }
 
-            foreach (Pattern pattern in patterns)
-            {
-                pattern.patternIcon.IsChecked = false;
-            }
+            return animMove;
         }
 
         private void DeleteOccurrence(int occurrenceIndex, int patternIndex)
@@ -2256,13 +2364,13 @@ namespace AnnotationTool.views
 
         private void SelectPattern(int patternIndex)
         {
-            for (int i = 0; i < patterns.Count; i++)
-            {
-                patterns[i].patternIcon.IsChecked = false;
-            }
-
             if (patternIndex < patterns.Count && patterns[patternIndex] != null)
             {
+                for (int i = 0; i < patterns.Count; i++)
+                {
+                    patterns[i].patternIcon.IsChecked = false;
+                }
+
                 patterns[patternIndex].patternIcon.IsChecked = true;
                 currentPattern = patternIndex;
             }
@@ -2607,7 +2715,7 @@ namespace AnnotationTool.views
             x = (pt1.X < pt2.X) ? pt1.X : pt2.X;
             width = Math.Abs(pt2.X - pt1.X);
             Canvas.SetLeft(dragBorder, x);
-            dragBorder.Width = width;
+            dragBorder.Width = x + width > (double)this.Resources["PianoRollWidth"] ? (double)this.Resources["PianoRollWidth"] - x : width;
 
             if (MainWindow.settings.noteSelect)
             {
