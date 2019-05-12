@@ -275,8 +275,8 @@ namespace AnnotationTool.views
         {
             foreach (NoteRect noteRect in notes[currentChannel])
             {
-                scheduler.Schedule(new NoteOnMessage(outputDevice, Channel.Channel1, (Midi.Pitch)noteRect.note.GetPitch(), MainWindow.settings.normaliseVelocities ? 100 : noteRect.note.GetVelocity(), (float)(noteRect.note.GetTime() / resolution)));
-                scheduler.Schedule(new NoteOffMessage(outputDevice, Channel.Channel1, (Midi.Pitch)noteRect.note.GetPitch(), MainWindow.settings.normaliseVelocities ? 100 : noteRect.note.GetVelocity(), (float)((noteRect.note.GetTime() + noteRect.note.GetDuration()) / resolution)));
+                scheduler.Schedule(new NoteOnMessage(outputDevice, (Midi.Channel)noteRect.note.GetChannel(), (Midi.Pitch)noteRect.note.GetPitch(), MainWindow.settings.normaliseVelocities ? 100 : noteRect.note.GetVelocity(), (float)(noteRect.note.GetTime() / resolution)));
+                scheduler.Schedule(new NoteOffMessage(outputDevice, (Midi.Channel)noteRect.note.GetChannel(), (Midi.Pitch)noteRect.note.GetPitch(), MainWindow.settings.normaliseVelocities ? 100 : noteRect.note.GetVelocity(), (float)((noteRect.note.GetTime() + noteRect.note.GetDuration()) / resolution)));
             }
         }
 
@@ -286,8 +286,8 @@ namespace AnnotationTool.views
             {
                 if (noteRect.note.GetTime() >= start && noteRect.note.GetTime() <= end)
                 {
-                    scheduler.Schedule(new NoteOnMessage(outputDevice, Channel.Channel1, (Midi.Pitch)noteRect.note.GetPitch(), MainWindow.settings.normaliseVelocities ? 100 : noteRect.note.GetVelocity(), (float)((noteRect.note.GetTime() - start) / resolution)));
-                    scheduler.Schedule(new NoteOffMessage(outputDevice, Channel.Channel1, (Midi.Pitch)noteRect.note.GetPitch(), MainWindow.settings.normaliseVelocities ? 100 : noteRect.note.GetVelocity(), (float)((noteRect.note.GetTime() - start + noteRect.note.GetDuration()) / resolution)));
+                    scheduler.Schedule(new NoteOnMessage(outputDevice, (Midi.Channel)noteRect.note.GetChannel(), (Midi.Pitch)noteRect.note.GetPitch(), MainWindow.settings.normaliseVelocities ? 100 : noteRect.note.GetVelocity(), (float)((noteRect.note.GetTime() - start) / resolution)));
+                    scheduler.Schedule(new NoteOffMessage(outputDevice, (Midi.Channel)noteRect.note.GetChannel(), (Midi.Pitch)noteRect.note.GetPitch(), MainWindow.settings.normaliseVelocities ? 100 : noteRect.note.GetVelocity(), (float)((noteRect.note.GetTime() - start + noteRect.note.GetDuration()) / resolution)));
                 }
             }
         }
@@ -904,7 +904,7 @@ namespace AnnotationTool.views
             }
             else
             {
-                cnvGridLinesThirtySecondNote.Visibility = Visibility.Visible;
+                cnvGridLinesThirtySecondNote.Visibility = MainWindow.settings.gridLines == true ? Visibility.Visible : Visibility.Hidden;
             }
 
             if (currentHorizZoom < 0.3)
@@ -913,7 +913,7 @@ namespace AnnotationTool.views
             }
             else
             {
-                cnvGridLinesSixteenthNote.Visibility = Visibility.Visible;
+                cnvGridLinesSixteenthNote.Visibility = MainWindow.settings.gridLines == true ? Visibility.Visible : Visibility.Hidden;
             }
         }
 
@@ -2725,7 +2725,6 @@ namespace AnnotationTool.views
                 dragBorder.Height = height;
 
                 Rect dragRect = new Rect(x, y, width, height);
-                dragRect.Inflate(width / 10, height / 10);
 
                 foreach (NoteRect noteRect in notes[currentChannel])
                 {
