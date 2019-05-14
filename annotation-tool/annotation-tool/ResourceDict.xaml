@@ -53,6 +53,7 @@
     <Brush x:Key="GridLightColour">#25262C</Brush>
     <Brush x:Key="GridDarkColour">#1D1E22</Brush>
     <Brush x:Key="GridExtraDarkColour">#0C0C0E</Brush>
+    
     <Thickness x:Key="ThinBorderThickness">0.4</Thickness>
     <Thickness x:Key="BotBorderThickness">0,0,0,0.4</Thickness>
 
@@ -63,7 +64,7 @@
     </Style>
 
     <Style TargetType="{x:Type Button}">
-        <Setter Property="Background" Value="{StaticResource ButtonColour}"/>
+        <Setter Property="Background" Value="{DynamicResource ButtonColour}"/>
         <Setter Property="Foreground" Value="White"/>
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
@@ -72,17 +73,17 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
-                    <Border Background="{TemplateBinding Background}" BorderBrush="{StaticResource GridExtraDarkColour}" BorderThickness="1">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{DynamicResource GridExtraDarkColour}" BorderThickness="1">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
 
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="{StaticResource ButtonMouseOverColour}"/>
+                            <Setter Property="Background" Value="{DynamicResource ButtonMouseOverColour}"/>
                         </Trigger>
 
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter Property="Background" Value="{StaticResource ButtonPressedColour}"/>
+                            <Setter Property="Background" Value="{DynamicResource ButtonPressedColour}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -115,7 +116,7 @@
 
                         <Trigger Property="IsChecked" Value="True">
                             <Setter Property="Opacity" Value="1" TargetName="Colour"/>
-                            <Setter Property="Foreground" Value="{StaticResource ButtonMouseOverColour}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource ButtonMouseOverColour}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -125,7 +126,7 @@
 
     <Style x:Key="TextToggleButton" TargetType="{x:Type ToggleButton}">
         <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="Foreground" Value="{StaticResource ButtonColour}"/>
+        <Setter Property="Foreground" Value="{DynamicResource ButtonColour}"/>
         <Setter Property="FontSize" Value="10"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
@@ -139,11 +140,11 @@
                     
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Foreground" Value="{StaticResource ButtonMouseOverColour}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource ButtonMouseOverColour}"/>
                         </Trigger>
 
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter Property="Foreground" Value="{StaticResource ButtonPressedColour}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource ButtonPressedColour}"/>
                         </Trigger>
                         
                         <Trigger Property="IsChecked" Value="True">
@@ -170,19 +171,19 @@
 
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Foreground" Value="{StaticResource ButtonMouseOverColour}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource ButtonMouseOverColour}"/>
                         </Trigger>
 
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter Property="Foreground" Value="{StaticResource ButtonPressedColour}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource ButtonPressedColour}"/>
                         </Trigger>
                         
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter Property="Foreground" Value="{StaticResource ButtonMouseOverColour}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource ButtonMouseOverColour}"/>
                         </Trigger>
 
                         <Trigger Property="IsChecked" Value="False">
-                            <Setter Property="Foreground" Value="{StaticResource ButtonColour}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource ButtonColour}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -192,7 +193,7 @@
 
     <Style x:Key="TextButton" TargetType="{x:Type Button}">
         <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="Foreground" Value="{StaticResource ButtonColour}"/>
+        <Setter Property="Foreground" Value="{DynamicResource ButtonColour}"/>
         <Setter Property="FontSize" Value="10"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
@@ -204,11 +205,11 @@
 
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Foreground" Value="{StaticResource ButtonMouseOverColour}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource ButtonMouseOverColour}"/>
                         </Trigger>
 
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter Property="Foreground" Value="{StaticResource ButtonPressedColour}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource ButtonPressedColour}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -226,7 +227,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Menu}">
-                    <Border BorderThickness="1" BorderBrush="{StaticResource GridExtraDarkColour}" Background="{StaticResource GridLightColour}">
+                    <Border BorderThickness="1" BorderBrush="{DynamicResource GridExtraDarkColour}" Background="{DynamicResource GridLightColour}">
                         <StackPanel ClipToBounds="True" Orientation="Horizontal" IsItemsHost="True" />
                     </Border>
                 </ControlTemplate>
@@ -240,7 +241,7 @@
             <Grid>
                 <ContentPresenter Margin="6,3,6,3" ContentSource="Header" RecognizesAccessKey="True"/>
                 <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsSubmenuOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
-                    <Border x:Name="SubmenuBorder" SnapsToDevicePixels="True" BorderThickness="1" Background="{StaticResource GridLightColour}" BorderBrush="{StaticResource GridExtraDarkColour}">
+                    <Border x:Name="SubmenuBorder" SnapsToDevicePixels="True" BorderThickness="1" Background="{DynamicResource GridLightColour}" BorderBrush="{DynamicResource GridExtraDarkColour}">
                         <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle"/>
                     </Border>
                 </Popup>
@@ -252,14 +253,14 @@
             </Trigger>
             <Trigger Property="IsHighlighted" Value="true">
                 <Setter TargetName="Border" Property="BorderBrush" Value="Transparent"/>
-                <Setter Property="Background" TargetName="Border" Value="{StaticResource MenuButtonMouseOverColour}"/>
+                <Setter Property="Background" TargetName="Border" Value="{DynamicResource MenuButtonMouseOverColour}"/>
             </Trigger>
             <Trigger SourceName="Popup" Property="AllowsTransparency" Value="True">
                 <Setter TargetName="SubmenuBorder" Property="CornerRadius" Value="0,0,4,4"/>
                 <Setter TargetName="SubmenuBorder" Property="Padding" Value="0,0,0,3"/>
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">
-                <Setter Property="Foreground" Value="{StaticResource GridDarkColour}"/>
+                <Setter Property="Foreground" Value="{DynamicResource GridDarkColour}"/>
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
@@ -273,10 +274,10 @@
         </Border>
         <ControlTemplate.Triggers>
             <Trigger Property="IsHighlighted" Value="true">
-                <Setter Property="Background" TargetName="Border" Value="{StaticResource MenuButtonMouseOverColour}"/>
+                <Setter Property="Background" TargetName="Border" Value="{DynamicResource MenuButtonMouseOverColour}"/>
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">
-                <Setter Property="Foreground" Value="{StaticResource GridDarkColour}"/>
+                <Setter Property="Foreground" Value="{DynamicResource GridDarkColour}"/>
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
@@ -292,8 +293,8 @@
                     <ColumnDefinition Width="13"/>
                 </Grid.ColumnDefinitions>
                 <ContentPresenter x:Name="Icon" Margin="6,0,6,0" VerticalAlignment="Center" ContentSource="Icon"/>
-                <Border x:Name="Check" Width="10" Height="10" Visibility="Collapsed" Margin="6,0,6,0" Background="{StaticResource GridExtraLightColour}">
-                    <Rectangle x:Name="CheckMark" Width="10" Height="10" Visibility="Hidden" SnapsToDevicePixels="False" Fill="{StaticResource ButtonPressedColour}"/>
+                <Border x:Name="Check" Width="10" Height="10" Visibility="Collapsed" Margin="6,0,6,0" Background="{DynamicResource GridExtraLightColour}">
+                    <Rectangle x:Name="CheckMark" Width="10" Height="10" Visibility="Hidden" SnapsToDevicePixels="False" Fill="{DynamicResource ButtonPressedColour}"/>
                 </Border>
                 <ContentPresenter x:Name="HeaderHost" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True"/>
                 <TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" Margin="5,1,0,1" DockPanel.Dock="Right"/>
@@ -312,10 +313,10 @@
                 <Setter TargetName="Icon" Property="Visibility" Value="Hidden"/>
             </Trigger>
             <Trigger Property="IsHighlighted" Value="true">
-                <Setter Property="Background" TargetName="Border" Value="{StaticResource MenuButtonMouseOverColour}"/>
+                <Setter Property="Background" TargetName="Border" Value="{DynamicResource MenuButtonMouseOverColour}"/>
             </Trigger>
             <Trigger Property="IsEnabled" Value="false">
-                <Setter Property="Foreground" Value="{StaticResource GridDarkColour}"/>
+                <Setter Property="Foreground" Value="{DynamicResource GridDarkColour}"/>
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
@@ -332,9 +333,9 @@
                 <ContentPresenter x:Name="Icon" Margin="6,0,6,0" VerticalAlignment="Center" ContentSource="Icon"/>
                 <ContentPresenter x:Name="HeaderHost" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True"/>
                 <TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" Margin="5,1,0,1" DockPanel.Dock="Right"/>
-                <Path Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 0 7 L 4 3.5 Z" Stroke="{StaticResource GridExtraLightColour}" Fill="{StaticResource GridExtraLightColour}"/>
+                <Path Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 0 7 L 4 3.5 Z" Stroke="{DynamicResource GridExtraLightColour}" Fill="{DynamicResource GridExtraLightColour}"/>
                 <Popup x:Name="Popup" Placement="Right" HorizontalOffset="-4" IsOpen="{TemplateBinding IsSubmenuOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
-                    <Border x:Name="SubmenuBorder" SnapsToDevicePixels="True" Background="{StaticResource GridLightColour}" BorderThickness="0.5" BorderBrush="{StaticResource GridExtraDarkColour}">
+                    <Border x:Name="SubmenuBorder" SnapsToDevicePixels="True" Background="{DynamicResource GridLightColour}" BorderThickness="0.5" BorderBrush="{DynamicResource GridExtraDarkColour}">
                         <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle"/>
                     </Border>
                 </Popup>
@@ -345,17 +346,17 @@
                 <Setter TargetName="Icon" Property="Visibility" Value="Hidden"/>
             </Trigger>
             <Trigger Property="IsHighlighted" Value="true">
-                <Setter Property="Background" TargetName="Border" Value="{StaticResource MenuButtonMouseOverColour}"/>
+                <Setter Property="Background" TargetName="Border" Value="{DynamicResource MenuButtonMouseOverColour}"/>
             </Trigger>
             <Trigger Property="IsEnabled" Value="false">
-                <Setter Property="Foreground" Value="{StaticResource GridDarkColour}"/>
+                <Setter Property="Foreground" Value="{DynamicResource GridDarkColour}"/>
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
 
     <!-- MenuItem Style -->
     <Style x:Key="{x:Type MenuItem}" TargetType="{x:Type MenuItem}">
-        <Setter Property="Background" Value="{StaticResource GridLightColour}"/>
+        <Setter Property="Background" Value="{DynamicResource GridLightColour}"/>
         <Setter Property="Foreground" Value="White"/>
         <Setter Property="FontSize" Value="15"/>
         <Setter Property="FontFamily" Value="{StaticResource Exo2Light}"/>
@@ -387,7 +388,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ContextMenu}">
-                    <Border x:Name="Border" Background="{StaticResource GridLightColour}" BorderThickness="1" BorderBrush="{StaticResource GridExtraDarkColour}">
+                    <Border x:Name="Border" Background="{DynamicResource GridLightColour}" BorderThickness="1" BorderBrush="{DynamicResource GridExtraDarkColour}">
                         <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -410,44 +411,36 @@
                   x:Name="Border" 
                   Grid.ColumnSpan="2"
                   CornerRadius="0"
-                  Background="{StaticResource GridExtraDarkColour}"
-                  BorderBrush="{StaticResource GridLightColour}"
+                  Background="{DynamicResource GridExtraDarkColour}"
+                  BorderBrush="{DynamicResource GridLightColour}"
                   BorderThickness="1" />
             <Border 
                   Grid.Column="0"
                   CornerRadius="0" 
                   Margin="1" 
-                  Background="{StaticResource GridExtraDarkColour}" 
-                  BorderBrush="{StaticResource GridLightColour}"
+                  Background="{DynamicResource GridExtraDarkColour}" 
+                  BorderBrush="{DynamicResource GridLightColour}"
                   BorderThickness="0,0,1,0" />
-            <!--<Path 
-                  x:Name="Arrow"
-                  Grid.Column="1"     
-                  Fill="White"
-                  HorizontalAlignment="Center"
-                  VerticalAlignment="Center"
-                  Data="M0,0 L0,2 L4,6 L8,2 L8,0 L4,4 z"
-                />-->
-            <TextBlock x:Name="Arrow" FontFamily="Segoe MDL2 Assets" Text="&#xE96E;" FontSize="10" Grid.Column="1" Foreground="{StaticResource GridExtraLightColour}" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,5,2,0"/>
+            <TextBlock x:Name="Arrow" FontFamily="Segoe MDL2 Assets" Text="&#xE96E;" FontSize="10" Grid.Column="1" Foreground="{DynamicResource GridExtraLightColour}" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,5,2,0"/>
         </Grid>
         <ControlTemplate.Triggers>
             <Trigger Property="ToggleButton.IsMouseOver" Value="true">
-                <Setter TargetName="Arrow" Property="Foreground" Value="{StaticResource ButtonMouseOverColour}" />
+                <Setter TargetName="Arrow" Property="Foreground" Value="{DynamicResource ButtonMouseOverColour}" />
             </Trigger>
             <Trigger Property="ToggleButton.IsChecked" Value="true">
-                <Setter TargetName="Arrow" Property="Foreground" Value="{StaticResource ButtonPressedColour}" />
+                <Setter TargetName="Arrow" Property="Foreground" Value="{DynamicResource ButtonPressedColour}" />
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">
-                <Setter TargetName="Border" Property="Background" Value="{StaticResource GridDarkColour}" />
-                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource GridLightColour}" />
-                <Setter Property="Foreground" Value="{StaticResource GridLightColour}"/>
-                <Setter TargetName="Arrow" Property="Foreground" Value="{StaticResource GridLightColour}" />
+                <Setter TargetName="Border" Property="Background" Value="{DynamicResource GridDarkColour}" />
+                <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource GridLightColour}" />
+                <Setter Property="Foreground" Value="{DynamicResource GridLightColour}"/>
+                <Setter TargetName="Arrow" Property="Foreground" Value="{DynamicResource GridLightColour}" />
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
 
     <ControlTemplate x:Key="ComboBoxTextBox" TargetType="{x:Type TextBox}">
-        <Border x:Name="PART_ContentHost" Focusable="False" Background="{StaticResource GridExtraDarkColour}" />
+        <Border x:Name="PART_ContentHost" Focusable="False" Background="{DynamicResource GridExtraDarkColour}" />
     </ControlTemplate>
 
     <Style x:Key="{x:Type ComboBox}" TargetType="{x:Type ComboBox}">
@@ -485,7 +478,7 @@
                             VerticalAlignment="Center" 
                             Margin="7,3,23,3"
                             Focusable="True" 
-                            Background="{StaticResource GridLightColour}"
+                            Background="{DynamicResource GridLightColour}"
                             Foreground="White"
                             Visibility="Hidden"
                             IsReadOnly="{TemplateBinding IsReadOnly}"/>
@@ -503,9 +496,9 @@
                               MaxHeight="{TemplateBinding MaxDropDownHeight}">
                                 <Border 
                                 x:Name="DropDownBorder"
-                                Background="{StaticResource GridExtraDarkColour}"
+                                Background="{DynamicResource GridExtraDarkColour}"
                                 BorderThickness="1"
-                                BorderBrush="{StaticResource GridLightColour}"/>
+                                BorderBrush="{DynamicResource GridLightColour}"/>
                                 <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
                                     <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
                                 </ScrollViewer>
@@ -554,10 +547,10 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsHighlighted" Value="true">
-                            <Setter TargetName="Border" Property="Background" Value="{StaticResource GridLightColour}"/>
+                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource GridLightColour}"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="false">
-                            <Setter Property="Foreground" Value="{StaticResource GridDarkColour}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource GridDarkColour}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -572,7 +565,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Separator}">
                     <Border 
-                        BorderBrush="{StaticResource MenuButtonMouseOverColour}"
+                        BorderBrush="{DynamicResource MenuButtonMouseOverColour}"
                         BorderThickness="1" 
                         Height="1" 
                         SnapsToDevicePixels="true"/>
@@ -628,14 +621,14 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ScrollBar}">
-                    <Grid x:Name="GridRoot" Width="7" Background="{StaticResource GridDarkColour}">
+                    <Grid x:Name="GridRoot" Width="7" Background="{DynamicResource GridDarkColour}">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="0.00001*" />
                         </Grid.RowDefinitions>
                         <Track x:Name="PART_Track" Grid.Row="0" IsDirectionReversed="true" Focusable="false">
                             <Track.Thumb>
                                 <Thumb x:Name="Thumb"
-                                    Background="{StaticResource ButtonColour}"
+                                    Background="{DynamicResource ButtonColour}"
                                     Style="{DynamicResource ScrollBarTrackThumb}" />
                             </Track.Thumb>
                             <Track.IncreaseRepeatButton>
@@ -648,10 +641,10 @@
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger SourceName="Thumb" Property="IsMouseOver" Value="true">
-                            <Setter Value="{StaticResource ButtonMouseOverColour}" TargetName="Thumb" Property="Background"/>
+                            <Setter Value="{DynamicResource ButtonMouseOverColour}" TargetName="Thumb" Property="Background"/>
                         </Trigger>
                         <Trigger SourceName="Thumb" Property="IsDragging" Value="true">
-                            <Setter Value="{StaticResource ButtonPressedColour}" TargetName="Thumb" Property="Background"/>
+                            <Setter Value="{DynamicResource ButtonPressedColour}" TargetName="Thumb" Property="Background"/>
                         </Trigger>
 
                         <Trigger Property="IsEnabled" Value="false">

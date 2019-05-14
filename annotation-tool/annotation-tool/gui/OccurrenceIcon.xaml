@@ -19,14 +19,14 @@
                 <MenuItem x:Name="mnuConfidence2" Header="2" IsCheckable="True" IsChecked="false" Checked="OccurrenceIcon_ConfidenceChange"/>
                 <MenuItem x:Name="mnuConfidence1" Header="1" IsCheckable="True" IsChecked="false" Checked="OccurrenceIcon_ConfidenceChange"/>
             </MenuItem>
-            <Separator Background="{StaticResource MenuButtonMouseOverColour}" Margin="-22,3,0,3" Width="220" HorizontalAlignment="Left"/>
+            <Separator Background="{DynamicResource MenuButtonMouseOverColour}" Margin="-22,3,0,3" Width="220" HorizontalAlignment="Left"/>
             <MenuItem Header="_Find Similar Occurrences" Click="OccurrenceIcon_FindSimilar"/>
         </ContextMenu>
     </Button.ContextMenu>
 
     <Button.Template>
         <ControlTemplate TargetType="{x:Type Button}">
-            <Border Background="{StaticResource GridDarkColour}" BorderBrush="{StaticResource GridLightColour}" BorderThickness="1" Margin="0,0,0,0" MouseEnter="OccurrenceIcon_MouseIn" MouseLeave="OccurrenceIcon_MouseOut" MouseLeftButtonDown="OccurrenceIcon_MouseLeftClick">
+            <Border Background="{DynamicResource GridDarkColour}" BorderBrush="{DynamicResource GridLightColour}" BorderThickness="1" Margin="0,0,0,0" MouseEnter="OccurrenceIcon_MouseIn" MouseLeave="OccurrenceIcon_MouseOut" MouseLeftButtonDown="OccurrenceIcon_MouseLeftClick">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition/>
@@ -38,7 +38,7 @@
                         <ColumnDefinition Width="2*"/>
                     </Grid.ColumnDefinitions>
 
-                    <Border Grid.Row ="0" Grid.Column="0" Background="{StaticResource GridDarkColour}" BorderThickness="0" BorderBrush="{StaticResource GridDarkColour}">
+                    <Border Grid.Row ="0" Grid.Column="0" Background="{DynamicResource GridDarkColour}" BorderThickness="0" BorderBrush="{DynamicResource GridDarkColour}">
                         <Button Style="{DynamicResource TextDeleteButton}" Click="OccurrenceIcon_DeleteClick"/>
                     </Border>
                     <Border Grid.Row="0" Grid.Column="1" Grid.RowSpan="3" Background="{TemplateBinding Background}" Opacity="0.8" BorderThickness="0" Grid.ColumnSpan="2">

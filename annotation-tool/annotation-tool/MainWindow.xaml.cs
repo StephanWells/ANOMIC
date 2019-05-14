@@ -44,6 +44,8 @@ namespace AnnotationTool
         public static event EventHandler NoteSelectOff;
         public static event EventHandler AutomaticIconsOn;
         public static event EventHandler AutomaticIconsOff;
+        //public static event EventHandler DarkModeOn;
+        //public static event EventHandler DarkModeOff;
         public static event EventHandler Play;
         public static event EventHandler Pause;
         public static event EventHandler Stop;
@@ -343,6 +345,18 @@ namespace AnnotationTool
             settings.automaticIcons = false;
             AutomaticIconsOff?.Invoke(this, e);
         }
+
+        //private void MainWindow_DarkModeOn(object sender, RoutedEventArgs e)
+        //{
+        //    settings.darkMode = true;
+        //    DarkModeOn?.Invoke(this, e);
+        //}
+
+        //private void MainWindow_DarkModeOff(object sender, RoutedEventArgs e)
+        //{
+        //    settings.darkMode = false;
+        //    DarkModeOff?.Invoke(this, e);
+        //}
 
         private void MainWindow_Play(object sender, RoutedEventArgs e)
         {

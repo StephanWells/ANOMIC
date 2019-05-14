@@ -60,6 +60,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="classes\object classes\Events\SysExEvent.cs" />
+    <Compile Include="classes\object classes\Log.cs" />
     <Compile Include="classes\object classes\Occurrence.cs" />
     <Compile Include="classes\object classes\Pattern.cs" />
     <Compile Include="classes\parsers\FileParser.cs" />

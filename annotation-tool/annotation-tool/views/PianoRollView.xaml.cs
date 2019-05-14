@@ -1,33 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Media.Animation;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.IO;
 using Microsoft.Win32;
 using System.Text.RegularExpressions;
 using Midi;
-using System.Threading;
 using System.Windows.Threading;
-using System.ComponentModel;
 using System.Security;
 
 namespace AnnotationTool.views
 {
     public partial class PianoRollView : UserControl
     {
+        private const int pianoRollRows = 88;
+        private const int occurrenceIconHeight = 20;
+        private const double resolution = 96;
+        private const double barNumOffset = 4;
+        private const double moveScrollThreshold = 20;
+        private const double moveScrollSpeed = 0.5;
+        private const bool logging = true;
+
         private static OutputDevice outputDevice;
         private Midi.Clock scheduler;
         private TranslateTransform trackerTransform = new TranslateTransform();
@@ -35,13 +35,6 @@ namespace AnnotationTool.views
 
         private List<NoteRect> currentNotes = new List<NoteRect>();
         private List<NoteRect>[] notes = new List<NoteRect>[17];
-
-        private const int pianoRollRows = 88;
-        private const int occurrenceIconHeight = 20;
-        private const double resolution = 96;
-        private const double barNumOffset = 4;
-        private const double moveScrollThreshold = 20;
-        private const double moveScrollSpeed = 0.5;
 
         private double timeDivRatio;
         private double horizSnap;
@@ -79,6 +72,8 @@ namespace AnnotationTool.views
 
         private List<Line> gridLines;
         private List<TextBlock> barNumbers;
+        private List<Log> logs = new List<Log>();
+        private Stopwatch sw = new Stopwatch();
 
         private List<Brush> defaultPatternColours = new List<Brush>()
         {
@@ -96,6 +91,9 @@ namespace AnnotationTool.views
 
         public PianoRollView(MIDIParser midiParseIn, NoteParser noteParseIn)
         {
+            sw.Start();
+            if (logging) logs.Add(new Log() { logType = LogType.Session, time = sw.Elapsed, value = "Session start" });
+
             InitializeComponent();
             Init(midiParseIn, noteParseIn);
 
@@ -119,6 +117,8 @@ namespace AnnotationTool.views
             MainWindow.NoteSelectOff += new EventHandler(MainWindow_NoteSelectOff);
             MainWindow.AutomaticIconsOn += new EventHandler(MainWindow_AutomaticIconsOn);
             MainWindow.AutomaticIconsOff += new EventHandler(MainWindow_AutomaticIconsOff);
+            //MainWindow.DarkModeOn += new EventHandler(MainWindow_DarkModeOn);
+            //MainWindow.DarkModeOff += new EventHandler(MainWindow_DarkModeOff);
             MainWindow.Play += new EventHandler(MainWindow_Play);
             MainWindow.Pause += new EventHandler(MainWindow_Pause);
             MainWindow.Stop += new EventHandler(MainWindow_Stop);
@@ -170,6 +170,8 @@ namespace AnnotationTool.views
 
         public void Init(MIDIParser midiParseIn, NoteParser noteParseIn)
         {
+            if (logging) logs.Add(new Log() { logType = LogType.LoadedFile, time = sw.Elapsed, value = midiParseIn.fileName });
+
             for (int i = 0; i < notes.Length; i++)
             {
                 notes[i] = new List<NoteRect>();
@@ -453,6 +455,8 @@ namespace AnnotationTool.views
 
                 ClearPatterns();
                 ImportPatterns(filePatterns);
+
+                if (logging) logs.Add(new Log() { logType = LogType.PatternImport, time = sw.Elapsed, value = "Filename: " + browseDialog.SafeFileName.ToString() });
             }
         }
 
@@ -468,6 +472,9 @@ namespace AnnotationTool.views
                 FileParser fileParser = new FileParser(patterns);
                 fileParser.midiName = midiParse.fileName;
                 fileParser.midiDuration = "" + noteParse.midiLength;
+
+                if (logging) fileParser.logs = logs;
+                if (logging) logs.Add(new Log() { logType = LogType.Session, time = sw.Elapsed, value = "Session end" });
                 string[] file = fileParser.ParseToJAMS();
 
                 try
@@ -557,36 +564,50 @@ namespace AnnotationTool.views
         private void MainWindow_SnapChange(object sender, EventArgs e)
         {
             UpdateSnap();
+
+            if (logging) logs.Add(new Log() { logType = LogType.SnapUpdate, time = sw.Elapsed, value = "" + MainWindow.settings.snap });
         }
 
         private void MainWindow_HorizZoomChange(object sender, EventArgs e)
         {
             UpdateHorizZoom(MainWindow.settings.horizZoom);
+
+            if (logging) logs.Add(new Log() { logType = LogType.HorizZoomUpdate, time = sw.Elapsed, value = "" + MainWindow.settings.horizZoom });
         }
 
         private void MainWindow_VertiZoomChange(object sender, EventArgs e)
         {
             UpdateVertiZoom(MainWindow.settings.vertiZoom);
+
+            if (logging) logs.Add(new Log() { logType = LogType.VertiZoomUpdate, time = sw.Elapsed, value = "" + MainWindow.settings.vertiZoom });
         }
 
         private void MainWindow_KeyVisibilityChange(object sender, EventArgs e)
         {
             UpdateKeyNames();
+
+            if (logging) logs.Add(new Log() { logType = LogType.KeyVisibilityUpdate, time = sw.Elapsed, value = "" + MainWindow.settings.keyNames });
         }
 
         private void MainWindow_GridVisibilityOn(object sender, EventArgs e)
         {
             GridVisibilityOn();
+
+            if (logging) logs.Add(new Log() { logType = LogType.GridVisibilityUpdate, time = sw.Elapsed, value = "" + MainWindow.settings.gridLines });
         }
 
         private void MainWindow_GridVisibilityOff(object sender, EventArgs e)
         {
             GridVisibilityOff();
+
+            if (logging) logs.Add(new Log() { logType = LogType.GridVisibilityUpdate, time = sw.Elapsed, value = "" + MainWindow.settings.gridLines });
         }
 
         private void MainWindow_NoteSelectOn(object sender, EventArgs e)
         {
             Panel.SetZIndex(grdNotes, 5);
+
+            if (logging) logs.Add(new Log() { logType = LogType.NoteSelectUpdate, time = sw.Elapsed, value = "" + MainWindow.settings.noteSelect });
         }
 
         private void MainWindow_NoteSelectOff(object sender, EventArgs e)
@@ -597,6 +618,8 @@ namespace AnnotationTool.views
             {
                 CancelOccurrenceCreation();
             }
+
+            if (logging) logs.Add(new Log() { logType = LogType.NoteSelectUpdate, time = sw.Elapsed, value = "" + MainWindow.settings.noteSelect });
         }
 
         private void MainWindow_AutomaticIconsOn(object sender, EventArgs e)
@@ -611,6 +634,8 @@ namespace AnnotationTool.views
                     }
                 }
             }
+
+            if (logging) logs.Add(new Log() { logType = LogType.AutomaticIconsUpdate, time = sw.Elapsed, value = "" + MainWindow.settings.automaticIcons });
         }
 
         private void MainWindow_AutomaticIconsOff(object sender, EventArgs e)
@@ -625,16 +650,48 @@ namespace AnnotationTool.views
                     }
                 }
             }
+
+            if (logging) logs.Add(new Log() { logType = LogType.AutomaticIconsUpdate, time = sw.Elapsed, value = "" + MainWindow.settings.automaticIcons });
         }
+
+        //private void MainWindow_DarkModeOn(object sender, EventArgs e)
+        //{
+        //    this.Resources["ButtonColour"] = (new BrushConverter()).ConvertFrom("#6D7081");
+        //    this.Resources["ButtonMouseOverColour"] = (new BrushConverter()).ConvertFrom("#00CCCC");
+        //    this.Resources["ButtonPressedColour"] = (new BrushConverter()).ConvertFrom("#00B7B7");
+        //    this.Resources["MenuButtonMouseOverColour"] = (new BrushConverter()).ConvertFrom("#393C46");
+        //    this.Resources["GridLineColour"] = (new BrushConverter()).ConvertFrom("#07070A");
+        //    this.Resources["GridExtraLightColour"] = (new BrushConverter()).ConvertFrom("#74778B");
+        //    this.Resources["GridLightColour"] = (new BrushConverter()).ConvertFrom("#25262C");
+        //    this.Resources["GridDarkColour"] = (new BrushConverter()).ConvertFrom("#1D1E22");
+        //    this.Resources["GridExtraDarkColour"] = (new BrushConverter()).ConvertFrom("#0C0C0E");
+        //}
+
+        //private void MainWindow_DarkModeOff(object sender, EventArgs e)
+        //{
+        //    this.Resources["ButtonColour"] = (new BrushConverter()).ConvertFrom("#e3e5e8");
+        //    this.Resources["ButtonMouseOverColour"] = (new BrushConverter()).ConvertFrom("#FF5C33");
+        //    this.Resources["ButtonPressedColour"] = (new BrushConverter()).ConvertFrom("#CC2900");
+        //    this.Resources["MenuButtonMouseOverColour"] = (new BrushConverter()).ConvertFrom("#838795");
+        //    this.Resources["GridLineColour"] = (new BrushConverter()).ConvertFrom("#07070A");
+        //    this.Resources["GridExtraLightColour"] = (new BrushConverter()).ConvertFrom("#232529");
+        //    this.Resources["GridLightColour"] = (new BrushConverter()).ConvertFrom("#f1f2f3");
+        //    this.Resources["GridDarkColour"] = (new BrushConverter()).ConvertFrom("#e3e5e8");
+        //    this.Resources["GridExtraDarkColour"] = (new BrushConverter()).ConvertFrom("#0C0C0E");
+        //}
 
         private void MainWindow_ExpandAll(object sender, EventArgs e)
         {
             ExpandAllPatternOccurrences();
+
+            if (logging) logs.Add(new Log() { logType = LogType.ExpandAll, time = sw.Elapsed, value = "n/a" });
         }
 
         private void MainWindow_CollapseAll(object sender, EventArgs e)
         {
             CollapseAllPatternOccurrences();
+
+            if (logging) logs.Add(new Log() { logType = LogType.CollapseAll, time = sw.Elapsed, value = "n/a" });
         }
 
         private void MainWindow_ShowAll(object sender, EventArgs e)
@@ -644,6 +701,8 @@ namespace AnnotationTool.views
                 patterns[i].patternIcon.View = true;
                 ShowOccurrenceVisuals(i);
             }
+
+            if (logging) logs.Add(new Log() { logType = LogType.ShowAll, time = sw.Elapsed, value = "n/a" });
         }
 
         private void MainWindow_HideAll(object sender, EventArgs e)
@@ -653,6 +712,8 @@ namespace AnnotationTool.views
                 patterns[i].patternIcon.View = false;
                 HideOccurrenceVisuals(i);
             }
+
+            if (logging) logs.Add(new Log() { logType = LogType.HideAll, time = sw.Elapsed, value = "n/a" });
         }
 
         private void MainWindow_AddPattern(object sender, EventArgs e)
@@ -681,33 +742,45 @@ namespace AnnotationTool.views
         private void MainWindow_Play(object sender, EventArgs e)
         {
             PlayMusic();
+
+            if (logging) logs.Add(new Log() { logType = LogType.Play, time = sw.Elapsed, value = "n/a" });
         }
 
         private void MainWindow_Pause(object sender, EventArgs e)
         {
             PauseMusic();
+
+            if (logging) logs.Add(new Log() { logType = LogType.Pause, time = sw.Elapsed, value = "n/a" });
         }
 
         private void MainWindow_Stop(object sender, EventArgs e)
         {
-            PauseMusic();
+            StopMusic();
+
+            if (logging) logs.Add(new Log() { logType = LogType.Stop, time = sw.Elapsed, value = "n/a" });
         }
 
         private void MainWindow_NormaliseVelocitiesOn(object sender, EventArgs e)
         {
             MuteCurrentNotes();
             RefreshMusic();
+
+            if (logging) logs.Add(new Log() { logType = LogType.NormaliseVelocitiesUpdate, time = sw.Elapsed, value = "" + MainWindow.settings.normaliseVelocities });
         }
 
         private void MainWindow_NormaliseVelocitiesOff(object sender, EventArgs e)
         {
             MuteCurrentNotes();
             RefreshMusic();
+
+            if (logging) logs.Add(new Log() { logType = LogType.NormaliseVelocitiesUpdate, time = sw.Elapsed, value = "" + MainWindow.settings.normaliseVelocities });
         }
 
         private void MainWindow_Closing(object sender, EventArgs e)
         {
             HaltSound();
+
+            if (logging) logs.Add(new Log() { logType = LogType.Session, time = sw.Elapsed, value = "Session end" });
         }
 
         private void GridVisibilityOn()
@@ -1101,34 +1174,6 @@ namespace AnnotationTool.views
             return quantisedSection;
         }
 
-        private List<List<NotePitch>> Quantise(List<NoteRect> notesIn, double start, double end)
-        {
-            List<List<NotePitch>> quantisedSection = new List<List<NotePitch>>();
-
-            double zoomRobustSnapLength = Math.Round(horizSnap / MainWindow.settings.horizZoom, 2);
-
-            for (int i = 0; i < (end - start) / zoomRobustSnapLength; i++)
-            {
-                quantisedSection.Add(new List<NotePitch>());
-            }
-
-            for (int i = 0; i < notesIn.Count; i++)
-            {
-                double j = 0;
-                NoteRect currentNote = notesIn[i];
-                int quantisedIndex = 0;
-
-                while (j < currentNote.note.GetDuration())
-                {
-                    quantisedIndex = (int)((j + currentNote.note.GetTime() - start) / zoomRobustSnapLength);
-                    quantisedSection[quantisedIndex].Add(currentNote.note.GetPitch());
-                    j += zoomRobustSnapLength;
-                }
-            }
-
-            return quantisedSection;
-        }
-
         private List<Occurrence> SimilarOccurrences(Occurrence occurrence)
         {
             List<Occurrence> similarOccurrences = new List<Occurrence>();
@@ -1402,16 +1447,22 @@ namespace AnnotationTool.views
         private void Play_Click(object sender, RoutedEventArgs e)
         {
             PlayMusic();
+
+            if (logging) logs.Add(new Log() { logType = LogType.Play, time = sw.Elapsed, value = "n/a" });
         }
 
         private void Pause_Click(object sender, RoutedEventArgs e)
         {
             PauseMusic();
+
+            if (logging) logs.Add(new Log() { logType = LogType.Pause, time = sw.Elapsed, value = "n/a" });
         }
 
         private void Stop_Click(object sender, RoutedEventArgs e)
         {
             StopMusic();
+
+            if (logging) logs.Add(new Log() { logType = LogType.Stop, time = sw.Elapsed, value = "n/a" });
         }
 
         private void PlayMusic()
@@ -1562,6 +1613,8 @@ namespace AnnotationTool.views
             {
                 RefreshMusic();
             }
+
+            if (logging) logs.Add(new Log() { logType = LogType.ChannelUpdate, time = sw.Elapsed, value = "Channel: " + currentChannel });
         }
 
         private void HideNotesInChannel(int channelIndex)
@@ -1608,6 +1661,8 @@ namespace AnnotationTool.views
             patterns.Add(newPattern);
             itmPatternsView.Items.Add(newPatternButton);
 
+            if (logging) logs.Add(new Log() { logType = LogType.PatternAdd, time = sw.Elapsed, value = "PatternNum: " + patterns.Count });
+
             return newPattern.patternIcon.Height;
         }
 
@@ -1625,6 +1680,8 @@ namespace AnnotationTool.views
             newOccurrence.SetStart(Math.Round(Canvas.GetLeft(currentPatternRect) / MainWindow.settings.horizZoom, 2));
             newOccurrence.SetEnd(Math.Round((Canvas.GetLeft(currentPatternRect) + currentPatternRect.Width) / MainWindow.settings.horizZoom, 2));
 
+            if (logging) logs.Add(new Log() { logType = LogType.OccurrenceAdd, time = sw.Elapsed, value = "PatternNum: " + patternIndex + ", OccurrenceNum: " + newOccurrence.occurrenceIcon.OccurrenceNum });
+
             return newOccurrence;
         }
 
@@ -1638,6 +1695,8 @@ namespace AnnotationTool.views
             newOccurrence = FindStartAndEnd(newOccurrence);
             newOccurrence.isNotesMode = true;
             newOccurrence.SetConfidence(3);
+
+            if (logging) logs.Add(new Log() { logType = LogType.OccurrenceAdd, time = sw.Elapsed, value = "PatternNum: " + patternIndex + ", OccurrenceNum: " + newOccurrence.occurrenceIcon.OccurrenceNum });
 
             return newOccurrence;
         }
@@ -1937,6 +1996,8 @@ namespace AnnotationTool.views
             {
                 currentSolo = -1;
             }
+
+            if (logging) logs.Add(new Log() { logType = LogType.PatternViewUpdate, time = sw.Elapsed, value = "PatternNum: " + patternIndex });
         }
 
         private void PatternIcon_ViewSolo(object sender, EventArgs e)
@@ -1954,6 +2015,8 @@ namespace AnnotationTool.views
                 RestoreViews();
                 currentSolo = -1;
             }
+
+            if (logging) logs.Add(new Log() { logType = LogType.PatternSoloUpdate, time = sw.Elapsed, value = "PatternNum: " + patternIndex });
         }
 
         private void PatternIcon_CollExpToggle(object sender, EventArgs e)
@@ -1963,10 +2026,14 @@ namespace AnnotationTool.views
             if (patterns[patternIndex].patternIcon.CollExp)
             {
                 ExpandOccurrences(patternIndex);
+
+                if (logging) logs.Add(new Log() { logType = LogType.PatternExpand, time = sw.Elapsed, value = "PatternNum: " + patternIndex });
             }
             else
             {
                 CollapseOccurrences(patternIndex);
+
+                if (logging) logs.Add(new Log() { logType = LogType.PatternCollapse, time = sw.Elapsed, value = "PatternNum: " + patternIndex });
             }
         }
 
@@ -2024,6 +2091,8 @@ namespace AnnotationTool.views
 
             List<Occurrence> similarOccurrences = SimilarOccurrences(occurrence);
             MoveElement(btnAddPattern, AddOccurrenceGraphics(similarOccurrences, ((OccurrenceIcon)sender).PatternNumOfOccurrence));
+
+            if (logging) logs.Add(new Log() { logType = LogType.OccurrenceFindSimilar, time = sw.Elapsed, value = "PatternNum: " + occurrence.occurrenceIcon.PatternNumOfOccurrence + ", OccurrenceNum: " + occurrence.occurrenceIcon.OccurrenceNum });
         }
 
         private void OccurrenceIcon_ConfidenceChange(object sender, EventArgs e)
@@ -2032,6 +2101,8 @@ namespace AnnotationTool.views
             Occurrence occurrence = GetOccurrence((OccurrenceIcon)sender);
 
             occurrence.SetConfidence(Int32.Parse(confidenceMenuChoice));
+
+            if (logging) logs.Add(new Log() { logType = LogType.OccurrenceConfidenceUpdate, time = sw.Elapsed, value = "PatternNum: " + occurrence.occurrenceIcon.PatternNumOfOccurrence + ", OccurrenceNum: " + occurrence.occurrenceIcon.OccurrenceNum + ", Confidence: " + Int32.Parse(confidenceMenuChoice) });
         }
 
         private Occurrence GetOccurrence(OccurrenceIcon icon)
@@ -2213,6 +2284,8 @@ namespace AnnotationTool.views
                 noteRect.noteOutlines.Remove(patternIndex);
             }
 
+            if (logging) logs.Add(new Log() { logType = LogType.PatternDelete, time = sw.Elapsed, value = "PatternNum: " + patternIndex });
+
             return animMove;
         }
 
@@ -2243,6 +2316,8 @@ namespace AnnotationTool.views
                 occurrence.occurrenceIcon.OccurrenceNum--;
                 occurrence.occurrenceIcon.UpdateConfidenceGroupName();
             }
+
+            if (logging) logs.Add(new Log() { logType = LogType.OccurrenceFindSimilar, time = sw.Elapsed, value = "PatternNum: " + patternIndex + ", OccurrenceNum: " + occurrenceIndex });
         }
 
         private void DeleteOccurrenceInProgress()

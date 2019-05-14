@@ -56,8 +56,42 @@ namespace AnnotationTool
         public bool noteSelect;
         public bool gridLines;
         public bool automaticIcons;
+        public bool darkMode;
         public bool normaliseVelocities;
     }
+
+    public enum LogType
+    {
+        Session,
+        LoadedFile,
+        SnapUpdate,
+        HorizZoomUpdate,
+        VertiZoomUpdate,
+        KeyVisibilityUpdate,
+        GridVisibilityUpdate,
+        NoteSelectUpdate,
+        AutomaticIconsUpdate,
+        ExpandAll,
+        CollapseAll,
+        ShowAll,
+        HideAll,
+        Play,
+        Pause,
+        Stop,
+        NormaliseVelocitiesUpdate,
+        ChannelUpdate,
+        PatternAdd,
+        PatternDelete,
+        PatternViewUpdate,
+        PatternSoloUpdate,
+        PatternCollapse,
+        PatternExpand,
+        PatternImport,
+        OccurrenceAdd,
+        OccurrenceDelete,
+        OccurrenceFindSimilar,
+        OccurrenceConfidenceUpdate
+    };
 
     public enum TimeDivType
     {

@@ -20,6 +20,7 @@ namespace AnnotationTool
         public string midiDuration;
         public string curatorName;
         public string curatorEmail;
+        public List<Log> logs;
 
         private struct JAMSObject
         {
@@ -85,6 +86,7 @@ namespace AnnotationTool
         public FileParser(List<Pattern> patternsIn)
         {
             patterns = patternsIn;
+            logs = new List<Log>();
         }
 
         public List<Pattern> ParseFile()
@@ -1074,6 +1076,11 @@ namespace AnnotationTool
             jamsParse.annotations = new List<Annotations>();
 
             jamsParse.sandbox = new Dictionary<string, string>();
+
+            for (int i = 0; i < logs.Count; i++)
+            {
+                jamsParse.sandbox.Add("Log" + i, logs[i].ToString());
+            }
         }
 
         private void PopulateAnnotationsData()
