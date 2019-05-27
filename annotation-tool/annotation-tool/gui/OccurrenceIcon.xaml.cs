@@ -98,5 +98,19 @@ namespace Controls
         {
             Edit?.Invoke(this, e);
         }
+
+        public void DisableButtons()
+        {
+            var template = Template;
+
+            ((Button)template.FindName("DeleteButton", this)).IsEnabled = false;
+        }
+
+        public void EnableButtons()
+        {
+            var template = Template;
+
+            ((Button)template.FindName("DeleteButton", this)).IsEnabled = true;
+        }
     }
 }

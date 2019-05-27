@@ -38,8 +38,8 @@
                         <ColumnDefinition Width="2*"/>
                     </Grid.ColumnDefinitions>
 
-                    <Border Grid.Row ="0" Grid.Column="0" Background="{DynamicResource GridDarkColour}" BorderThickness="0" BorderBrush="{DynamicResource GridDarkColour}">
-                        <Button Style="{DynamicResource TextDeleteButton}" Click="OccurrenceIcon_DeleteClick"/>
+                    <Border Grid.Row="0" Grid.Column="0" Background="{DynamicResource GridDarkColour}" BorderThickness="0" BorderBrush="{DynamicResource GridDarkColour}">
+                        <Button x:Name="DeleteButton" Style="{DynamicResource TextDeleteButton}" Click="OccurrenceIcon_DeleteClick"/>
                     </Border>
                     <Border Grid.Row="0" Grid.Column="1" Grid.RowSpan="3" Background="{TemplateBinding Background}" Opacity="0.8" BorderThickness="0" Grid.ColumnSpan="2">
                         <TextBlock x:Name="OccurrenceText" VerticalAlignment="Center" FontSize="15" HorizontalAlignment="Center" Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=OccurrenceText, FallbackValue='0'}" Foreground="White"/>

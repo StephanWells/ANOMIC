@@ -77,7 +77,7 @@
                         <MenuItem x:Name="mnuDefaultSnap" Header="1/4 Step" Width="200" local:MenuItemExtensions.GroupName="snapSettings" IsCheckable="True" IsChecked="True" Checked="MainWindow_SnapChange"/>
                         <MenuItem Header="1/8 Step" Width="200" local:MenuItemExtensions.GroupName="snapSettings" IsCheckable="True" Checked="MainWindow_SnapChange"/>
                     </MenuItem>
-                    <MenuItem x:Name="mnuNoteSelect" Header="_Note Select Mode" Width="200" IsCheckable="True" IsChecked="False" Checked="MainWindow_NoteSelectOn" Unchecked="MainWindow_NoteSelectOff"/>
+                    <MenuItem x:Name="mnuSongSelect" Header="_Song Select Mode" Width="200" IsCheckable="True" IsChecked="False" Checked="MainWindow_SongSelectOn" Unchecked="MainWindow_SongSelectOff"/>
                 </MenuItem>
 
                 <MenuItem x:Name="mnuPlayback" Header="Play_back" Width="Auto" Visibility="Hidden">

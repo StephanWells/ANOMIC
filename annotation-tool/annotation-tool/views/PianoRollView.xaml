@@ -677,7 +677,7 @@
                         <Line x:Name="linTrackerLine" X1="0" X2="0" Y1="0" Y2="{DynamicResource CanvasHeight}" Margin="0,6,0,0" Stroke="{DynamicResource ButtonMouseOverColour}" Opacity="1" StrokeThickness="1"></Line>
                         <Rectangle Fill="Transparent" Width="{Binding ElementName=cnvMouseLayer, Path=Width}" Height="1638"/>
                     </Canvas>
-                    <Grid x:Name="grdNotes" HorizontalAlignment="Left" Height="{DynamicResource PianoRollHeight}" VerticalAlignment="Center" Width="{DynamicResource PianoRollWidth}" Canvas.Top="8" Canvas.Left="133" Panel.ZIndex="3">
+                    <Grid x:Name="grdNotes" HorizontalAlignment="Left" Height="{DynamicResource PianoRollHeight}" VerticalAlignment="Center" Width="{DynamicResource PianoRollWidth}" Canvas.Top="8" Canvas.Left="133" Panel.ZIndex="5">
                         <Grid.RowDefinitions>
                             <RowDefinition/>
                             <RowDefinition/>

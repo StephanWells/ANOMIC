@@ -113,8 +113,8 @@ namespace AnnotationTool.views
             MainWindow.KeyVisibilityChange += new EventHandler(MainWindow_KeyVisibilityChange);
             MainWindow.GridVisibilityOn += new EventHandler(MainWindow_GridVisibilityOn);
             MainWindow.GridVisibilityOff += new EventHandler(MainWindow_GridVisibilityOff);
-            MainWindow.NoteSelectOn += new EventHandler(MainWindow_NoteSelectOn);
-            MainWindow.NoteSelectOff += new EventHandler(MainWindow_NoteSelectOff);
+            MainWindow.SongSelectOn += new EventHandler(MainWindow_SongSelectOn);
+            MainWindow.SongSelectOff += new EventHandler(MainWindow_SongSelectOff);
             MainWindow.AutomaticIconsOn += new EventHandler(MainWindow_AutomaticIconsOn);
             MainWindow.AutomaticIconsOff += new EventHandler(MainWindow_AutomaticIconsOff);
             //MainWindow.DarkModeOn += new EventHandler(MainWindow_DarkModeOn);
@@ -294,19 +294,19 @@ namespace AnnotationTool.views
             }
         }
 
-        private void HighlightNotes(List<NoteRect> notesIn, int patternIndex)
+        private void HighlightNotes(List<NoteRect> notesIn, int patternIndex, int occurrenceIndex)
         {
             foreach (NoteRect noteRect in notesIn)
             {
-                HighlightNote(noteRect, patternIndex);
+                HighlightNote(noteRect, patternIndex, occurrenceIndex);
             }
         }
 
-        private void HighlightNote(NoteRect noteRect, int patternIndex)
+        private void HighlightNote(NoteRect noteRect, int patternIndex, int occurrenceIndex)
         {
-            if (noteRect.noteOutlines.ContainsKey(patternIndex))
+            if (noteRect.noteOutlines.ContainsKey(patternIndex + "n" + occurrenceIndex))
             {
-                noteRect.noteOutlines[patternIndex].Visibility = Visibility.Visible;
+                noteRect.noteOutlines[patternIndex + "n" + occurrenceIndex].Visibility = Visibility.Visible;
             }
             else
             {
@@ -328,23 +328,23 @@ namespace AnnotationTool.views
                 noteOutline.MouseDown += NoteRect_SelectNote;
                 noteOutline.MouseEnter += NoteRect_MouseIn;
                 noteOutline.MouseLeave += NoteRect_MouseOut;
-                noteRect.noteOutlines.Add(patternIndex, noteOutline);
+                noteRect.noteOutlines.Add(patternIndex + "n" + occurrenceIndex, noteOutline);
                 grdNotes.Children.Add(noteOutline);
             }
         }
 
-        private void RemoveNoteHighlights(List<NoteRect> notesIn, int patternIndex)
+        private void RemoveNoteHighlights(List<NoteRect> notesIn, int patternIndex, int occurrenceIndex)
         {
             foreach (NoteRect noteRect in notesIn)
             {
-                RemoveNoteHighlight(noteRect, patternIndex);
+                RemoveNoteHighlight(noteRect, patternIndex, occurrenceIndex);
             }
         }
 
-        private void RemoveNoteHighlight(NoteRect noteRect, int patternIndex)
+        private void RemoveNoteHighlight(NoteRect noteRect, int patternIndex, int occurrenceIndex)
         {
-            grdNotes.Children.Remove(noteRect.noteOutlines[patternIndex]);
-            noteRect.noteOutlines.Remove(patternIndex);
+            grdNotes.Children.Remove(noteRect.noteOutlines[patternIndex + "n" + occurrenceIndex]);
+            noteRect.noteOutlines.Remove(patternIndex + "n" + occurrenceIndex);
         }
 
         private void HighlightNoteRects()
@@ -603,23 +603,23 @@ namespace AnnotationTool.views
             if (logging) logs.Add(new Log() { logType = LogType.GridVisibilityUpdate, time = sw.Elapsed, value = "" + MainWindow.settings.gridLines });
         }
 
-        private void MainWindow_NoteSelectOn(object sender, EventArgs e)
-        {
-            Panel.SetZIndex(grdNotes, 5);
-
-            if (logging) logs.Add(new Log() { logType = LogType.NoteSelectUpdate, time = sw.Elapsed, value = "" + MainWindow.settings.noteSelect });
-        }
-
-        private void MainWindow_NoteSelectOff(object sender, EventArgs e)
+        private void MainWindow_SongSelectOn(object sender, EventArgs e)
         {
             Panel.SetZIndex(grdNotes, 3);
+
+            if (logging) logs.Add(new Log() { logType = LogType.SongSelectUpdate, time = sw.Elapsed, value = "" + MainWindow.settings.songSelect });
+        }
+
+        private void MainWindow_SongSelectOff(object sender, EventArgs e)
+        {
+            Panel.SetZIndex(grdNotes, 5);
 
             if (isSelectingOccurrence)
             {
                 CancelOccurrenceCreation();
             }
 
-            if (logging) logs.Add(new Log() { logType = LogType.NoteSelectUpdate, time = sw.Elapsed, value = "" + MainWindow.settings.noteSelect });
+            if (logging) logs.Add(new Log() { logType = LogType.SongSelectUpdate, time = sw.Elapsed, value = "" + MainWindow.settings.songSelect });
         }
 
         private void MainWindow_AutomaticIconsOn(object sender, EventArgs e)
@@ -937,7 +937,7 @@ namespace AnnotationTool.views
                 noteRect.noteBar.Width = noteWidth;
                 noteRect.noteBar.Margin = noteMargin;
 
-                foreach (KeyValuePair<int, Rectangle> outline in noteRect.noteOutlines)
+                foreach (KeyValuePair<string, Rectangle> outline in noteRect.noteOutlines)
                 {
                     outline.Value.Width = noteWidth;
                     outline.Value.Margin = noteMargin;
@@ -1115,7 +1115,7 @@ namespace AnnotationTool.views
                     Name = "note" + i
                 };
 
-                Dictionary<int, Rectangle> noteOutlines = new Dictionary<int, Rectangle>();
+                Dictionary<string, Rectangle> noteOutlines = new Dictionary<string, Rectangle>();
 
                 Grid.SetRow(noteBar, PitchToRow((int)currentNote.GetPitch()));
                 Panel.SetZIndex(noteBar, 3);
@@ -1438,7 +1438,7 @@ namespace AnnotationTool.views
 
             for (int i = 0; i < stringList.Count; i++)
             {
-                result += stringList[i] + ";";
+                result += stringList[i] + "n";
             }
 
             return result;
@@ -1732,7 +1732,7 @@ namespace AnnotationTool.views
         {
             OccurrenceIcon occurrenceIcon = new OccurrenceIcon
             {
-                Name = "occurrenceIcon" + patternIndex + "s" + patterns[patternIndex].GetOccurrences().Count,
+                Name = "occurrenceIcon" + patternIndex + "n" + patterns[patternIndex].GetOccurrences().Count,
                 Background = patterns[patternIndex].patternIcon.Background,
                 OccurrenceText = "" + (patterns[patternIndex].GetOccurrences().Count),
                 Height = occurrenceIconHeight,
@@ -1763,7 +1763,7 @@ namespace AnnotationTool.views
         {
             OccurrenceIcon occurrenceIcon = new OccurrenceIcon
             {
-                Name = "occurrenceIconInProgress" + patternIndex + "s" + patterns[patternIndex].GetOccurrences().Count,
+                Name = "occurrenceIconInProgress" + patternIndex + "n" + patterns[patternIndex].GetOccurrences().Count,
                 Background = patterns[patternIndex].patternIcon.Background,
                 OccurrenceText = "Confirm",
                 Height = occurrenceIconHeight,
@@ -1782,6 +1782,11 @@ namespace AnnotationTool.views
             {
                 HideOccurrenceVisuals(i);
                 patterns[i].patternIcon.DisableButtons();
+
+                foreach (Occurrence occurrence in patterns[i].GetOccurrences())
+                {
+                    occurrence.occurrenceIcon.DisableButtons();
+                }
             }
 
             btnAddPattern.IsEnabled = false;
@@ -1814,7 +1819,6 @@ namespace AnnotationTool.views
             if (currentOccurrence.highlightedNotes.Count > 0)
             {
                 Occurrence newOccurrence = AddOccurrence(patternIndex, currentOccurrence.highlightedNotes);
-                DeleteOccurrenceInProgress();
                 newOccurrence.occurrenceIcon = CreateOccurrenceIcon(patternIndex);
                 AddOccurrenceIcon(newOccurrence.occurrenceIcon);
 
@@ -1830,7 +1834,6 @@ namespace AnnotationTool.views
             }
             else
             {
-                DeleteOccurrenceInProgress();
                 MoveElement(btnAddPattern, (-1) * occurrenceIconHeight);
             }
 
@@ -1841,12 +1844,15 @@ namespace AnnotationTool.views
                     ShowOccurrenceVisuals(i);
                 }
             }
+
+            DeleteOccurrenceInProgress();
         }
 
         private void CancelOccurrenceCreation()
         {
             if (!isUIMoving)
             {
+                RemoveNoteHighlights(currentOccurrence.highlightedNotes, currentPattern, patterns[currentPattern].GetOccurrences().Count);
                 DeleteOccurrenceInProgress();
                 MoveElement(btnAddPattern, (-1) * occurrenceIconHeight);
                 isSelectingOccurrence = false;
@@ -1867,14 +1873,14 @@ namespace AnnotationTool.views
 
             Canvas patternCanvas = new Canvas
             {
-                Name = "dragSelectionCanvas" + patternIndex + "s" + patterns[patternIndex].GetOccurrences().Count,
+                Name = "dragSelectionCanvas" + patternIndex + "n" + patterns[patternIndex].GetOccurrences().Count,
                 Visibility = Visibility.Visible,
                 Width = 0
             };
 
             Border patternBorder = new Border
             {
-                Name = "dragSelectionBorder" + patternIndex + "s" + patterns[patternIndex].GetOccurrences().Count,
+                Name = "dragSelectionBorder" + patternIndex + "n" + patterns[patternIndex].GetOccurrences().Count,
                 Background = occurrenceRectColour,
                 CornerRadius = new CornerRadius(1),
                 BorderBrush = patterns[patternIndex].patternIcon.Background
@@ -1920,9 +1926,13 @@ namespace AnnotationTool.views
 
             foreach (Occurrence occurrence in occurrences)
             {
+                patterns[patternIndex].AddOccurrence(occurrence);
+                occurrence.occurrenceIcon = CreateOccurrenceIcon(patternIndex);
+                occurrence.occurrenceIcon.AutomaticIcon = occurrence.isAutomatic && MainWindow.settings.automaticIcons ? Visibility.Visible : Visibility.Hidden;
+
                 if (occurrence.isNotesMode)
                 {
-                    HighlightNotes(occurrence.highlightedNotes, patternIndex);
+                    HighlightNotes(occurrence.highlightedNotes, patternIndex, occurrence.occurrenceIcon.OccurrenceNum);
                 }
                 else
                 {
@@ -1937,10 +1947,6 @@ namespace AnnotationTool.views
                     cnvMouseLayer.Children.Add(occurrenceRect);
                     occurrence.occurrenceRect = occurrenceRect;
                 }
-
-                patterns[patternIndex].AddOccurrence(occurrence);
-                occurrence.occurrenceIcon = CreateOccurrenceIcon(patternIndex);
-                occurrence.occurrenceIcon.AutomaticIcon = occurrence.isAutomatic && MainWindow.settings.automaticIcons ? Visibility.Visible : Visibility.Hidden;
             }
 
             for (int i = 0; i < occurrences.Count; i++)
@@ -2120,9 +2126,13 @@ namespace AnnotationTool.views
             {
                 foreach (NoteRect noteRect in occurrence.highlightedNotes)
                 {
-                    noteRect.noteOutlines[occurrence.occurrenceIcon.PatternNumOfOccurrence].Fill = patterns[occurrence.occurrenceIcon.PatternNumOfOccurrence].patternIcon.Background;
-                    noteRect.noteOutlines[occurrence.occurrenceIcon.PatternNumOfOccurrence].Stroke = Brushes.Black;
-                    noteRect.noteOutlines[occurrence.occurrenceIcon.PatternNumOfOccurrence].StrokeThickness = 1;
+                    if (noteRect.noteOutlines.ContainsKey(occurrence.occurrenceIcon.PatternNumOfOccurrence + "n" + occurrence.occurrenceIcon.OccurrenceNum))
+                    {
+                        Rectangle noteOutline = noteRect.noteOutlines[occurrence.occurrenceIcon.PatternNumOfOccurrence + "n" + occurrence.occurrenceIcon.OccurrenceNum];
+                        noteOutline.Fill = patterns[occurrence.occurrenceIcon.PatternNumOfOccurrence].patternIcon.Background;
+                        noteOutline.Stroke = Brushes.Black;
+                        noteOutline.StrokeThickness = 1;
+                    }
                 }
             }
         }
@@ -2137,9 +2147,13 @@ namespace AnnotationTool.views
             {
                 foreach (NoteRect noteRect in occurrence.highlightedNotes)
                 {
-                    noteRect.noteOutlines[occurrence.occurrenceIcon.PatternNumOfOccurrence].Stroke = patterns[occurrence.occurrenceIcon.PatternNumOfOccurrence].patternIcon.Background;
-                    noteRect.noteOutlines[occurrence.occurrenceIcon.PatternNumOfOccurrence].Fill = Brushes.Transparent;
-                    noteRect.noteOutlines[occurrence.occurrenceIcon.PatternNumOfOccurrence].StrokeThickness = 2;
+                    if (noteRect.noteOutlines.ContainsKey(occurrence.occurrenceIcon.PatternNumOfOccurrence + "n" + occurrence.occurrenceIcon.OccurrenceNum))
+                    {
+                        Rectangle noteOutline = noteRect.noteOutlines[occurrence.occurrenceIcon.PatternNumOfOccurrence + "n" + occurrence.occurrenceIcon.OccurrenceNum];
+                        noteOutline.Stroke = patterns[occurrence.occurrenceIcon.PatternNumOfOccurrence].patternIcon.Background;
+                        noteOutline.Fill = Brushes.Transparent;
+                        noteOutline.StrokeThickness = 2;
+                    }
                 }
             }
         }
@@ -2246,6 +2260,14 @@ namespace AnnotationTool.views
                 animMove -= occurrenceIconHeight * (patterns[patternIndex].GetOccurrences().Count);
             }
 
+            /*foreach (NoteRect noteRect in notes[0])
+            {
+                foreach (Occurrence occurrence in patterns[patternIndex].GetOccurrences())
+                {
+                    noteRect.noteOutlines.Remove(patternIndex + "n" + occurrence.occurrenceIcon.OccurrenceNum);
+                }
+            }*/
+
             for (int i = patterns[patternIndex].GetOccurrences().Count - 1; i >= 0; i--)
             {
                 DeleteOccurrence(i, patternIndex);
@@ -2279,11 +2301,6 @@ namespace AnnotationTool.views
                 }
             }
 
-            foreach (NoteRect noteRect in notes[0])
-            {
-                noteRect.noteOutlines.Remove(patternIndex);
-            }
-
             if (logging) logs.Add(new Log() { logType = LogType.PatternDelete, time = sw.Elapsed, value = "PatternNum: " + patternIndex });
 
             return animMove;
@@ -2300,7 +2317,7 @@ namespace AnnotationTool.views
             else
             {
                 NormaliseOccurrence(occurrenceToRemove);
-                RemoveNoteHighlights(occurrenceToRemove.highlightedNotes, patternIndex);
+                RemoveNoteHighlights(occurrenceToRemove.highlightedNotes, patternIndex, occurrenceIndex);
             }
             
             patterns[patternIndex].GetOccurrences().RemoveAt(occurrenceIndex);
@@ -2311,10 +2328,16 @@ namespace AnnotationTool.views
             {
                 int newIndex = occurrence.occurrenceIcon.OccurrenceNum - 1;
 
-                occurrence.occurrenceIcon.Name = "occurrenceIcon" + patternIndex + "s" + occurrence.occurrenceIcon.OccurrenceNum;
+                occurrence.occurrenceIcon.Name = "occurrenceIcon" + patternIndex + "n" + occurrence.occurrenceIcon.OccurrenceNum;
                 occurrence.occurrenceIcon.OccurrenceText = "" + (newIndex + 1);
                 occurrence.occurrenceIcon.OccurrenceNum--;
                 occurrence.occurrenceIcon.UpdateConfidenceGroupName();
+
+                foreach (NoteRect noteRect in occurrence.highlightedNotes)
+                {
+                    noteRect.noteOutlines.Add(patternIndex + "n" + newIndex, noteRect.noteOutlines[patternIndex + "n" + (newIndex + 1)]);
+                    noteRect.noteOutlines.Remove(patternIndex + "n" + (newIndex + 1));
+                }
             }
 
             if (logging) logs.Add(new Log() { logType = LogType.OccurrenceFindSimilar, time = sw.Elapsed, value = "PatternNum: " + patternIndex + ", OccurrenceNum: " + occurrenceIndex });
@@ -2322,13 +2345,17 @@ namespace AnnotationTool.views
 
         private void DeleteOccurrenceInProgress()
         {
-            RemoveNoteHighlights(currentOccurrence.highlightedNotes, currentPattern);
             itmPatternsView.Items.Remove(currentOccurrence.occurrenceIcon);
             currentOccurrence = new Occurrence();
 
             for (int i = 0; i < patterns.Count; i++)
             {
                 patterns[i].patternIcon.EnableButtons();
+
+                for (int j = 0; j < patterns[i].GetOccurrences().Count - 1; j++)
+                {
+                    patterns[i].GetOccurrences()[j].occurrenceIcon.EnableButtons();
+                }
             }
 
             btnAddPattern.IsEnabled = true;
@@ -2344,7 +2371,7 @@ namespace AnnotationTool.views
                 }
                 else
                 {
-                    HighlightNotes(occurrence.highlightedNotes, patternIndex);
+                    HighlightNotes(occurrence.highlightedNotes, patternIndex, occurrence.occurrenceIcon.OccurrenceNum);
                 }
             }
         }
@@ -2361,7 +2388,10 @@ namespace AnnotationTool.views
                 {
                     foreach (NoteRect noteRect in occurrence.highlightedNotes)
                     {
-                        noteRect.noteOutlines[patternIndex].Visibility = Visibility.Hidden;
+                        if (noteRect.noteOutlines.ContainsKey(patternIndex + "n" + occurrence.occurrenceIcon.OccurrenceNum))
+                        {
+                            noteRect.noteOutlines[patternIndex + "n" + occurrence.occurrenceIcon.OccurrenceNum].Visibility = Visibility.Hidden;
+                        }
                     }
                 }
             }
@@ -2616,7 +2646,7 @@ namespace AnnotationTool.views
 
         private void NoteRect_SelectNote(object sender, MouseEventArgs e)
         {
-            if (MainWindow.settings.noteSelect && !isSelectingOccurrence && !isUIMoving && currentPattern != -1)
+            if (!MainWindow.settings.songSelect && !isSelectingOccurrence && !isUIMoving && currentPattern != -1)
             {
                 CreateOccurrenceInProgress(currentPattern);
                 isSelectingOccurrence = true;
@@ -2629,12 +2659,12 @@ namespace AnnotationTool.views
 
                 if (currentOccurrence.highlightedNotes.Contains(notes[0][noteIndex]))
                 {
-                    RemoveNoteHighlight(notes[0][noteIndex], currentPattern);
+                    RemoveNoteHighlight(notes[0][noteIndex], currentPattern, patterns[currentPattern].GetOccurrences().Count);
                     currentOccurrence.highlightedNotes.Remove(notes[0][noteIndex]); 
                 }
                 else
                 {
-                    HighlightNote(notes[0][noteIndex], currentPattern);
+                    HighlightNote(notes[0][noteIndex], currentPattern, patterns[currentPattern].GetOccurrences().Count);
                     currentOccurrence.highlightedNotes.Add(notes[0][noteIndex]);
                 }
             }
@@ -2642,7 +2672,7 @@ namespace AnnotationTool.views
 
         private void NoteRect_MouseIn(object sender, MouseEventArgs e)
         {
-            if (MainWindow.settings.noteSelect)
+            if (!MainWindow.settings.songSelect)
             {
                 Cursor = Cursors.Hand;
             }
@@ -2650,7 +2680,7 @@ namespace AnnotationTool.views
 
         private void NoteRect_MouseOut(object sender, MouseEventArgs e)
         {
-            if (MainWindow.settings.noteSelect)
+            if (!MainWindow.settings.songSelect)
             {
                 Cursor = Cursors.Arrow;
             }
@@ -2663,7 +2693,7 @@ namespace AnnotationTool.views
                 origMouseDownPoint = GetCurrentMousePosition(e);
                 origMouseDownPoint.X = Snap(origMouseDownPoint.X, horizSnap);
 
-                if (MainWindow.settings.noteSelect && !isSelectingOccurrence)
+                if (!MainWindow.settings.songSelect && !isSelectingOccurrence)
                 {
                     origMouseDownPoint.Y = Snap(origMouseDownPoint.Y, vertiSnap);
                     CreateOccurrenceInProgress(currentPattern);
@@ -2682,14 +2712,14 @@ namespace AnnotationTool.views
             isLeftMouseButtonDownOnPianoRoll = false;
             Mouse.Capture(null);
 
-            if (!MainWindow.settings.noteSelect)
+            if (MainWindow.settings.songSelect)
             {
                 isSelectingOccurrence = false;
             }
 
-            if (!isUIMoving && isDraggingPatternRect && currentPattern != -1)
+            if (isDraggingPatternRect && currentPattern != -1)
             {
-                if (MainWindow.settings.noteSelect)
+                if (!MainWindow.settings.songSelect)
                 {
                     currentOccurrenceRect.Visibility = Visibility.Collapsed;
                     currentOccurrenceRect = null;
@@ -2697,19 +2727,22 @@ namespace AnnotationTool.views
                 }
                 else
                 {
-                    Occurrence newOccurrence = AddOccurrence(currentPattern, currentOccurrenceRect);
-                    AddOccurrenceIcon(newOccurrence.occurrenceIcon);
-
-                    if (patterns[currentPattern].patternIcon.CollExp)
+                    if (!isUIMoving)
                     {
-                        MoveElement(btnAddPattern, occurrenceIconHeight);
-                    }
-                    else
-                    {
-                        newOccurrence.occurrenceIcon.Visibility = Visibility.Collapsed;
-                    }
+                        Occurrence newOccurrence = AddOccurrence(currentPattern, currentOccurrenceRect);
+                        AddOccurrenceIcon(newOccurrence.occurrenceIcon);
 
-                    currentOccurrenceRect = null;
+                        if (patterns[currentPattern].patternIcon.CollExp)
+                        {
+                            MoveElement(btnAddPattern, occurrenceIconHeight);
+                        }
+                        else
+                        {
+                            newOccurrence.occurrenceIcon.Visibility = Visibility.Collapsed;
+                        }
+
+                        currentOccurrenceRect = null;
+                    }
                 }
             }
 
@@ -2724,7 +2757,7 @@ namespace AnnotationTool.views
             double dragDistanceY = Math.Abs(dragDelta.Y);
             bool isDistanceFarEnough = false;
 
-            if (MainWindow.settings.noteSelect)
+            if (!MainWindow.settings.songSelect)
             {
                 isDistanceFarEnough = dragDistanceX >= horizSnap || dragDistanceY >= vertiSnap;
             }
@@ -2739,7 +2772,7 @@ namespace AnnotationTool.views
                 {
                     curMouseDownPoint.X = Snap(curMouseDownPoint.X, horizSnap);
 
-                    if (MainWindow.settings.noteSelect)
+                    if (!MainWindow.settings.songSelect)
                     {
                         curMouseDownPoint.Y = Snap(curMouseDownPoint.Y, vertiSnap);
                     }
@@ -2753,7 +2786,7 @@ namespace AnnotationTool.views
                 {
                     curMouseDownPoint.X = Snap(curMouseDownPoint.X, horizSnap);
 
-                    if (MainWindow.settings.noteSelect)
+                    if (!MainWindow.settings.songSelect)
                     {
                         curMouseDownPoint.Y = Snap(curMouseDownPoint.Y, vertiSnap);
                     }
@@ -2771,7 +2804,7 @@ namespace AnnotationTool.views
 
         private void InitDragPatternRect(Point pt1, Point pt2)
         {
-            if (!patterns[currentPattern].patternIcon.View)
+            if (!patterns[currentPattern].patternIcon.View && !isSelectingOccurrence)
             {
                 patterns[currentPattern].patternIcon.View = true;
                 ShowOccurrenceVisuals(currentPattern);
@@ -2792,7 +2825,7 @@ namespace AnnotationTool.views
             Canvas.SetLeft(dragBorder, x);
             dragBorder.Width = x + width > (double)this.Resources["PianoRollWidth"] ? (double)this.Resources["PianoRollWidth"] - x : width;
 
-            if (MainWindow.settings.noteSelect)
+            if (!MainWindow.settings.songSelect)
             {
                 y = (pt1.Y < pt2.Y) ? pt1.Y : pt2.Y;
                 height = Math.Abs(pt2.Y - pt1.Y);
@@ -2809,7 +2842,7 @@ namespace AnnotationTool.views
                     {
                         if (!currentOccurrence.highlightedNotes.Contains(noteRect))
                         {
-                            HighlightNote(noteRect, currentPattern);
+                            HighlightNote(noteRect, currentPattern, patterns[currentPattern].GetOccurrences().Count);
                             currentOccurrence.highlightedNotes.Add(noteRect);
                             currentSelection.Add(noteRect);
                         }
@@ -2824,7 +2857,7 @@ namespace AnnotationTool.views
 
                     if (!dragRect.Contains(noteShape))
                     {
-                        RemoveNoteHighlight(noteRect, currentPattern);
+                        RemoveNoteHighlight(noteRect, currentPattern, patterns[currentPattern].GetOccurrences().Count);
                         currentOccurrence.highlightedNotes.Remove(noteRect);
                         currentSelection.Remove(noteRect);
                     }

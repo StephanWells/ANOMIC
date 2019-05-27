@@ -40,8 +40,8 @@ namespace AnnotationTool
         public static event EventHandler KeyVisibilityChange;
         public static event EventHandler GridVisibilityOn;
         public static event EventHandler GridVisibilityOff;
-        public static event EventHandler NoteSelectOn;
-        public static event EventHandler NoteSelectOff;
+        public static event EventHandler SongSelectOn;
+        public static event EventHandler SongSelectOff;
         public static event EventHandler AutomaticIconsOn;
         public static event EventHandler AutomaticIconsOff;
         //public static event EventHandler DarkModeOn;
@@ -59,6 +59,8 @@ namespace AnnotationTool
         {
             InitializeComponent();
             SetDefaults();
+
+            this.Title = "Annotation Tool";
         }
 
         private void MainWindow_MIDIBrowseClick(object sender, RoutedEventArgs e)
@@ -119,14 +121,14 @@ namespace AnnotationTool
             settings.vertiZoom = 1;
             settings.keyNames = 1;
             settings.snap = 3;
-            settings.noteSelect = false;
+            settings.songSelect = false;
             settings.gridLines = true;
             settings.automaticIcons = true;
             settings.normaliseVelocities = false;
 
             mnuDefaultKeyNames.IsChecked = true;
             mnuDefaultSnap.IsChecked = true;
-            mnuNoteSelect.IsChecked = false;
+            mnuSongSelect.IsChecked = false;
             mnuGridLines.IsChecked = true;
             mnuAutomaticIcons.IsChecked = true;
             mnuNormaliseVelocities.IsChecked = false;
@@ -322,16 +324,16 @@ namespace AnnotationTool
             GridVisibilityOff?.Invoke(this, e);
         }
 
-        private void MainWindow_NoteSelectOn(object sender, RoutedEventArgs e)
+        private void MainWindow_SongSelectOn(object sender, RoutedEventArgs e)
         {
-            settings.noteSelect = true;
-            NoteSelectOn?.Invoke(this, e);
+            settings.songSelect = true;
+            SongSelectOn?.Invoke(this, e);
         }
 
-        private void MainWindow_NoteSelectOff(object sender, RoutedEventArgs e)
+        private void MainWindow_SongSelectOff(object sender, RoutedEventArgs e)
         {
-            settings.noteSelect = false;
-            NoteSelectOff?.Invoke(this, e);
+            settings.songSelect = false;
+            SongSelectOff?.Invoke(this, e);
         }
 
         private void MainWindow_AutomaticIconsOn(object sender, RoutedEventArgs e)

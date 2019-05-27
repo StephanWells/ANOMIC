@@ -44,7 +44,7 @@ namespace AnnotationTool
     {
         public Note note;
         public Rectangle noteBar;
-        public Dictionary<int, Rectangle> noteOutlines;
+        public Dictionary<string, Rectangle> noteOutlines;
     }
 
     public struct Settings
@@ -53,7 +53,7 @@ namespace AnnotationTool
         public int snap;
         public double horizZoom;
         public double vertiZoom;
-        public bool noteSelect;
+        public bool songSelect;
         public bool gridLines;
         public bool automaticIcons;
         public bool darkMode;
@@ -69,7 +69,7 @@ namespace AnnotationTool
         VertiZoomUpdate,
         KeyVisibilityUpdate,
         GridVisibilityUpdate,
-        NoteSelectUpdate,
+        SongSelectUpdate,
         AutomaticIconsUpdate,
         ExpandAll,
         CollapseAll,
