@@ -20,9 +20,9 @@
         <DockPanel Grid.Row="0" Background="{DynamicResource GridDarkColour}" Panel.ZIndex="2">
             <Menu x:Name="mnuMain" Background="{DynamicResource GridLightColour}" DockPanel.Dock="Top">
                 <MenuItem Header="File" Width="Auto">
-                    <MenuItem Header="_New" Width="200" Click="MainWindow_MIDIBrowseClick"/>
-                    <MenuItem Header="_Open" Width="200" Click="MainWindow_OpenAnnotationsClick"/>
-                    <MenuItem Header="_Save" Width="200" Click="MainWindow_SaveAnnotationsClick"/>
+                    <MenuItem Header="_New MIDI" Width="200" Click="MainWindow_MIDIBrowseClick"/>
+                    <MenuItem Header="_Open Annotations" Width="200" Click="MainWindow_OpenAnnotationsClick"/>
+                    <MenuItem Header="_Save Annotations" Width="200" Click="MainWindow_SaveAnnotationsClick"/>
                     <Separator Background="{DynamicResource MenuButtonMouseOverColour}" Margin="-22,3,0,3" Width="220" HorizontalAlignment="Left"/>
                     <MenuItem Header="_Exit" Width="200" Click="MainWindow_Exit"/>
                 </MenuItem>
