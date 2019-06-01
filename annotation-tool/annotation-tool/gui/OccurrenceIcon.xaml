@@ -20,7 +20,7 @@
                 <MenuItem x:Name="mnuConfidence1" Header="1" IsCheckable="True" IsChecked="false" Checked="OccurrenceIcon_ConfidenceChange"/>
             </MenuItem>
             <Separator Background="{DynamicResource MenuButtonMouseOverColour}" Margin="-22,3,0,3" Width="220" HorizontalAlignment="Left"/>
-            <MenuItem Header="_Find Similar Occurrences" Click="OccurrenceIcon_FindSimilar"/>
+            <MenuItem Header="_Find Exact Occurrences" Click="OccurrenceIcon_FindSimilar"/>
         </ContextMenu>
     </Button.ContextMenu>
 

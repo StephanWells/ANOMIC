@@ -143,11 +143,21 @@ namespace AnnotationTool
         private void MainWindow_OpenAnnotationsClick(object sender, RoutedEventArgs e)
         {
             OpenAnnotationsClick?.Invoke(this, e);
+
+            if (pianoRoll == null)
+            {
+                MessageBox.Show("You have to load a MIDI file first!", "Error");
+            }
         }
 
         private void MainWindow_SaveAnnotationsClick(object sender, RoutedEventArgs e)
         {
             SaveAnnotationsClick?.Invoke(this, e);
+
+            if (pianoRoll == null)
+            {
+                MessageBox.Show("You have to load a MIDI file first!", "Error");
+            }
         }
 
         private void MainWindow_SnapChange(object sender, RoutedEventArgs e)
