@@ -1382,24 +1382,40 @@ namespace AnnotationTool.views
                     {
                         if (occurrence.isNotesMode && similarOccurrence.isNotesMode)
                         {
-                            bool match = true;
+                            bool duplicateMatch = true;
 
                             if (occurrence.highlightedNotes.Count == similarOccurrence.highlightedNotes.Count)
                             {
+                                List<NoteRect> tempNotes = new List<NoteRect>(similarOccurrence.highlightedNotes);
+
                                 for (int i = 0; i < occurrence.highlightedNotes.Count; i++)
                                 {
-                                    if (!AreTwoNotesEqual(occurrence.highlightedNotes[i].note, similarOccurrence.highlightedNotes[i].note))
+                                    for (int j = 0; j < tempNotes.Count; j++)
                                     {
-                                        match = false;
+                                        if (AreTwoNotesEqual(occurrence.highlightedNotes[i].note, tempNotes[j].note))
+                                        {
+                                            tempNotes.RemoveAt(j);
+                                            break;
+                                        }
                                     }
+
+                                    //if (!AreTwoNotesEqual(occurrence.highlightedNotes[i].note, similarOccurrence.highlightedNotes[i].note))
+                                    //{
+                                    //    match = false;
+                                    //}
+                                }
+
+                                if (tempNotes.Count != 0)
+                                {
+                                    duplicateMatch = false;
                                 }
                             }
                             else
                             {
-                                match = false;
+                                duplicateMatch = false;
                             }
 
-                            if (match == true)
+                            if (duplicateMatch == true)
                             {
                                 duplicateFound = true;
                             }
@@ -2352,7 +2368,7 @@ namespace AnnotationTool.views
             {
                 patterns[i].patternIcon.EnableButtons();
 
-                for (int j = 0; j < patterns[i].GetOccurrences().Count - 1; j++)
+                for (int j = 0; j < ((i == currentPattern) ? patterns[i].GetOccurrences().Count - 1 : patterns[i].GetOccurrences().Count); j++)
                 {
                     patterns[i].GetOccurrences()[j].occurrenceIcon.EnableButtons();
                 }
