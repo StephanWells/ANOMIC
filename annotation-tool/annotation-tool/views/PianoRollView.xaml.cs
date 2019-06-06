@@ -32,6 +32,7 @@ namespace AnnotationTool.views
         private Midi.Clock scheduler;
         private TranslateTransform trackerTransform = new TranslateTransform();
         private static IList<DispatcherTimer> timers = new List<DispatcherTimer>();
+        public bool midiDeviceLoaded = true;
 
         private List<NoteRect> currentNotes = new List<NoteRect>();
         private List<NoteRect>[] notes = new List<NoteRect>[17];
@@ -95,7 +96,16 @@ namespace AnnotationTool.views
             if (logging) logs.Add(new Log() { logType = LogType.Session, time = sw.Elapsed, value = "Session start" });
 
             InitializeComponent();
-            Init(midiParseIn, noteParseIn);
+
+            try
+            {
+                Init(midiParseIn, noteParseIn);
+            }
+            catch (DeviceException e)
+            {
+                MessageBox.Show("Warning! Failed to load MIDI Device. Please ensure audio drivers are installed correctly. Error code:" + e.Message);
+                DisableMidiFunctionality();
+            }
 
             MainWindow.MIDIBrowseClick += new EventHandler(MainWindow_MIDIBrowseClick);
             MainWindow.Exit += new EventHandler(MainWindow_Exit);
@@ -165,7 +175,16 @@ namespace AnnotationTool.views
 
             ClearPatterns();
             cmbChannelSelect.SelectedIndex = 0;
-            Init(midiParseIn, noteParseIn);
+
+            try
+            {
+                Init(midiParseIn, noteParseIn);
+            }
+            catch (DeviceException e)
+            {
+                MessageBox.Show("Warning! Failed to load MIDI Device. Please ensure audio drivers are installed correctly. Error code:" + e.Message);
+                DisableMidiFunctionality();
+            }
         }
 
         public void Init(MIDIParser midiParseIn, NoteParser noteParseIn)
@@ -204,27 +223,15 @@ namespace AnnotationTool.views
 
             foreach (Note note in noteParse.notes)
             {
-                note.SetTime(note.GetTime() * timeDivRatio);
-                note.SetDuration(note.GetDuration() * timeDivRatio);
+                note.SetTime(Math.Round(note.GetTime() * timeDivRatio, 2));
+                note.SetDuration(Math.Round(note.GetDuration() * timeDivRatio, 2));
             }
 
             horizSnap = Math.Round((MainWindow.settings.horizZoom * resolution) / 8, 2);
             vertiSnap = Math.Round((MainWindow.settings.vertiZoom * (double)this.Resources["PianoRollHeight"]) / grdNotes.RowDefinitions.Count, 2);
 
             scheduler = new Midi.Clock(noteParse.bpm);
-
-            try
-            {
-                outputDevice = OutputDevice.InstalledDevices[0];
-            }
-            catch (NullReferenceException)
-            {
-
-            }
-            catch (InvalidOperationException)
-            {
-
-            }
+            outputDevice = OutputDevice.InstalledDevices[0];
 
             txtFileName.Text = midiParse.fileName.Length >= 30 ? midiParse.fileName.Substring(0, 30) + "..." : midiParse.fileName;
             txtBPM.Text = "BPM: " + noteParse.bpm;
@@ -257,6 +264,14 @@ namespace AnnotationTool.views
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             InitScroll();
+        }
+
+        private void DisableMidiFunctionality()
+        {
+            btnPlay.IsEnabled = false;
+            btnPause.IsEnabled = false;
+            btnStop.IsEnabled = false;
+            midiDeviceLoaded = false;
         }
 
         private void InitScroll()
@@ -517,13 +532,20 @@ namespace AnnotationTool.views
             switch (e.Key)
             {
                 case Key.Space:
-                    if (isPlaying && linTrackerLine.Margin.Left + linTrackerLine.RenderTransform.Value.OffsetX != grdNotes.Width)
+                    if (midiDeviceLoaded)
                     {
-                        PauseMusic();
+                        if (isPlaying && linTrackerLine.Margin.Left + linTrackerLine.RenderTransform.Value.OffsetX != grdNotes.Width)
+                        {
+                            PauseMusic();
+                        }
+                        else
+                        {
+                            PlayMusic();
+                        }
                     }
                     else
                     {
-                        PlayMusic();
+                        MessageBox.Show("Error! Cannot use playback functionality if MIDI device failed to load.");
                     }
                 break;
 
@@ -741,21 +763,42 @@ namespace AnnotationTool.views
 
         private void MainWindow_Play(object sender, EventArgs e)
         {
-            PlayMusic();
+            if (midiDeviceLoaded)
+            {
+                PlayMusic();
+            }
+            else
+            {
+                MessageBox.Show("Error! Cannot use playback functionality if MIDI device failed to load.");
+            }
 
             if (logging) logs.Add(new Log() { logType = LogType.Play, time = sw.Elapsed, value = "n/a" });
         }
 
         private void MainWindow_Pause(object sender, EventArgs e)
         {
-            PauseMusic();
+            if (midiDeviceLoaded)
+            {
+                PauseMusic();
+            }
+            else
+            {
+                MessageBox.Show("Error! Cannot use playback functionality if MIDI device failed to load.");
+            }
 
             if (logging) logs.Add(new Log() { logType = LogType.Pause, time = sw.Elapsed, value = "n/a" });
         }
 
         private void MainWindow_Stop(object sender, EventArgs e)
         {
-            StopMusic();
+            if (midiDeviceLoaded)
+            {
+                StopMusic();
+            }
+            else
+            {
+                MessageBox.Show("Error! Cannot use playback functionality if MIDI device failed to load.");
+            }
 
             if (logging) logs.Add(new Log() { logType = LogType.Stop, time = sw.Elapsed, value = "n/a" });
         }
@@ -1696,7 +1739,7 @@ namespace AnnotationTool.views
             newOccurrence.SetStart(Math.Round(Canvas.GetLeft(currentPatternRect) / MainWindow.settings.horizZoom, 2));
             newOccurrence.SetEnd(Math.Round((Canvas.GetLeft(currentPatternRect) + currentPatternRect.Width) / MainWindow.settings.horizZoom, 2));
 
-            if (logging) logs.Add(new Log() { logType = LogType.OccurrenceAdd, time = sw.Elapsed, value = "PatternNum: " + patternIndex + ", OccurrenceNum: " + newOccurrence.occurrenceIcon.OccurrenceNum });
+            if (logging) logs.Add(new Log() { logType = LogType.OccurrenceAdd, time = sw.Elapsed, value = "PatternNum: " + patternIndex + " - OccurrenceNum: " + newOccurrence.occurrenceIcon.OccurrenceNum });
 
             return newOccurrence;
         }
@@ -1712,7 +1755,7 @@ namespace AnnotationTool.views
             newOccurrence.isNotesMode = true;
             newOccurrence.SetConfidence(3);
 
-            if (logging) logs.Add(new Log() { logType = LogType.OccurrenceAdd, time = sw.Elapsed, value = "PatternNum: " + patternIndex + ", OccurrenceNum: " + newOccurrence.occurrenceIcon.OccurrenceNum });
+            if (logging) logs.Add(new Log() { logType = LogType.OccurrenceAdd, time = sw.Elapsed, value = "PatternNum: " + patternIndex + " - OccurrenceNum: " + newOccurrence.occurrenceIcon.OccurrenceNum });
 
             return newOccurrence;
         }
@@ -2114,7 +2157,7 @@ namespace AnnotationTool.views
             List<Occurrence> similarOccurrences = SimilarOccurrences(occurrence);
             MoveElement(btnAddPattern, AddOccurrenceGraphics(similarOccurrences, ((OccurrenceIcon)sender).PatternNumOfOccurrence));
 
-            if (logging) logs.Add(new Log() { logType = LogType.OccurrenceFindSimilar, time = sw.Elapsed, value = "PatternNum: " + occurrence.occurrenceIcon.PatternNumOfOccurrence + ", OccurrenceNum: " + occurrence.occurrenceIcon.OccurrenceNum });
+            if (logging) logs.Add(new Log() { logType = LogType.OccurrenceFindSimilar, time = sw.Elapsed, value = "PatternNum: " + occurrence.occurrenceIcon.PatternNumOfOccurrence + " - OccurrenceNum: " + occurrence.occurrenceIcon.OccurrenceNum });
         }
 
         private void OccurrenceIcon_ConfidenceChange(object sender, EventArgs e)
@@ -2124,7 +2167,7 @@ namespace AnnotationTool.views
 
             occurrence.SetConfidence(Int32.Parse(confidenceMenuChoice));
 
-            if (logging) logs.Add(new Log() { logType = LogType.OccurrenceConfidenceUpdate, time = sw.Elapsed, value = "PatternNum: " + occurrence.occurrenceIcon.PatternNumOfOccurrence + ", OccurrenceNum: " + occurrence.occurrenceIcon.OccurrenceNum + ", Confidence: " + Int32.Parse(confidenceMenuChoice) });
+            if (logging) logs.Add(new Log() { logType = LogType.OccurrenceConfidenceUpdate, time = sw.Elapsed, value = "PatternNum: " + occurrence.occurrenceIcon.PatternNumOfOccurrence + " - OccurrenceNum: " + occurrence.occurrenceIcon.OccurrenceNum + " - Confidence: " + Int32.Parse(confidenceMenuChoice) });
         }
 
         private Occurrence GetOccurrence(OccurrenceIcon icon)
@@ -2356,7 +2399,7 @@ namespace AnnotationTool.views
                 }
             }
 
-            if (logging) logs.Add(new Log() { logType = LogType.OccurrenceFindSimilar, time = sw.Elapsed, value = "PatternNum: " + patternIndex + ", OccurrenceNum: " + occurrenceIndex });
+            if (logging) logs.Add(new Log() { logType = LogType.OccurrenceFindSimilar, time = sw.Elapsed, value = "PatternNum: " + patternIndex + " - OccurrenceNum: " + occurrenceIndex });
         }
 
         private void DeleteOccurrenceInProgress()

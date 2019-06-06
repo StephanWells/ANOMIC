@@ -842,7 +842,7 @@ namespace AnnotationTool
                     int occurrenceIndex = Int32.Parse(data.value["occurrence_id"]);
                     int confidence = Int32.Parse(data.confidence);
                     int start = Int32.Parse(data.time);
-                    int duration = Int32.Parse(data.duration);
+                    double duration = Double.Parse(data.duration);
 
                     while (patternIndex >= patterns.Count)
                     {
