@@ -743,6 +743,7 @@ namespace AnnotationTool.views
             if (!isSelectingOccurrence)
             {
                 MoveElement(btnAddPattern, AddPattern());
+                SelectPattern(patterns.Count - 1);
             }
             else
             {
@@ -959,7 +960,7 @@ namespace AnnotationTool.views
             srlPianoScroll.ScrollToHorizontalOffset(Math.Round((MainWindow.settings.horizZoom / oldZoom) * (srlPianoScroll.HorizontalOffset) - scrollAnchorOffset, 2));
 
             double thirtySecondNote = Math.Round(MainWindow.settings.horizZoom * (resolution / 8), 2);
-            double width = Math.Round(barNumbers.Count * MainWindow.settings.horizZoom * resolution * 4, 2);
+            double width = Math.Round(barNumbers.Count * MainWindow.settings.horizZoom * resolution * noteParse.timeSig[0], 2);
 
             cnvPianoRoll.Width = width + grdPiano.Width;
             this.Resources["PianoRollWidth"] = width;
@@ -989,7 +990,7 @@ namespace AnnotationTool.views
 
             for (int i = 0; i < barNumbers.Count; i++)
             {
-                barNumbers[i].Margin = new Thickness(Math.Round((i * resolution * 4) * MainWindow.settings.horizZoom + barNumOffset, 2), 0, 0, 10);
+                barNumbers[i].Margin = new Thickness(Math.Round((i * resolution * noteParse.timeSig[0]) * MainWindow.settings.horizZoom + barNumOffset, 2), 0, 0, 10);
             }
 
             foreach (Pattern pattern in patterns)
@@ -1631,6 +1632,7 @@ namespace AnnotationTool.views
         private void AddPattern_Click(object sender, RoutedEventArgs e)
         {
             MoveElement(btnAddPattern, AddPattern());
+            SelectPattern(patterns.Count - 1);
         }
 
         private void ChannelSelect_SelectChannel(object sender, RoutedEventArgs e)
