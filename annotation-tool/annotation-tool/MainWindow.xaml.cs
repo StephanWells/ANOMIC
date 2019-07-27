@@ -72,6 +72,8 @@ namespace AnnotationTool
                 Filter = "MIDI files (*.mid)|*.mid|All files (*.*)|*.*"
             };
 
+            browseDialog.InitialDirectory = System.IO.Path.GetFullPath(System.IO.Path.Combine(Directory.GetCurrentDirectory(), @"..\"));
+
             if (browseDialog.ShowDialog() == true)
             {
                 try

@@ -69,7 +69,7 @@ namespace AnnotationTool
 
             if (formatType == 0 && trackNum != 1) return -1;
 
-            uint timeDiv = FixedLengthArrayToUInt(SubArray(index, 2))/* & 0x7FFF*/; index += 2;
+            uint timeDiv = FixedLengthArrayToUInt(SubArray(index, 2)); index += 2;
             TimeDivType timeDivType;
 
             if ((timeDiv & 0x8000) == 0) timeDivType = TimeDivType.PPQ;

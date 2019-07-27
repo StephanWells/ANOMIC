@@ -451,6 +451,8 @@ namespace AnnotationTool.views
                 Filter = "JAMS files (*.jams)|*.jams|All files (*.*)|*.*"
             };
 
+            browseDialog.InitialDirectory = System.IO.Path.GetFullPath(System.IO.Path.Combine(Directory.GetCurrentDirectory(), @"..\"));
+
             if (browseDialog.ShowDialog() == true)
             {
                 string fileInput = "";
@@ -481,6 +483,8 @@ namespace AnnotationTool.views
             {
                 Filter = "JAMS files (*.jams)|*.jams|All files (*.*)|*.*"
             };
+
+            browseDialog.InitialDirectory = System.IO.Path.GetFullPath(System.IO.Path.Combine(Directory.GetCurrentDirectory(), @"..\"));
 
             if (browseDialog.ShowDialog() == true)
             {
