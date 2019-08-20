@@ -175,6 +175,7 @@ namespace AnnotationTool.views
 
             ClearPatterns();
             cmbChannelSelect.SelectedIndex = 0;
+            logs = new List<Log>();
 
             try
             {
@@ -255,7 +256,7 @@ namespace AnnotationTool.views
             }
             catch (InvalidOperationException)
             {
-
+                MessageBox.Show("Error opening MIDI device!", "Error");
             }
 
             Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(() => { Cursor = Cursors.Arrow; })).Wait();
@@ -462,18 +463,25 @@ namespace AnnotationTool.views
                     fileInput = sr.ReadToEnd();
                 }
 
-                FileParser fileParser = new FileParser(fileInput);
-                List<Pattern> filePatterns = fileParser.ParseFile();
-
-                if (fileParser.midiName != midiParse.fileName || Double.Parse(fileParser.midiDuration) != noteParse.midiLength)
+                try
                 {
-                    MessageBox.Show("Annotation data does not match MIDI file!", "Warning", MessageBoxButton.OK);
+                    FileParser fileParser = new FileParser(fileInput);
+                    List<Pattern> filePatterns = fileParser.ParseFile();
+
+                    if (fileParser.midiName != midiParse.fileName || Double.Parse(fileParser.midiDuration) != noteParse.midiLength)
+                    {
+                        MessageBox.Show("Annotation data does not match MIDI file!", "Warning", MessageBoxButton.OK);
+                    }
+
+                    ClearPatterns();
+                    ImportPatterns(filePatterns);
+
+                    if (logging) logs.Add(new Log() { logType = LogType.PatternImport, time = sw.Elapsed, value = "Filename: " + browseDialog.SafeFileName.ToString() });
                 }
-
-                ClearPatterns();
-                ImportPatterns(filePatterns);
-
-                if (logging) logs.Add(new Log() { logType = LogType.PatternImport, time = sw.Elapsed, value = "Filename: " + browseDialog.SafeFileName.ToString() });
+                catch (InvalidOperationException)
+                {
+                    MessageBox.Show("Corrupt JAMS file!", "Error");
+                }
             }
         }
 
@@ -2325,14 +2333,6 @@ namespace AnnotationTool.views
                 animMove -= occurrenceIconHeight * (patterns[patternIndex].GetOccurrences().Count);
             }
 
-            /*foreach (NoteRect noteRect in notes[0])
-            {
-                foreach (Occurrence occurrence in patterns[patternIndex].GetOccurrences())
-                {
-                    noteRect.noteOutlines.Remove(patternIndex + "n" + occurrence.occurrenceIcon.OccurrenceNum);
-                }
-            }*/
-
             for (int i = patterns[patternIndex].GetOccurrences().Count - 1; i >= 0; i--)
             {
                 DeleteOccurrence(i, patternIndex);
@@ -2353,16 +2353,35 @@ namespace AnnotationTool.views
 
                 foreach (Occurrence occurrence in pattern.GetOccurrences())
                 {
+                    if (!occurrence.isNotesMode)
+                    {
+                        SolidColorBrush occurrenceRectColour = new SolidColorBrush(((SolidColorBrush)(pattern.patternIcon.Background)).Color)
+                        {
+                            Opacity = 0.3
+                        };
+
+                        ((Border)occurrence.occurrenceRect.Children[0]).Background = occurrenceRectColour;
+                        ((Border)occurrence.occurrenceRect.Children[0]).BorderBrush = pattern.patternIcon.Background;
+                    }
+                    else
+                    {
+                        foreach (NoteRect noteRect in occurrence.highlightedNotes)
+                        {
+                            if (noteRect.noteOutlines.ContainsKey(occurrence.occurrenceIcon.PatternNumOfOccurrence + "n" + occurrence.occurrenceIcon.OccurrenceNum))
+                            {
+                                Rectangle noteOutline = noteRect.noteOutlines[occurrence.occurrenceIcon.PatternNumOfOccurrence + "n" + occurrence.occurrenceIcon.OccurrenceNum];
+                                noteOutline.Stroke = pattern.patternIcon.Background;
+                                noteOutline.Fill = Brushes.Transparent;
+                                noteOutline.StrokeThickness = 2;
+
+                                noteRect.noteOutlines.Add((occurrence.occurrenceIcon.PatternNumOfOccurrence - 1) + "n" + occurrence.occurrenceIcon.OccurrenceNum, noteOutline);
+                                noteRect.noteOutlines.Remove(occurrence.occurrenceIcon.PatternNumOfOccurrence + "n" + occurrence.occurrenceIcon.OccurrenceNum);
+                            }
+                        }
+                    }
+
                     occurrence.occurrenceIcon.Background = pattern.patternIcon.Background;
                     occurrence.occurrenceIcon.PatternNumOfOccurrence--;
-
-                    SolidColorBrush occurrenceRectColour = new SolidColorBrush(((SolidColorBrush)(pattern.patternIcon.Background)).Color)
-                    {
-                        Opacity = 0.3
-                    };
-
-                    ((Border)occurrence.occurrenceRect.Children[0]).Background = occurrenceRectColour;
-                    ((Border)occurrence.occurrenceRect.Children[0]).BorderBrush = pattern.patternIcon.Background;
                 }
             }
 

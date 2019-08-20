@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AnnotationTool
@@ -21,6 +23,8 @@ namespace AnnotationTool
         public string curatorName;
         public string curatorEmail;
         public List<Log> logs;
+        NumberFormatInfo nfi;
+        CultureInfo customCulture;
 
         private struct JAMSObject
         {
@@ -81,12 +85,28 @@ namespace AnnotationTool
             midiDuration = "";
             curatorName = "";
             curatorEmail = "";
+
+            nfi = new NumberFormatInfo();
+            nfi.NumberDecimalSeparator = ".";
+
+            CultureInfo customCulture = (CultureInfo)Thread.CurrentThread.CurrentCulture.Clone();
+            customCulture.NumberFormat.NumberDecimalSeparator = ".";
+
+            Thread.CurrentThread.CurrentCulture = customCulture;
         }
 
         public FileParser(List<Pattern> patternsIn)
         {
             patterns = patternsIn;
             logs = new List<Log>();
+
+            nfi = new NumberFormatInfo();
+            nfi.NumberDecimalSeparator = ".";
+
+            CultureInfo customCulture = (CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
+            customCulture.NumberFormat.NumberDecimalSeparator = ".";
+
+            Thread.CurrentThread.CurrentCulture = customCulture;
         }
 
         public List<Pattern> ParseFile()
@@ -838,11 +858,11 @@ namespace AnnotationTool
             {
                 foreach (Data data in annotations.data)
                 {
-                    int patternIndex = Int32.Parse(data.value["pattern_id"]);
-                    int occurrenceIndex = Int32.Parse(data.value["occurrence_id"]);
-                    int confidence = Int32.Parse(data.confidence);
-                    int start = Int32.Parse(data.time);
-                    double duration = Double.Parse(data.duration);
+                    int patternIndex = Int32.Parse(data.value["pattern_id"], NumberStyles.Any, customCulture);
+                    int occurrenceIndex = Int32.Parse(data.value["occurrence_id"], NumberStyles.Any, customCulture);
+                    int confidence = Int32.Parse(data.confidence, NumberStyles.Any, customCulture);
+                    double start = Double.Parse(data.time, NumberStyles.Any, customCulture);
+                    double duration = Double.Parse(data.duration, NumberStyles.Any, customCulture);
 
                     while (patternIndex >= patterns.Count)
                     {
@@ -942,7 +962,7 @@ namespace AnnotationTool
             List<string> textLines = new List<string>();
 
             textLines.Add("  \"file_metadata\": {");
-            textLines.Add("    \"duration\": " + jamsParse.fileMetaData.duration + ",");
+            textLines.Add("    \"duration\": " + jamsParse.fileMetaData.duration.ToString(customCulture) + ",");
             textLines.Add("    \"title\": \"" + jamsParse.fileMetaData.title + "\",");
             textLines.Add("    \"release\": \"" + jamsParse.fileMetaData.release + "\",");
             textLines.AddRange(DictionaryToText(jamsParse.fileMetaData.identifiers, "identifiers", 2));
@@ -1025,9 +1045,9 @@ namespace AnnotationTool
                 textLines.AddRange(DictionaryToText(data.value, "value", 5));
             }
 
-            textLines.Add("          \"confidence\": " + data.confidence + ",");
-            textLines.Add("          \"time\": " + data.time + ",");
-            textLines.Add("          \"duration\": " + data.duration);
+            textLines.Add("          \"confidence\": " + data.confidence.ToString() + ",");
+            textLines.Add("          \"time\": " + data.time.ToString() + ",");
+            textLines.Add("          \"duration\": " + data.duration.ToString());
 
             return textLines.ToArray();
         }
@@ -1135,9 +1155,9 @@ namespace AnnotationTool
                     if (!occurrence.isNotesMode)
                     {
                         Data annotationData = new Data();
-                        annotationData.time = "" + occurrence.GetStart();
-                        annotationData.duration = "" + (occurrence.GetEnd() - occurrence.GetStart());
-                        annotationData.confidence = "" + occurrence.GetConfidence();
+                        annotationData.time = "" + occurrence.GetStart().ToString(nfi);
+                        annotationData.duration = "" + (occurrence.GetEnd() - occurrence.GetStart()).ToString(nfi);
+                        annotationData.confidence = "" + occurrence.GetConfidence().ToString(nfi);
                         annotationData.value = new Dictionary<string, string>();
                         annotationData.value.Add("pattern_id", "" + patternIndex);
                         annotationData.value.Add("occurrence_id", "" + occurrenceIndex);
