@@ -17,12 +17,12 @@ namespace AnnotationTool
 
         private string file;
         private JAMSObject jamsParse;
-        private List<Pattern> patterns;
+        public List<Pattern> patterns;
+        public List<Log> logs;
         public string midiName;
         public string midiDuration;
         public string curatorName;
         public string curatorEmail;
-        public List<Log> logs;
         NumberFormatInfo nfi;
         CultureInfo customCulture;
 
@@ -109,12 +109,10 @@ namespace AnnotationTool
             Thread.CurrentThread.CurrentCulture = customCulture;
         }
 
-        public List<Pattern> ParseFile()
+        public void ParseFile()
         {
             FileToJAMS();
             JAMSToPatterns();
-
-            return patterns;
         }
 
         private void FileToJAMS()

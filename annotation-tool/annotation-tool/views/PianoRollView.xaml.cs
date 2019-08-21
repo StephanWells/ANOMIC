@@ -466,7 +466,9 @@ namespace AnnotationTool.views
                 try
                 {
                     FileParser fileParser = new FileParser(fileInput);
-                    List<Pattern> filePatterns = fileParser.ParseFile();
+                    fileParser.ParseFile();
+                    List<Pattern> filePatterns = fileParser.patterns;
+                    
 
                     if (fileParser.midiName != midiParse.fileName || Double.Parse(fileParser.midiDuration) != noteParse.midiLength)
                     {

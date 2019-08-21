@@ -11,21 +11,24 @@ namespace AnnotationTool
 
         public static void Main(string[] args)
         {
-            Dictionary<string, Dictionary<string, List<Pattern>>> data = ImportPatterns();
+            Tuple<Dictionary<string, Dictionary<string, List<Pattern>>>, Dictionary<string, Dictionary<string, List<Log>>>> data = ImportData();
 
-            List<Tuple<string, string, string>> dataOverview = GetOverview(data);
-            TupleToCSV(dataOverview, root + "overview.csv");
+            List<Tuple<string, string, string, string>> dataOverview = GetFilesOverview(data.Item1);
+            TupleToCSV(dataOverview, root + "filesoverview.csv");
         }
 
-        private static Dictionary<string, Dictionary<string, List<Pattern>>> ImportPatterns()
+        private static Tuple<Dictionary<string, Dictionary<string, List<Pattern>>>, Dictionary<string, Dictionary<string, List<Log>>>> ImportData()
         {
             Dictionary<string, Dictionary<string, List<Pattern>>> importedPatterns = new Dictionary<string, Dictionary<string, List<Pattern>>>();
+            Dictionary<string, Dictionary<string, List<Log>>> importedLogs = new Dictionary<string, Dictionary<string, List<Log>>>();
+
             string[] folders = Directory.GetDirectories(root);
 
             foreach (string folder in folders)
             {
                 string folderName = new DirectoryInfo(folder).Name;
                 Dictionary<string, List<Pattern>> annotations = new Dictionary<string, List<Pattern>>();
+                Dictionary<string, List<Log>> logs = new Dictionary<string, List<Log>>();
 
                 foreach (string jamsFile in Directory.EnumerateFiles(folder, "*.jams"))
                 {
@@ -36,7 +39,8 @@ namespace AnnotationTool
                         if (midiName.Equals(Path.GetFileNameWithoutExtension(jamsFile)))
                         {
                             FileParser fileParser = new FileParser(File.ReadAllText(jamsFile));
-                            List<Pattern> filePatterns = fileParser.ParseFile();
+                            fileParser.ParseFile();
+                            List<Pattern> filePatterns = fileParser.patterns;
 
                             annotations.Add(midiName, filePatterns);
                             midiNamesList.Remove(midiName);
@@ -49,17 +53,73 @@ namespace AnnotationTool
                 importedPatterns.Add(folderName, annotations);
             }
 
-            return importedPatterns;
+            Tuple<Dictionary<string, Dictionary<string, List<Pattern>>>, Dictionary<string, Dictionary<string, List<Log>>>> data = new Tuple<Dictionary<string, Dictionary<string, List<Pattern>>>, Dictionary<string, Dictionary<string, List<Log>>>>(importedPatterns, importedLogs);
+
+            return data;
         }
 
-        private static List<Tuple<string, string, string>> GetOverview(Dictionary<string, Dictionary<string, List<Pattern>>> data)
+        private static List<Tuple<string, string, string, string>> GetFilesOverview(Dictionary<string, Dictionary<string, List<Pattern>>> data)
         {
-            List<Tuple<string, string, string>> dataOverview = new List<Tuple<string, string, string>>();
+            List<Tuple<string, string, string, string>> filesOverview = new List<Tuple<string, string, string, string>>();
+            List<int> totalPatterns = new List<int>();
+            List<int> totalOccurrences = new List<int>();
+            List<int> totalNotes = new List<int>();
+            List<double> averageNotes = new List<double>();
+
+            foreach (string midiName in midiNames)
+            {
+                totalPatterns.Add(0);
+                totalOccurrences.Add(0);
+                totalNotes.Add(0);
+            }
+
+            foreach (KeyValuePair<string, Dictionary<string, List<Pattern>>> annotations in data)
+            {
+                foreach (KeyValuePair<string, List<Pattern>> file in annotations.Value)
+                {
+                    for (int i = 0; i < midiNames.Length; i++)
+                    {
+                        if (file.Key.Equals(midiNames[i]))
+                        {
+                            totalPatterns[i] += file.Value.Count;
+
+                            foreach (Pattern pattern in file.Value)
+                            {
+                                totalOccurrences[i] += pattern.GetOccurrences().Count;
+
+                                foreach (Occurrence occurrence in pattern.GetOccurrences())
+                                {
+                                    totalNotes[i] += occurrence.highlightedNotes.Count;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            for (int i = 0; i < totalNotes.Count; i++)
+            {
+                averageNotes.Add(Math.Round((double)totalNotes[i] / (double)totalOccurrences[i], 2));
+            }
+
+            for (int i = 0; i < midiNames.Length; i++)
+            {
+                Tuple<string, string, string, string> tempData = new Tuple<string, string, string, string>(midiNames[i], "" + totalPatterns[i], "" + totalOccurrences[i], averageNotes[i].ToString());
+                filesOverview.Add(tempData);
+            }
+
+            return filesOverview;
+        }
+
+        private static List<Tuple<string, string, string, string>> GetParticipantsOverview(Dictionary<string, Dictionary<string, List<Pattern>>> data)
+        {
+            List<Tuple<string, string, string, string>> participantsOverview = new List<Tuple<string, string, string, string>>();
 
             foreach (KeyValuePair<string, Dictionary<string, List<Pattern>>> annotations in data)
             {
                 int totalPatterns = 0;
                 int totalOccurrences = 0;
+                int totalNotes = 0;
 
                 foreach (KeyValuePair<string, List<Pattern>> file in annotations.Value)
                 {
@@ -68,14 +128,21 @@ namespace AnnotationTool
                     foreach (Pattern pattern in file.Value)
                     {
                         totalOccurrences += pattern.GetOccurrences().Count;
+
+                        foreach (Occurrence occurrence in pattern.GetOccurrences())
+                        {
+                            totalNotes += occurrence.highlightedNotes.Count;
+                        }
                     }
                 }
 
-                Tuple<string, string, string> tempData = new Tuple<string, string, string>(annotations.Key, "" + totalPatterns, "" + totalOccurrences);
-                dataOverview.Add(tempData);
+                double averageNotes = Math.Round((double)totalNotes / (double)totalOccurrences, 2);
+
+                Tuple<string, string, string, string> tempData = new Tuple<string, string, string, string>(annotations.Key, "" + totalPatterns, "" + totalOccurrences, averageNotes.ToString());
+                participantsOverview.Add(tempData);
             }
 
-            return dataOverview;
+            return participantsOverview;
         }
 
         private static void TupleToCSV(List<Tuple<string, string, string>> tuples, string filename)
@@ -84,7 +151,20 @@ namespace AnnotationTool
 
             foreach (Tuple<string, string, string> tuple in tuples)
             {
-                string textLine = tuple.Item1 + "; " + tuple.Item2 + "; " + tuple.Item3;
+                string textLine = tuple.Item1 + ", " + tuple.Item2 + ", " + tuple.Item3;
+                textLines.Add(textLine);
+            }
+
+            File.WriteAllLines(filename, textLines);
+        }
+
+        private static void TupleToCSV(List<Tuple<string, string, string, string>> tuples, string filename)
+        {
+            List<string> textLines = new List<string>();
+
+            foreach (Tuple<string, string, string, string> tuple in tuples)
+            {
+                string textLine = tuple.Item1 + ", " + tuple.Item2 + ", " + tuple.Item3 + ", " + tuple.Item4;
                 textLines.Add(textLine);
             }
 
