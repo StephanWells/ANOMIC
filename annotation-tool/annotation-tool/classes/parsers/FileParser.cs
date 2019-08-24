@@ -113,6 +113,7 @@ namespace AnnotationTool
         {
             FileToJAMS();
             JAMSToPatterns();
+            JAMSToLogs();
         }
 
         private void FileToJAMS()
@@ -890,6 +891,55 @@ namespace AnnotationTool
                         patterns[patternIndex].GetOccurrences()[occurrenceIndex].SetEnd(start + duration);
                     }
                 }
+            }
+        }
+
+        private void JAMSToLogs()
+        {
+            logs = new List<Log>();
+            
+            foreach (KeyValuePair<string, string> sandboxElement in jamsParse.sandbox)
+            {
+                Log tempLog = new Log();
+                string[] logElements = sandboxElement.Value.Split(';');
+
+                foreach (string logElement in logElements)
+                {
+                    int stringIndex = 0;
+                    string tempString = "";
+
+                    while (logElement[stringIndex] != ':')
+                    {
+                        tempString += logElement[stringIndex];
+                        stringIndex++;
+                    }
+
+                    stringIndex++;
+                    string tempString2 = "";
+
+                    while (stringIndex != logElement.Length)
+                    {
+                        tempString2 += logElement[stringIndex];
+                        stringIndex++;
+                    }
+
+                    switch (tempString)
+                    {
+                        case "type":
+                            Enum.TryParse(tempString2, out tempLog.logType);
+                        break;
+
+                        case "time":
+                            TimeSpan.TryParse(tempString2, out tempLog.time);
+                        break;
+
+                        case "value":
+                            tempLog.value = tempString2;
+                        break;
+                    }
+                }
+
+                logs.Add(tempLog);
             }
         }
 

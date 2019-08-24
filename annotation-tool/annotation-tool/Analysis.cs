@@ -8,13 +8,32 @@ namespace AnnotationTool
     {
         private static string root = "C:\\Users\\steph\\Dropbox\\University - Master's\\Year 2\\Thesis Annotations\\";
         private static string[] midiNames = { "bach1", "bach2", "bee1", "hay1", "mo155", "mo458" };
+        private static double inactivityThreshold = 120; // Threshold for time between logs which counts as inactivity.
 
         public static void Main(string[] args)
         {
             Tuple<Dictionary<string, Dictionary<string, List<Pattern>>>, Dictionary<string, Dictionary<string, List<Log>>>> data = ImportData();
 
-            List<Tuple<string, string, string, string>> dataOverview = GetFilesOverview(data.Item1);
-            TupleToCSV(dataOverview, root + "filesoverview.csv");
+            //List<Tuple<string, string, string, string>> participantOverview = GetParticipantsOverview(data.Item1);
+            //TupleToCSV(participantOverview, root + "participantsoverview.csv");
+
+            //List<Tuple<string, string, string, string>> fileOverview = GetFilesOverview(data.Item1);
+            //TupleToCSV(fileOverview, root + "filesoverview.csv");
+
+            //List<Tuple<string, string, string>> timeTakenPerParticipant = GetTimeTakenPerParticipant(data.Item2);
+            //TupleToCSV(timeTakenPerParticipant, root + "timeparticipantseconds.csv");
+
+            //List<Tuple<string, string>> timeTakenPerFile = GetTimeTakenPerFile(data.Item2);
+            //TupleToCSV(timeTakenPerFile, root + "timefile.csv");
+
+
+        }
+
+        private static double CompareAnnotations(List<Pattern> annotation1, List<Pattern> annotation2)
+        {
+            double agreement = 0;
+
+            return agreement;
         }
 
         private static Tuple<Dictionary<string, Dictionary<string, List<Pattern>>>, Dictionary<string, Dictionary<string, List<Log>>>> ImportData()
@@ -41,8 +60,10 @@ namespace AnnotationTool
                             FileParser fileParser = new FileParser(File.ReadAllText(jamsFile));
                             fileParser.ParseFile();
                             List<Pattern> filePatterns = fileParser.patterns;
+                            List<Log> fileLogs = fileParser.logs;
 
                             annotations.Add(midiName, filePatterns);
+                            logs.Add(midiName, fileLogs);
                             midiNamesList.Remove(midiName);
 
                             break;
@@ -51,11 +72,122 @@ namespace AnnotationTool
                 }
 
                 importedPatterns.Add(folderName, annotations);
+                importedLogs.Add(folderName, logs);
             }
 
             Tuple<Dictionary<string, Dictionary<string, List<Pattern>>>, Dictionary<string, Dictionary<string, List<Log>>>> data = new Tuple<Dictionary<string, Dictionary<string, List<Pattern>>>, Dictionary<string, Dictionary<string, List<Log>>>>(importedPatterns, importedLogs);
 
             return data;
+        }
+
+        private static List<Tuple<string, string>> GetTimeTakenPerFile(Dictionary<string, Dictionary<string, List<Log>>> logs)
+        {
+            List<Tuple<string, string>> timeTakenPerFile = new List<Tuple<string, string>>();
+            List<double> totalTimes = new List<double>();
+
+            for (int i = 0; i < midiNames.Length; i++)
+            {
+                totalTimes.Add(0);
+            }
+
+            foreach (KeyValuePair<string, Dictionary<string, List<Log>>> participantLogs in logs)
+            {
+                foreach (KeyValuePair<string, List<Log>> file in participantLogs.Value)
+                {
+                    for (int i = 0; i < midiNames.Length; i++)
+                    {
+                        if (file.Key.Equals(midiNames[i]))
+                        {
+                            Tuple<TimeSpan, TimeSpan> time = GetTimeTaken(file.Key, file.Value);
+                            totalTimes[i] += time.Item1.TotalSeconds;
+                        }
+                    }
+                }
+            }
+
+            for (int i = 0; i < midiNames.Length; i++)
+            {
+                double averageTime = totalTimes[i] / logs.Count;
+                Tuple<string, string> timeTaken = new Tuple<string, string>(midiNames[i], MakeTimeReadable(averageTime));
+                timeTakenPerFile.Add(timeTaken);
+            }
+
+            return timeTakenPerFile;
+        }
+
+        private static List<Tuple<string, string, string>> GetTimeTakenPerParticipant(Dictionary<string, Dictionary<string, List<Log>>> logs)
+        {
+            List<Tuple<string, string, string>> timeTakenPerParticipant = new List<Tuple<string, string, string>>();
+
+            foreach (KeyValuePair<string, Dictionary<string, List<Log>>> participantLogs in logs)
+            {
+                double totalActivitySeconds = 0;
+                double totalInactivitySeconds = 0;
+
+                foreach (KeyValuePair<string, List<Log>> file in participantLogs.Value)
+                {
+                    Tuple<TimeSpan, TimeSpan> time = GetTimeTaken(file.Key, file.Value);
+                    totalActivitySeconds += time.Item1.TotalSeconds;
+                    totalInactivitySeconds += time.Item2.TotalSeconds;
+                }
+
+                Tuple<string, string, string> timeTaken = new Tuple<string, string, string>(participantLogs.Key, MakeTimeReadable(totalActivitySeconds), MakeTimeReadable(totalInactivitySeconds));
+                timeTakenPerParticipant.Add(timeTaken);
+            }
+
+            return timeTakenPerParticipant;
+        }
+
+        private static string MakeTimeReadable(double seconds)
+        {
+            TimeSpan timeSpan = TimeSpan.FromSeconds(seconds);
+
+            return "" + timeSpan.Hours + "h" + 
+                (timeSpan.Minutes < 10 ? "0" : "") + timeSpan.Minutes + "m" +
+                (timeSpan.Seconds < 10 ? "0" : "") + timeSpan.Seconds + "." +
+                (timeSpan.Milliseconds < 100 ? "0" : "") + (timeSpan.Milliseconds < 10 ? "0" : "") + timeSpan.Milliseconds + "s"; 
+        }
+
+        private static Tuple<TimeSpan, TimeSpan> GetTimeTaken(string fileName, List<Log> fileLogs)
+        {
+            TimeSpan time = new TimeSpan(0);
+            TimeSpan inactivity = new TimeSpan(0);
+            bool counting = false;
+
+            for (int i = 0; i < fileLogs.Count; i++)
+            {
+                if (counting)
+                {
+                    double difference = fileLogs[i].time.TotalSeconds - fileLogs[i - 1].time.TotalSeconds;
+
+                    if (difference < inactivityThreshold)
+                    {
+                        time = time.Add(TimeSpan.FromSeconds(difference));
+                    }
+                    else
+                    {
+                        inactivity = inactivity.Add(TimeSpan.FromSeconds(difference));
+                    }
+                }
+
+                if (fileLogs[i].logType == LogType.LoadedFile)
+                {
+                    if (fileLogs[i].value.Split('.')[0].Equals(fileName))
+                    {
+                        counting = true;
+                    }
+                    else if (counting) break;
+                }
+
+                if (counting && fileLogs[i].logType == LogType.Session && fileLogs[i].value.Equals("Sessionend"))
+                {
+                    break;
+                }
+            }
+
+            Tuple<TimeSpan, TimeSpan> timeResults = new Tuple<TimeSpan, TimeSpan>(time, inactivity);
+
+            return timeResults;
         }
 
         private static List<Tuple<string, string, string, string>> GetFilesOverview(Dictionary<string, Dictionary<string, List<Pattern>>> data)
@@ -66,7 +198,7 @@ namespace AnnotationTool
             List<int> totalNotes = new List<int>();
             List<double> averageNotes = new List<double>();
 
-            foreach (string midiName in midiNames)
+            for (int i = 0; i < midiNames.Length; i++)
             {
                 totalPatterns.Add(0);
                 totalOccurrences.Add(0);
@@ -143,6 +275,19 @@ namespace AnnotationTool
             }
 
             return participantsOverview;
+        }
+
+        private static void TupleToCSV(List<Tuple<string, string>> tuples, string filename)
+        {
+            List<string> textLines = new List<string>();
+
+            foreach (Tuple<string, string> tuple in tuples)
+            {
+                string textLine = tuple.Item1 + ", " + tuple.Item2;
+                textLines.Add(textLine);
+            }
+
+            File.WriteAllLines(filename, textLines);
         }
 
         private static void TupleToCSV(List<Tuple<string, string, string>> tuples, string filename)
