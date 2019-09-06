@@ -1450,7 +1450,7 @@ namespace AnnotationTool.views
                                 {
                                     for (int j = 0; j < tempNotes.Count; j++)
                                     {
-                                        if (AreTwoNotesEqual(occurrence.highlightedNotes[i].note, tempNotes[j].note))
+                                        if (NoteRect.AreTwoNotesEqual(occurrence.highlightedNotes[i].note, tempNotes[j].note))
                                         {
                                             tempNotes.RemoveAt(j);
                                             break;
@@ -1495,15 +1495,6 @@ namespace AnnotationTool.views
             }
 
             return occurrencesNoDuplicates;
-        }
-
-        private bool AreTwoNotesEqual(Note note1, Note note2)
-        {
-            bool pitchesEqual = note1.GetPitch() == note2.GetPitch();
-            bool timesEqual = note1.GetTime() == note2.GetTime();
-            bool durationsEqual = note1.GetDuration() == note2.GetDuration();
-
-            return pitchesEqual && timesEqual && durationsEqual;
         }
 
         private string ConcatenateList(List<String> stringList)
@@ -2287,7 +2278,7 @@ namespace AnnotationTool.views
                         {
                             foreach (NoteRect noteRect in notes[0])
                             {
-                                if (AreTwoNotesEqual(noteRect.note, highlightedNote.note))
+                                if (NoteRect.AreTwoNotesEqual(noteRect.note, highlightedNote.note))
                                 {
                                     highlightedNotes.Add(noteRect);
                                 }

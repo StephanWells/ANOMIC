@@ -45,6 +45,15 @@ namespace AnnotationTool
         public Note note;
         public Rectangle noteBar;
         public Dictionary<string, Rectangle> noteOutlines;
+
+        public static bool AreTwoNotesEqual(Note note1, Note note2)
+        {
+            bool pitchesEqual = note1.GetPitch() == note2.GetPitch();
+            bool timesEqual = note1.GetTime() == note2.GetTime();
+            bool durationsEqual = note1.GetDuration() == note2.GetDuration();
+
+            return pitchesEqual && timesEqual && durationsEqual;
+        }
     }
 
     public struct Settings

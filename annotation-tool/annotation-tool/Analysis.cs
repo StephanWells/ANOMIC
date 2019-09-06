@@ -4,11 +4,32 @@ using System.IO;
 
 namespace AnnotationTool
 {
+    public class ReverseComparer : IComparer<double>
+    {
+        public int Compare(double x, double y)
+        {
+            // Compare y and x in reverse order.
+            return y.CompareTo(x);
+        }
+    }
+
     public static class Analysis
     {
         private static string root = "C:\\Users\\steph\\Dropbox\\University - Master's\\Year 2\\Thesis Annotations\\";
         private static string[] midiNames = { "bach1", "bach2", "bee1", "hay1", "mo155", "mo458" };
         private static double inactivityThreshold = 120; // Threshold for time between logs which counts as inactivity.
+        private enum MatrixDirection
+        {
+            ROW,
+            COLUMN
+        };
+        private struct MatrixLine
+        {
+            public int val;
+            public MatrixDirection dir;
+        };
+
+        private static int testCounter = 0;
 
         public static void Main(string[] args)
         {
@@ -26,18 +47,18 @@ namespace AnnotationTool
             //List<Tuple<string, string>> timeTakenPerFile = GetTimeTakenPerFile(data.Item2);
             //TupleToCSV(timeTakenPerFile, root + "timefile.csv");
 
+            //double[,] test = new double[3, 3] { { 8, 10, 1 }, { 2, 9, 2 }, { 9, 4, 5 } };
+            //HungarianAlgorithm(test);
 
-        }
-
-        private static double CompareAnnotations(List<Pattern> annotation1, List<Pattern> annotation2)
-        {
-            double agreement = 0;
-
-            return agreement;
+            //double[,] test = new double[5, 5] { { 0, 1, 0, 1, 1 }, { 1, 1, 0, 1, 1 }, { 1, 0, 0, 0, 1 }, { 1, 1, 0, 1, 1 }, { 1, 0, 0, 1, 0 } };
+            //double[,] test = new double[3, 3] { { 0, 0, 1 }, { 0, 1, 1 }, { 1, 0, 1 } };
+            double test = CompareAnnotations(data.Item1["Troisnyx"]["bach1"], data.Item1["Myriada"]["bach1"]);
         }
 
         private static Tuple<Dictionary<string, Dictionary<string, List<Pattern>>>, Dictionary<string, Dictionary<string, List<Log>>>> ImportData()
         {
+            Console.WriteLine("- IMPORTING DATA:");
+
             Dictionary<string, Dictionary<string, List<Pattern>>> importedPatterns = new Dictionary<string, Dictionary<string, List<Pattern>>>();
             Dictionary<string, Dictionary<string, List<Log>>> importedLogs = new Dictionary<string, Dictionary<string, List<Log>>>();
 
@@ -48,6 +69,8 @@ namespace AnnotationTool
                 string folderName = new DirectoryInfo(folder).Name;
                 Dictionary<string, List<Pattern>> annotations = new Dictionary<string, List<Pattern>>();
                 Dictionary<string, List<Log>> logs = new Dictionary<string, List<Log>>();
+
+                Console.Write("-- Folder: " + folderName + "...\t" + (folderName.Length < 11 ? "\t" : ""));
 
                 foreach (string jamsFile in Directory.EnumerateFiles(folder, "*.jams"))
                 {
@@ -73,11 +96,255 @@ namespace AnnotationTool
 
                 importedPatterns.Add(folderName, annotations);
                 importedLogs.Add(folderName, logs);
+
+                Console.WriteLine("Loaded!");
             }
 
             Tuple<Dictionary<string, Dictionary<string, List<Pattern>>>, Dictionary<string, Dictionary<string, List<Log>>>> data = new Tuple<Dictionary<string, Dictionary<string, List<Pattern>>>, Dictionary<string, Dictionary<string, List<Log>>>>(importedPatterns, importedLogs);
 
+            Console.WriteLine("- DATA IMPORTED. Folder count: " + data.Item1.Count);
+            Console.WriteLine();
+
             return data;
+        }
+
+        private static List<Occurrence> PatternListToOccurrenceList(List<Pattern> patterns)
+        {
+            List<Occurrence> occurrences = new List<Occurrence>();
+
+            foreach (Pattern pattern in patterns)
+            {
+                foreach (Occurrence occurrence in pattern.GetOccurrences())
+                {
+                    occurrences.Add(occurrence);
+                }
+            }
+
+            return occurrences;
+        }
+
+        private static double CompareOccurrences(Occurrence occ1, Occurrence occ2)
+        {
+            double agreement = 0;
+            bool found = false;
+            
+            foreach (NoteRect noteRect1 in occ1.highlightedNotes)
+            {
+                foreach (NoteRect noteRect2 in occ2.highlightedNotes)
+                {
+                    if (NoteRect.AreTwoNotesEqual(noteRect1.note, noteRect2.note))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (found)
+                {
+                    found = false;
+                    agreement += 1;
+                }
+            }
+
+            agreement = Math.Round(agreement / occ1.highlightedNotes.Count, 2);
+
+            return agreement;
+        }
+
+        private static double CompareAnnotations(List<Pattern> patterns1, List<Pattern> patterns2)
+        {
+            double agreement = 0;
+            List<Occurrence> annotation1 = PatternListToOccurrenceList(patterns1);
+            List<Occurrence> annotation2 = PatternListToOccurrenceList(patterns2);
+            double[,] agreementMatrix = new double[annotation1.Count, annotation2.Count];
+
+            for (int i = 0; i < annotation1.Count; i++)
+            {
+                for (int j = 0; j < annotation2.Count; j++)
+                {
+                    agreementMatrix[i, j] = CompareOccurrences(annotation1[i], annotation2[j]);
+                }
+            }
+
+            List<Tuple<int, int>> assignments = Assign(agreementMatrix);
+            double totalAgreement = 0;
+
+            foreach (Tuple<int, int> assignment in assignments)
+            {
+                totalAgreement += agreementMatrix[assignment.Item1, assignment.Item2];
+            }
+
+            return totalAgreement / assignments.Count;
+        }
+
+        private static List<Tuple<int, int>> Assign(double[,] matrix)
+        {
+            List<Tuple<int, int>> assignments = new List<Tuple<int, int>>();
+            List<Tuple<Tuple<int, int>, double>> remainingList = GetMaxOfEachRow(matrix);
+
+            do
+            {
+                Tuple<Tuple<int, int>[], double[]> maximumArrays = ListToParallelArrays(remainingList);
+                Tuple<int, int>[] indices = maximumArrays.Item1;
+                double[] values = maximumArrays.Item2;
+
+                Array.Sort(values, indices, new ReverseComparer());
+                List<int> usedColumns = new List<int>();
+                remainingList = new List<Tuple<Tuple<int, int>, double>>();
+
+                for (int i = 0; i < indices.Length; i++)
+                {
+                    if (usedColumns.Contains(indices[i].Item2))
+                    {
+                        remainingList.Add(new Tuple<Tuple<int, int>, double>(indices[i], values[i]));
+                    }
+                    else
+                    {
+                        usedColumns.Add(indices[i].Item2);
+                        assignments.Add(new Tuple<int, int>(indices[i].Item1, indices[i].Item2));
+
+                        for (int j = 0; j < matrix.GetLength(1); j++)
+                        {
+                            matrix[j, indices[i].Item2] = 0;
+                        }
+                    }
+                }
+
+                List<Tuple<Tuple<int, int>, double>> tempList = new List<Tuple<Tuple<int, int>, double>>(remainingList);
+                remainingList = new List<Tuple<Tuple<int, int>, double>>();
+
+                for (int j = 0; j < tempList.Count; j++)
+                {
+                    remainingList.Add(GetRowMax(matrix, tempList[j].Item1.Item1));
+                }
+            } while (remainingList.Count > 0);
+
+            return assignments;
+        }
+
+        private static List<Tuple<Tuple<int, int>, double>> GetMaxOfEachRow(double[,] matrix)
+        {
+            List<Tuple<Tuple<int, int>, double>> maximums = new List<Tuple<Tuple<int, int>, double>>();
+
+            for (int i = 0; i < matrix.GetLength(0); i++)
+            {
+                Tuple<Tuple<int, int>, double> rowMax = GetRowMax(matrix, i);
+                maximums.Add(rowMax);
+            }
+
+            return maximums;
+        }
+
+        private static Tuple<K[], V[]> ListToParallelArrays<K, V>(List<Tuple<K, V>> list)
+        {
+            K[] indices = new K[list.Count];
+            V[] values = new V[list.Count];
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                indices[i] = list[i].Item1;
+                values[i] = list[i].Item2;
+            }
+
+            return new Tuple<K[], V[]>(indices, values);
+        }
+
+        private static Tuple<Tuple<int, int>, double> GetRowMax(double[,] matrix, int rowIndex)
+        {
+            int maxIndex = -1;
+            double maxValue = 0;
+            double[] row = GetRow(matrix, rowIndex);
+
+            for (int i = 0; i < row.Length; i++)
+            {
+                if (maxValue < row[i])
+                {
+                    maxValue = row[i];
+                    maxIndex = i;
+                }
+            }
+
+            return new Tuple<Tuple<int, int>, double>(new Tuple<int, int>(rowIndex, maxIndex), maxValue);
+        }
+
+        private static void OutputMatrix<T>(T[,] matrix)
+        {
+            for (int i = 0; i < matrix.GetLength(0); i++)
+            {
+                for (int j = 0; j < matrix.GetLength(1); j++)
+                {
+                    Console.Write("[" + matrix[i, j] + "]");
+                }
+
+                Console.WriteLine();
+            }
+
+            Console.WriteLine();
+        }
+
+        private static Dictionary<string, double[,]> GetConfusionMatrix(Dictionary<string, Dictionary<string, List<Pattern>>> data)
+        {
+            Console.WriteLine("- CALCULATING CONFUSION MATRIX:");
+
+            Dictionary<string, double[,]> confuMatrix = new Dictionary<string, double[,]>();
+
+            for (int i = 0; i < midiNames.Length; i++)
+            {
+                confuMatrix.Add(midiNames[i], new double[data.Count, data.Count]);
+            }
+
+            int participantCount1 = 0, participantCount2 = 0;
+            int totalMatches = data.Count * data.Count;
+            int runningMatches = 0;
+            Dictionary<string, List<Pattern>> annotationsPerParticipant = new Dictionary<string, List<Pattern>>();
+
+            foreach (KeyValuePair<string, Dictionary<string, List<Pattern>>> annotations in data)
+            {
+                foreach (KeyValuePair<string, Dictionary<string, List<Pattern>>> annotations2 in data)
+                {
+                    foreach (KeyValuePair<string, List<Pattern>> files in annotations.Value)
+                    {
+                        confuMatrix[files.Key][participantCount1, participantCount2] = CompareAnnotations(annotations.Value[files.Key], annotations2.Value[files.Key]);
+                    }
+
+                    participantCount2++;
+                    runningMatches++;
+
+                    Console.Write("\r-- " + ((runningMatches * 100) / (totalMatches)) + "%");
+                }
+
+                participantCount1++;
+                participantCount2 = 0;
+            }
+
+            Console.WriteLine(": Done!");
+            Console.WriteLine();
+
+            return confuMatrix;
+        }
+
+        private static T[] GetRow<T>(T[,] matrix, int rowIndex)
+        {
+            T[] row = new T[matrix.GetLength(0)];
+
+            for (int i = 0; i < matrix.GetLength(1); i++)
+            {
+                row[i] = matrix[rowIndex, i];
+            }
+
+            return row;
+        }
+
+        private static T[] GetColumn<T>(T[,] matrix, int columnIndex)
+        {
+            T[] column = new T[matrix.GetLength(0)];
+
+            for (int i = 0; i < matrix.GetLength(0); i++)
+            {
+                column[i] = matrix[i, columnIndex];
+            }
+
+            return column;
         }
 
         private static List<Tuple<string, string>> GetTimeTakenPerFile(Dictionary<string, Dictionary<string, List<Log>>> logs)
@@ -315,5 +582,381 @@ namespace AnnotationTool
 
             File.WriteAllLines(filename, textLines);
         }
+
+        /*private static int CountZeros(string[] nums)
+        {
+            int zeroCount = 0;
+
+            foreach (string num in nums)
+            {
+                if (num == "0")
+                {
+                    zeroCount++;
+                }
+            }
+
+            return zeroCount;
+        }*/
+
+        /*private static double[,] SubtractRowMinima(double[,] matrix)
+        {
+            double min = double.MaxValue;
+
+            for (int i = 0; i < matrix.GetLength(0); i++)
+            {
+                // Finding minimum value in a row.
+                for (int j = 0; j < matrix.GetLength(1); j++)
+                {
+                    if (matrix[i, j] < min)
+                    {
+                        min = matrix[i, j];
+                    }
+                }
+
+                // Subtracting all row elements by that value
+                for (int j = 0; j < matrix.GetLength(1); j++)
+                {
+                    matrix[i, j] -= min;
+                }
+
+                min = double.MaxValue;
+            }
+
+            return matrix;
+        }*/
+
+        /*private static double[,] SubtractColumnMinima(double[,] matrix)
+        {
+            double min = double.MaxValue;
+
+            for (int j = 0; j < matrix.GetLength(1); j++)
+            {
+                // Finding minimum value in a column.
+                for (int i = 0; i < matrix.GetLength(0); i++)
+                {
+                    if (matrix[i, j] < min)
+                    {
+                        min = matrix[i, j];
+                    }
+                }
+
+                // Subtracting all column elements by that value
+                for (int i = 0; i < matrix.GetLength(1); i++)
+                {
+                    matrix[i, j] -= min;
+                }
+
+                min = double.MaxValue;
+            }
+
+            return matrix;
+        }*/
+
+        /*private static void HungarianAlgorithm(double[,] matrix)
+        {
+            double[,] tempMatrix = (double[,])matrix.Clone();
+
+            matrix = NegativeMatrix(matrix);
+            matrix = AddDummyValues(matrix);
+            matrix = SubtractRowMinima(matrix);
+            matrix = SubtractColumnMinima(matrix);
+
+            Tuple<string[,], int> lines = MarkMatrix(matrix);
+
+            if (lines.Item2 == matrix.GetLength(0)) // If assignment is possible.
+            {
+                List<Tuple<int, int>> assignments = Assign(matrix);
+            }
+        }*/
+
+        /*private static List<Tuple<int, int>> Assign(double[,] matrix)
+        {
+            List<Tuple<int, int>> assignments = new List<Tuple<int, int>>();
+
+            string[,] markedMatrix = new string[matrix.GetLength(0), matrix.GetLength(1)];
+
+            for (int i = 0; i < markedMatrix.GetLength(0); i++)
+            {
+                for (int j = 0; j < markedMatrix.GetLength(1); j++)
+                {
+                    markedMatrix[i, j] = "" + matrix[i, j];
+                }
+            }
+
+            for (int i = 0; i < matrix.GetLength(0); i++)
+            {
+                double[] row = GetRow(matrix, i);
+                List<int> zeroIndices = GetZeroIndices(row);
+
+                if (zeroIndices.Count == 1)
+                {
+                    assignments.Add(new Tuple<int, int>(i, zeroIndices[0]));
+
+                    for (int j = 0; j < matrix.GetLength(1); j++)
+                    {
+                        matrix[i, j] = 0;
+                    }
+                }
+            }
+
+            return assignments;
+        }*/
+
+        /*private static Tuple<string[,], int> MarkMatrix(double[,] matrix)
+        {
+            string[,] markedMatrix = new string[matrix.GetLength(0), matrix.GetLength(1)];
+
+            for (int i = 0; i < markedMatrix.GetLength(0); i++)
+            {
+                for (int j = 0; j < markedMatrix.GetLength(1); j++)
+                {
+                    markedMatrix[i, j] = "" + matrix[i, j];
+                }
+            }
+
+            MatrixLine[] zeroCounts = GetZeroCounts(markedMatrix);
+            List<MatrixLine> maxZeroResults = GetMaxZeroLines(zeroCounts, markedMatrix);
+            int runningCount = 0;
+
+            if (maxZeroResults.Count > 0)
+            {
+                int matrixIndex = maxZeroResults[0].dir == MatrixDirection.ROW ? maxZeroResults[0].val : maxZeroResults[0].val - matrix.GetLength(0);
+
+                if (zeroCounts[matrixIndex].val == matrix.GetLength(0))
+                {
+                    foreach (MatrixLine line in maxZeroResults)
+                    {
+                        markedMatrix = MarkLine(markedMatrix, line);
+                        runningCount++;
+                    }
+                }
+            }
+
+            Tuple<string[,], int> markResults = MarkLines(markedMatrix, runningCount, -1);
+
+            return markResults;
+        }*/
+
+        /*private static Tuple<string[,], int> MarkLines(string[,] markedMatrix, int runningCount, int testingCount)
+        {
+            MatrixLine[] zeroCounts = GetZeroCounts(markedMatrix);
+            List<MatrixLine> maxZeroResults = GetMaxZeroLines(zeroCounts, markedMatrix);
+            string[,] resultMatrix = (string[,])markedMatrix.Clone();
+
+            //Console.WriteLine("-- Running Count: " + runningCount + " - Max Zero Counts: " + maxZeroResults.Count);
+
+            // If only one line with the maximum count of zeros was found.
+            if (maxZeroResults.Count == 1)
+            {
+                runningCount++;
+
+                if (runningCount > testingCount && testingCount != -1)
+                {
+                    return new Tuple<string[,], int>((string[,])resultMatrix.Clone(), runningCount);
+                }
+
+                resultMatrix = MarkLine(markedMatrix, maxZeroResults[0]);
+                Tuple<string[,], int> markResults = MarkLines(resultMatrix, runningCount, -1);
+                resultMatrix = markResults.Item1;
+                runningCount = markResults.Item2;
+            }
+            else if (maxZeroResults.Count > 1)
+            {
+                if (zeroCounts[maxZeroResults[0].val].val == 1) // Early out: if the remaining possible lines are just singular 0s.
+                {
+                    foreach (MatrixLine matrixLine in maxZeroResults) // Fill all the rows.
+                    {
+                        if (matrixLine.dir == MatrixDirection.COLUMN) break; // At this point all 0s would have been filled by rows.
+
+                        resultMatrix = MarkLine(markedMatrix, matrixLine);
+                        runningCount++;
+                    }
+                }
+                else
+                {
+                    runningCount++;
+
+                    if (runningCount > testingCount && testingCount != -1)
+                    {
+                        return new Tuple<string[,], int>((string[,])resultMatrix.Clone(), runningCount);
+                    }
+
+                    List<int> potentialLineCounts = new List<int>();
+                    List<string[,]> potentialMatrices = new List<string[,]>();
+
+                    if (runningCount <= 1)
+                    {
+                        Console.WriteLine("- Test: " + testCounter++ + ", Potentials: " + maxZeroResults.Count);
+                    }
+
+                    foreach (MatrixLine matrixLine in maxZeroResults)
+                    {
+                        string[,] potentialMatrix = (string[,])markedMatrix.Clone();
+                        potentialMatrix = MarkLine(potentialMatrix, matrixLine);
+
+                        Tuple<string[,], int> markResults = MarkLines(potentialMatrix, runningCount, testingCount);
+                        potentialMatrices.Add((string[,])markResults.Item1.Clone());
+                        potentialLineCounts.Add(markResults.Item2);
+
+                        if (testingCount == -1)
+                        {
+                            testingCount = markResults.Item2;
+                        }
+                        else
+                        {
+                            if (testingCount > markResults.Item2)
+                            {
+                                testingCount = markResults.Item2;
+                            }
+                        }
+                    }
+
+                    int minLineCount = int.MaxValue;
+                    int minIndex = -1;
+
+                    for (int i = 0; i < potentialLineCounts.Count; i++)
+                    {
+                        if (minLineCount >= potentialLineCounts[i])
+                        {
+                            minLineCount = potentialLineCounts[i];
+                            minIndex = i;
+                        }
+                    }
+
+                    resultMatrix = (string[,])potentialMatrices[minIndex].Clone();
+                    runningCount = potentialLineCounts[minIndex];
+                }
+            }
+            else
+            {
+                resultMatrix = (string[,])markedMatrix.Clone();
+            }
+
+            return new Tuple<string[,], int>((string[,])resultMatrix.Clone(), runningCount);
+        }*/
+
+        /*private static MatrixLine[] GetZeroCounts(string[,] matrix)
+        {
+            MatrixLine[] zeroCounts = new MatrixLine[matrix.GetLength(0) + matrix.GetLength(1)];
+
+            // Initialising row zero counts.
+            for (int i = 0; i < matrix.GetLength(0); i++)
+            {
+                string[] row = GetRow(matrix, i);
+                zeroCounts[i].val = CountZeros(row);
+                zeroCounts[i].dir = MatrixDirection.ROW;
+            }
+
+            // Initialising column zero counts.
+            for (int j = 0; j < matrix.GetLength(1); j++)
+            {
+                string[] col = GetColumn(matrix, j);
+                zeroCounts[j + matrix.GetLength(0)].val = CountZeros(col);
+                zeroCounts[j + matrix.GetLength(0)].dir = MatrixDirection.COLUMN;
+            }
+
+            return zeroCounts;
+        }*/
+
+        /*private static List<int> GetZeroIndices(double[] row)
+        {
+            List<int> zeroIndices = new List<int>();
+
+            for (int i = 0; i < row.Length; i++)
+            {
+                if (row[i] == 0)
+                {
+                    zeroIndices.Add(i);
+                }
+            }
+
+            return zeroIndices;
+        }*/
+
+        /*private static List<MatrixLine> GetMaxZeroLines(MatrixLine[] zeroCounts, string[,] markedMatrix)
+        {
+            // Finding the row or column with the most zeros.
+            int maxCount = 0;
+            List<MatrixLine> maxIndex = new List<MatrixLine>();
+
+            for (int i = 0; i < zeroCounts.Length; i++)
+            {
+                if (zeroCounts[i].val > maxCount)
+                {
+                    maxCount = zeroCounts[i].val;
+                    maxIndex = new List<MatrixLine>();
+                    MatrixLine matrixLine = new MatrixLine();
+                    matrixLine.val = i - ((zeroCounts[i].dir == MatrixDirection.COLUMN) ? markedMatrix.GetLength(0) : 0);
+                    matrixLine.dir = zeroCounts[i].dir;
+                    maxIndex.Add(matrixLine);
+                }
+                else if (zeroCounts[i].val == maxCount && maxCount != 0)
+                {
+                    maxCount = zeroCounts[i].val;
+                    MatrixLine matrixLine = new MatrixLine();
+                    matrixLine.val = i - ((zeroCounts[i].dir == MatrixDirection.COLUMN) ? markedMatrix.GetLength(0) : 0);
+                    matrixLine.dir = zeroCounts[i].dir;
+                    maxIndex.Add(matrixLine);
+                }
+            }
+
+            return maxIndex;
+        }*/
+
+        /*private static string[,] MarkLine(string[,] markedMatrix, MatrixLine line)
+        {
+            if (line.dir == MatrixDirection.ROW)
+            {
+                for (int i = 0; i < markedMatrix.GetLength(1); i++)
+                {
+                    markedMatrix[line.val, i] = "x";
+                }
+            }
+            else
+            {
+                for (int i = 0; i < markedMatrix.GetLength(0); i++)
+                {
+                    markedMatrix[i, line.val] = "x";
+                }
+            }
+
+            return markedMatrix;
+        }*/
+
+        /*private static double[,] AddDummyValues(double[,] matrix)
+        {
+            int max = matrix.GetLength(0) > matrix.GetLength(1) ? matrix.GetLength(0) : matrix.GetLength(1);
+            double[,] resultMatrix = new double[max, max];
+
+            for (int i = 0; i < max; i++)
+            {
+                for (int j = 0; j < max; j++)
+                {
+                    if (i < matrix.GetLength(0) && j < matrix.GetLength(1))
+                    {
+                        resultMatrix[i, j] = matrix[i, j];
+                    }
+                    else
+                    {
+                        resultMatrix[i, j] = 0;
+                    }
+                }
+            }
+
+            return resultMatrix;
+        }*/
+
+        /*private static double[,] NegativeMatrix(double[,] matrix)
+        {
+            for (int i = 0; i < matrix.GetLength(0); i++)
+            {
+                for (int j = 0; j < matrix.GetLength(1); j++)
+                {
+                    matrix[i, j] *= -1;
+                }
+            }
+
+            return matrix;
+        }*/
     }
 }
