@@ -52,7 +52,11 @@ namespace AnnotationTool
 
             //double[,] test = new double[5, 5] { { 0, 1, 0, 1, 1 }, { 1, 1, 0, 1, 1 }, { 1, 0, 0, 0, 1 }, { 1, 1, 0, 1, 1 }, { 1, 0, 0, 1, 0 } };
             //double[,] test = new double[3, 3] { { 0, 0, 1 }, { 0, 1, 1 }, { 1, 0, 1 } };
-            double test = CompareAnnotations(data.Item1["Troisnyx"]["bach1"], data.Item1["Myriada"]["bach1"]);
+            //double test = CompareAnnotations(data.Item1["Troisnyx"]["bach1"], data.Item1["Myriada"]["bach1"]);
+
+            Dictionary<string, double[,]> confMatrix = GetConfusionMatrix(data.Item1);
+
+            OutputMatrix(confMatrix["bach1"]);
         }
 
         private static Tuple<Dictionary<string, Dictionary<string, List<Pattern>>>, Dictionary<string, Dictionary<string, List<Log>>>> ImportData()
@@ -153,7 +157,6 @@ namespace AnnotationTool
 
         private static double CompareAnnotations(List<Pattern> patterns1, List<Pattern> patterns2)
         {
-            double agreement = 0;
             List<Occurrence> annotation1 = PatternListToOccurrenceList(patterns1);
             List<Occurrence> annotation2 = PatternListToOccurrenceList(patterns2);
             double[,] agreementMatrix = new double[annotation1.Count, annotation2.Count];
@@ -179,8 +182,9 @@ namespace AnnotationTool
 
         private static List<Tuple<int, int>> Assign(double[,] matrix)
         {
+            double[,] tempMatrix = (double[,])matrix.Clone();
             List<Tuple<int, int>> assignments = new List<Tuple<int, int>>();
-            List<Tuple<Tuple<int, int>, double>> remainingList = GetMaxOfEachRow(matrix);
+            List<Tuple<Tuple<int, int>, double>> remainingList = GetMaxOfEachRow(tempMatrix);
 
             do
             {
@@ -203,9 +207,9 @@ namespace AnnotationTool
                         usedColumns.Add(indices[i].Item2);
                         assignments.Add(new Tuple<int, int>(indices[i].Item1, indices[i].Item2));
 
-                        for (int j = 0; j < matrix.GetLength(1); j++)
+                        for (int j = 0; j < tempMatrix.GetLength(0); j++)
                         {
-                            matrix[j, indices[i].Item2] = 0;
+                            tempMatrix[j, indices[i].Item2] = 0;
                         }
                     }
                 }
@@ -215,7 +219,7 @@ namespace AnnotationTool
 
                 for (int j = 0; j < tempList.Count; j++)
                 {
-                    remainingList.Add(GetRowMax(matrix, tempList[j].Item1.Item1));
+                    remainingList.Add(GetRowMax(tempMatrix, tempList[j].Item1.Item1));
                 }
             } while (remainingList.Count > 0);
 
@@ -257,7 +261,7 @@ namespace AnnotationTool
 
             for (int i = 0; i < row.Length; i++)
             {
-                if (maxValue < row[i])
+                if (maxValue <= row[i])
                 {
                     maxValue = row[i];
                     maxIndex = i;
@@ -304,7 +308,7 @@ namespace AnnotationTool
                 {
                     foreach (KeyValuePair<string, List<Pattern>> files in annotations.Value)
                     {
-                        confuMatrix[files.Key][participantCount1, participantCount2] = CompareAnnotations(annotations.Value[files.Key], annotations2.Value[files.Key]);
+                        confuMatrix[files.Key][participantCount1, participantCount2] = Math.Round(CompareAnnotations(annotations.Value[files.Key], annotations2.Value[files.Key]), 2);
                     }
 
                     participantCount2++;
@@ -325,7 +329,7 @@ namespace AnnotationTool
 
         private static T[] GetRow<T>(T[,] matrix, int rowIndex)
         {
-            T[] row = new T[matrix.GetLength(0)];
+            T[] row = new T[matrix.GetLength(1)];
 
             for (int i = 0; i < matrix.GetLength(1); i++)
             {
