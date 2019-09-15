@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Drawing;
+using System.Windows.Controls;
+using System.Drawing.Imaging;
+using System.Drawing.Drawing2D;
 
 namespace AnnotationTool
 {
@@ -35,28 +39,30 @@ namespace AnnotationTool
         {
             Tuple<Dictionary<string, Dictionary<string, List<Pattern>>>, Dictionary<string, Dictionary<string, List<Log>>>> data = ImportData();
 
-            //List<Tuple<string, string, string, string>> participantOverview = GetParticipantsOverview(data.Item1);
-            //TupleToCSV(participantOverview, root + "participantsoverview.csv");
+			//List<Tuple<string, string, string, string>> participantOverview = GetParticipantsOverview(data.Item1);
+			//TupleToCSV(participantOverview, root + "participantsoverview.csv");
 
-            //List<Tuple<string, string, string, string>> fileOverview = GetFilesOverview(data.Item1);
-            //TupleToCSV(fileOverview, root + "filesoverview.csv");
+			//List<Tuple<string, string, string, string>> fileOverview = GetFilesOverview(data.Item1);
+			//TupleToCSV(fileOverview, root + "filesoverview.csv");
 
-            //List<Tuple<string, string, string>> timeTakenPerParticipant = GetTimeTakenPerParticipant(data.Item2);
-            //TupleToCSV(timeTakenPerParticipant, root + "timeparticipantseconds.csv");
+			//List<Tuple<string, string, string>> timeTakenPerParticipant = GetTimeTakenPerParticipant(data.Item2);
+			//TupleToCSV(timeTakenPerParticipant, root + "timeparticipantseconds.csv");
 
-            //List<Tuple<string, string>> timeTakenPerFile = GetTimeTakenPerFile(data.Item2);
-            //TupleToCSV(timeTakenPerFile, root + "timefile.csv");
+			//List<Tuple<string, string>> timeTakenPerFile = GetTimeTakenPerFile(data.Item2);
+			//TupleToCSV(timeTakenPerFile, root + "timefile.csv");
 
-            //double[,] test = new double[3, 3] { { 8, 10, 1 }, { 2, 9, 2 }, { 9, 4, 5 } };
-            //HungarianAlgorithm(test);
+			//double[,] test = new double[3, 3] { { 8, 10, 1 }, { 2, 9, 2 }, { 9, 4, 5 } };
+			//HungarianAlgorithm(test);
 
-            //double[,] test = new double[5, 5] { { 0, 1, 0, 1, 1 }, { 1, 1, 0, 1, 1 }, { 1, 0, 0, 0, 1 }, { 1, 1, 0, 1, 1 }, { 1, 0, 0, 1, 0 } };
-            //double[,] test = new double[3, 3] { { 0, 0, 1 }, { 0, 1, 1 }, { 1, 0, 1 } };
-            //double test = CompareAnnotations(data.Item1["Troisnyx"]["bach1"], data.Item1["Myriada"]["bach1"]);
+			//double[,] test = new double[5, 5] { { 0, 1, 0, 1, 1 }, { 1, 1, 0, 1, 1 }, { 1, 0, 0, 0, 1 }, { 1, 1, 0, 1, 1 }, { 1, 0, 0, 1, 0 } };
+			//double[,] test = new double[3, 3] { { 0, 0, 1 }, { 0, 1, 1 }, { 1, 0, 1 } };
+			//double test = CompareAnnotations(data.Item1["Troisnyx"]["bach1"], data.Item1["Myriada"]["bach1"]);
 
-            Dictionary<string, double[,]> confMatrix = GetConfusionMatrix(data.Item1);
+			Dictionary<string, double[,]> confMatrix = GetConfusionMatrix(data.Item1);
 
-            OutputMatrix(confMatrix["bach1"]);
+			OutputConfusionMatrix(confMatrix["bach1"]);
+
+			double agreement = CompareAnnotations(data.Item1["Andrew"]["bach2"], data.Item1["Alex"]["bach2"]);
         }
 
         private static Tuple<Dictionary<string, Dictionary<string, List<Pattern>>>, Dictionary<string, Dictionary<string, List<Log>>>> ImportData()
@@ -112,6 +118,47 @@ namespace AnnotationTool
             return data;
         }
 
+		private static void OutputConfusionMatrix(double[,] confMatrix)
+		{
+			int size = 100;
+			Bitmap bmp = new Bitmap(confMatrix.GetLength(0) * size + size, confMatrix.GetLength(1) * size + size);
+			Graphics graph = Graphics.FromImage(bmp);
+			graph.SmoothingMode = SmoothingMode.AntiAlias;
+			graph.InterpolationMode = InterpolationMode.HighQualityBicubic;
+			graph.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+			for (int i = 1; i <= confMatrix.GetLength(0); i++)
+			{
+				graph.DrawString(i.ToString(), new Font("Tahoma", 40), Brushes.Black, new Point(i * size, 0));
+			}
+
+			for (int i = 1; i <= confMatrix.GetLength(1); i++)
+			{
+				graph.DrawString(i.ToString(), new Font("Tahoma", 40), Brushes.Black, new Point(0, i * size));
+			}
+
+			for (int i = 0; i < confMatrix.GetLength(0); i++)
+			{
+				for (int j = 0; j < confMatrix.GetLength(1); j++)
+				{
+					Point location = new Point((i + 1) * size, (j + 1) * size);
+					Size dimensions = new Size(size, size);
+
+					Rectangle matrixSquare = new Rectangle(location, dimensions);
+					byte r = (byte)(0);
+					byte g = (byte)(0);
+					byte b = (byte)(confMatrix[i, j] * 255);
+					Color squareColor = Color.FromArgb(255, r, g, b);
+					graph.FillRectangle(new SolidBrush(squareColor), matrixSquare);
+					graph.DrawString((confMatrix[i, j] * 100).ToString(), new Font("Agency FB", 40), Brushes.White, location);
+				}
+			}
+
+			Bitmap saveImage = (Bitmap)bmp.Clone();
+			bmp.Dispose();
+			saveImage.Save("C:\\Users\\steph\\Desktop\\matrix.png", ImageFormat.Png);
+		}
+
         private static List<Occurrence> PatternListToOccurrenceList(List<Pattern> patterns)
         {
             List<Occurrence> occurrences = new List<Occurrence>();
@@ -131,10 +178,13 @@ namespace AnnotationTool
         {
             double agreement = 0;
             bool found = false;
-            
-            foreach (NoteRect noteRect1 in occ1.highlightedNotes)
+
+			Occurrence largerOccurrence = occ1.highlightedNotes.Count > occ2.highlightedNotes.Count ? occ1 : occ2;
+			Occurrence smallerOccurrence = occ1.highlightedNotes.Count > occ2.highlightedNotes.Count ? occ2 : occ1;
+
+			foreach (NoteRect noteRect1 in largerOccurrence.highlightedNotes)
             {
-                foreach (NoteRect noteRect2 in occ2.highlightedNotes)
+                foreach (NoteRect noteRect2 in smallerOccurrence.highlightedNotes)
                 {
                     if (NoteRect.AreTwoNotesEqual(noteRect1.note, noteRect2.note))
                     {
@@ -150,7 +200,7 @@ namespace AnnotationTool
                 }
             }
 
-            agreement = Math.Round(agreement / occ1.highlightedNotes.Count, 2);
+            agreement = Math.Round(agreement / (largerOccurrence.highlightedNotes.Count), 2);
 
             return agreement;
         }
@@ -168,6 +218,8 @@ namespace AnnotationTool
                     agreementMatrix[i, j] = CompareOccurrences(annotation1[i], annotation2[j]);
                 }
             }
+
+			//OutputConfusionMatrix(agreementMatrix);
 
             List<Tuple<int, int>> assignments = Assign(agreementMatrix);
             double totalAgreement = 0;
