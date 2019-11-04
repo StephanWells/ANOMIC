@@ -1,0 +1,54 @@
+﻿<Button x:Class="Controls.OccurrenceIcon"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Controls"
+             xmlns:tool="clr-namespace:AnnotationTool"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Button.Resources>
+        <ResourceDictionary Source="../ResourceDict.xaml"/>
+    </Button.Resources>
+
+    <Button.ContextMenu>
+        <ContextMenu>
+            <MenuItem Header="_Delete" Click="OccurrenceIcon_DeleteClick"/>
+            <MenuItem Header="_Set Confidence Level">
+                <MenuItem x:Name="mnuConfidence3" Header="3" IsCheckable="True" IsChecked="true" Checked="OccurrenceIcon_ConfidenceChange"/>
+                <MenuItem x:Name="mnuConfidence2" Header="2" IsCheckable="True" IsChecked="false" Checked="OccurrenceIcon_ConfidenceChange"/>
+                <MenuItem x:Name="mnuConfidence1" Header="1" IsCheckable="True" IsChecked="false" Checked="OccurrenceIcon_ConfidenceChange"/>
+            </MenuItem>
+            <Separator Background="{DynamicResource MenuButtonMouseOverColour}" Margin="-22,3,0,3" Width="220" HorizontalAlignment="Left"/>
+            <MenuItem Header="_Find Exact Occurrences" Click="OccurrenceIcon_FindSimilar"/>
+        </ContextMenu>
+    </Button.ContextMenu>
+
+    <Button.Template>
+        <ControlTemplate TargetType="{x:Type Button}">
+            <Border Background="{DynamicResource GridDarkColour}" BorderBrush="{DynamicResource GridLightColour}" BorderThickness="1" Margin="0,0,0,0" MouseEnter="OccurrenceIcon_MouseIn" MouseLeave="OccurrenceIcon_MouseOut" MouseLeftButtonDown="OccurrenceIcon_MouseLeftClick">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="8*"/>
+                        <ColumnDefinition Width="2*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Row="0" Grid.Column="0" Background="{DynamicResource GridDarkColour}" BorderThickness="0" BorderBrush="{DynamicResource GridDarkColour}">
+                        <Button x:Name="DeleteButton" Style="{DynamicResource TextDeleteButton}" Click="OccurrenceIcon_DeleteClick"/>
+                    </Border>
+                    <Border Grid.Row="0" Grid.Column="1" Grid.RowSpan="3" Background="{TemplateBinding Background}" Opacity="0.8" BorderThickness="0" Grid.ColumnSpan="2">
+                        <TextBlock x:Name="OccurrenceText" VerticalAlignment="Center" FontSize="15" HorizontalAlignment="Center" Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=OccurrenceText, FallbackValue='0'}" Foreground="White"/>
+                    </Border>
+                    <Border Grid.Row="0" Grid.Column="2" Grid.RowSpan="3" Background="Transparent" Opacity="0.8" BorderThickness="0" Grid.ColumnSpan="1">
+                        <TextBlock x:Name="AutomaticIcon" VerticalAlignment="Center" FontSize="12" FontFamily="Segoe MDL2 Assets" HorizontalAlignment="Center" Text="&#xE945;" Foreground="#E6E6E6" Opacity="0.5" Visibility="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=AutomaticIcon, FallbackValue='Hidden'}"/>
+                    </Border>
+                </Grid>
+            </Border>
+        </ControlTemplate>
+    </Button.Template>
+</Button>

@@ -1,0 +1,100 @@
+﻿<Window x:Class="AnnotationTool.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AnnotationTool"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="550" Width="1000">
+
+    <Window.Resources>
+        <ResourceDictionary Source="ResourceDict.xaml"/>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0" Background="{DynamicResource GridDarkColour}" Panel.ZIndex="2">
+            <Menu x:Name="mnuMain" Background="{DynamicResource GridLightColour}" DockPanel.Dock="Top">
+                <MenuItem Header="File" Width="Auto">
+                    <MenuItem Header="_New MIDI" Width="200" Click="MainWindow_MIDIBrowseClick"/>
+                    <MenuItem Header="_Open Annotations" Width="200" Click="MainWindow_OpenAnnotationsClick"/>
+                    <MenuItem Header="_Save Annotations" Width="200" Click="MainWindow_SaveAnnotationsClick"/>
+                    <Separator Background="{DynamicResource MenuButtonMouseOverColour}" Margin="-22,3,0,3" Width="220" HorizontalAlignment="Left"/>
+                    <MenuItem Header="_Exit" Width="200" Click="MainWindow_Exit"/>
+                </MenuItem>
+
+                <MenuItem x:Name="mnuView" Header="View" Width="Auto" Visibility="Hidden">
+                    <MenuItem Header="_Horizontal Zoom" Width="200">
+                        <MenuItem Header="200%" Width="200" Click="MainWindow_HorizZoomChange"/>
+                        <MenuItem Header="180%" Width="200" Click="MainWindow_HorizZoomChange"/>
+                        <MenuItem Header="160%" Width="200" Click="MainWindow_HorizZoomChange"/>
+                        <MenuItem Header="140%" Width="200" Click="MainWindow_HorizZoomChange"/>
+                        <MenuItem Header="120%" Width="200" Click="MainWindow_HorizZoomChange"/>
+                        <MenuItem Header="100%" Width="200" Click="MainWindow_HorizZoomChange"/>
+                        <MenuItem Header="80%" Width="200" Click="MainWindow_HorizZoomChange"/>
+                        <MenuItem Header="60%" Width="200" Click="MainWindow_HorizZoomChange"/>
+                        <MenuItem Header="40%" Width="200" Click="MainWindow_HorizZoomChange"/>
+                        <MenuItem Header="20%" Width="200" Click="MainWindow_HorizZoomChange"/>
+                    </MenuItem>
+                    <MenuItem Header="_Vertical Zoom" Width="200">
+                        <MenuItem Header="100%" Width="200" Click="MainWindow_VertiZoomChange"/>
+                        <MenuItem Header="80%" Width="200" Click="MainWindow_VertiZoomChange"/>
+                        <MenuItem Header="60%" Width="200" Click="MainWindow_VertiZoomChange"/>
+                        <MenuItem Header="40%" Width="200" Click="MainWindow_VertiZoomChange"/>
+                        <MenuItem Header="20%" Width="200" Click="MainWindow_VertiZoomChange"/>
+                    </MenuItem>
+                    <Separator Background="{DynamicResource MenuButtonMouseOverColour}" Margin="-22,3,0,3" Width="220" HorizontalAlignment="Left"/>
+                    <MenuItem Header="_Occurrences" Width="200">
+                        <MenuItem Header="_Expand All" Width="200" Click="MainWindow_ExpandAll"/>
+                        <MenuItem Header="_Collapse All" Width="200" Click="MainWindow_CollapseAll"/>
+                        <Separator Background="{DynamicResource MenuButtonMouseOverColour}" Margin="-22,3,0,3" Width="220" HorizontalAlignment="Left"/>
+                        <MenuItem Header="_Show All" Width="200" Click="MainWindow_ShowAll"/>
+                        <MenuItem Header="_Hide All" Width="200" Click="MainWindow_HideAll"/>
+                    </MenuItem>
+                    <MenuItem Header="_Key Names" Width="200">
+                        <MenuItem Header="_All Keys" Width="200" local:MenuItemExtensions.GroupName="keyVisibilitySettings" IsCheckable="True" IsChecked="False" Checked="MainWindow_KeyVisibilityChange"/>
+                        <MenuItem x:Name="mnuDefaultKeyNames" Header="_Only Octaves" Width="200" local:MenuItemExtensions.GroupName="keyVisibilitySettings" IsCheckable="True" IsChecked="True" Checked="MainWindow_KeyVisibilityChange"/>
+                        <MenuItem Header="_None" Width="200" local:MenuItemExtensions.GroupName="keyVisibilitySettings" IsCheckable="True" IsChecked="False" Checked="MainWindow_KeyVisibilityChange"/>
+                    </MenuItem>
+                    <Separator Background="{DynamicResource MenuButtonMouseOverColour}" Margin="-22,3,0,3" Width="220" HorizontalAlignment="Left"/>
+                    <MenuItem x:Name="mnuGridLines" Header="_Show Grid Lines" Width="200" IsCheckable="True" IsChecked="True" Checked="MainWindow_GridVisibilityOn" Unchecked="MainWindow_GridVisibilityOff"/>
+                    <MenuItem x:Name="mnuAutomaticIcons" Header="_Automatic Icons" Width="200" IsCheckable="True" IsChecked="True" Checked="MainWindow_AutomaticIconsOn" Unchecked="MainWindow_AutomaticIconsOff"/>
+                    <!--<MenuItem x:Name="mnuDarkMode" Header="_Dark Mode" Width="200" IsCheckable="True" IsChecked="True" Checked="MainWindow_DarkModeOn" Unchecked="MainWindow_DarkModeOff"/>-->
+                </MenuItem>
+
+                <MenuItem x:Name="mnuPatterns" Header="_Patterns" Width="Auto" Visibility="Hidden">
+                    <MenuItem Header="_Add Pattern" Width="200" Click="MainWindow_AddPattern"/>
+                    <MenuItem Header="_Delete Selected Pattern" Width="200" Click="MainWindow_DeletePattern"/>
+                    <Separator Background="{DynamicResource MenuButtonMouseOverColour}" Margin="-22,3,0,3" Width="220" HorizontalAlignment="Left"/>
+                    <MenuItem Header="_Snap" Width="200">
+                        <MenuItem Header="Step" Width="200" local:MenuItemExtensions.GroupName="snapSettings" IsCheckable="True" Checked="MainWindow_SnapChange"/>
+                        <MenuItem Header="1/2 Step" Width="200" local:MenuItemExtensions.GroupName="snapSettings" IsCheckable="True" Checked="MainWindow_SnapChange"/>
+                        <MenuItem Header="1/3 Step" Width="200" local:MenuItemExtensions.GroupName="snapSettings" IsCheckable="True" Checked="MainWindow_SnapChange"/>
+                        <MenuItem x:Name="mnuDefaultSnap" Header="1/4 Step" Width="200" local:MenuItemExtensions.GroupName="snapSettings" IsCheckable="True" IsChecked="True" Checked="MainWindow_SnapChange"/>
+                        <MenuItem Header="1/8 Step" Width="200" local:MenuItemExtensions.GroupName="snapSettings" IsCheckable="True" Checked="MainWindow_SnapChange"/>
+                    </MenuItem>
+                    <MenuItem x:Name="mnuSongSelect" Header="_Song Select Mode" Width="200" IsCheckable="True" IsChecked="False" Checked="MainWindow_SongSelectOn" Unchecked="MainWindow_SongSelectOff"/>
+                </MenuItem>
+
+                <MenuItem x:Name="mnuPlayback" Header="Play_back" Width="Auto" Visibility="Hidden">
+                    <MenuItem Header="_Play" Width="200" Click="MainWindow_Play"/>
+                    <MenuItem Header="Pau_se" Width="200" Click="MainWindow_Pause"/>
+                    <MenuItem Header="_Stop" Width="200" Click="MainWindow_Stop"/>
+                    <Separator Background="{DynamicResource MenuButtonMouseOverColour}" Margin="-22,3,0,3" Width="220" HorizontalAlignment="Left"/>
+                    <MenuItem x:Name="mnuNormaliseVelocities" Header="_Normalise Velocities" Width="200" IsCheckable="True" IsChecked="False" Checked="MainWindow_NormaliseVelocitiesOn" Unchecked="MainWindow_NormaliseVelocitiesOff"/>
+                </MenuItem>
+            </Menu>
+        </DockPanel>
+
+        <Grid Grid.Row="1" Background="{DynamicResource GridDarkColour}" Panel.ZIndex="1">
+            <Image x:Name="imgBrowse" Source="gui/buttons/plusbutton.png" Height="200" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="40,-180,0,0"/>
+            <Button x:Name="btnBrowse" Height="30" Width="100" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,150,0,0" Content="Browse" Click="MainWindow_MIDIBrowseClick"></Button>
+            <TextBlock x:Name="txtLoading" Height="35" Width="110" FontSize="23" Text="Loading..." TextAlignment="Left" Margin="17,300,0,0" Visibility="Hidden"/>
+            <ContentControl x:Name="cntPianoRoll" Content="{Binding}"/>
+        </Grid>
+    </Grid>
+</Window>
