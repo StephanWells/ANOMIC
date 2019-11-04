@@ -476,7 +476,7 @@ namespace AnnotationTool.views
                     }
 
                     ClearPatterns();
-                    ImportPatterns(filePatterns);
+                    ImportPatterns(filePatterns, 1);
 
                     if (logging) logs.Add(new Log() { logType = LogType.PatternImport, time = sw.Elapsed, value = "Filename: " + browseDialog.SafeFileName.ToString() });
                 }
@@ -689,32 +689,6 @@ namespace AnnotationTool.views
 
             if (logging) logs.Add(new Log() { logType = LogType.AutomaticIconsUpdate, time = sw.Elapsed, value = "" + MainWindow.settings.automaticIcons });
         }
-
-        //private void MainWindow_DarkModeOn(object sender, EventArgs e)
-        //{
-        //    this.Resources["ButtonColour"] = (new BrushConverter()).ConvertFrom("#6D7081");
-        //    this.Resources["ButtonMouseOverColour"] = (new BrushConverter()).ConvertFrom("#00CCCC");
-        //    this.Resources["ButtonPressedColour"] = (new BrushConverter()).ConvertFrom("#00B7B7");
-        //    this.Resources["MenuButtonMouseOverColour"] = (new BrushConverter()).ConvertFrom("#393C46");
-        //    this.Resources["GridLineColour"] = (new BrushConverter()).ConvertFrom("#07070A");
-        //    this.Resources["GridExtraLightColour"] = (new BrushConverter()).ConvertFrom("#74778B");
-        //    this.Resources["GridLightColour"] = (new BrushConverter()).ConvertFrom("#25262C");
-        //    this.Resources["GridDarkColour"] = (new BrushConverter()).ConvertFrom("#1D1E22");
-        //    this.Resources["GridExtraDarkColour"] = (new BrushConverter()).ConvertFrom("#0C0C0E");
-        //}
-
-        //private void MainWindow_DarkModeOff(object sender, EventArgs e)
-        //{
-        //    this.Resources["ButtonColour"] = (new BrushConverter()).ConvertFrom("#e3e5e8");
-        //    this.Resources["ButtonMouseOverColour"] = (new BrushConverter()).ConvertFrom("#FF5C33");
-        //    this.Resources["ButtonPressedColour"] = (new BrushConverter()).ConvertFrom("#CC2900");
-        //    this.Resources["MenuButtonMouseOverColour"] = (new BrushConverter()).ConvertFrom("#838795");
-        //    this.Resources["GridLineColour"] = (new BrushConverter()).ConvertFrom("#07070A");
-        //    this.Resources["GridExtraLightColour"] = (new BrushConverter()).ConvertFrom("#232529");
-        //    this.Resources["GridLightColour"] = (new BrushConverter()).ConvertFrom("#f1f2f3");
-        //    this.Resources["GridDarkColour"] = (new BrushConverter()).ConvertFrom("#e3e5e8");
-        //    this.Resources["GridExtraDarkColour"] = (new BrushConverter()).ConvertFrom("#0C0C0E");
-        //}
 
         private void MainWindow_ExpandAll(object sender, EventArgs e)
         {
@@ -2257,9 +2231,28 @@ namespace AnnotationTool.views
             btnAddPattern.Margin = new Thickness(0, 0, 0, 0);
         }
 
-        private void ImportPatterns(List<Pattern> patternsIn)
+        private void ImportPatterns(List<Pattern> patternsIn, double res)
         {
             double animMove = 0;
+
+			foreach (Pattern pattern in patternsIn)
+			{
+				foreach (Occurrence occurrence in pattern.GetOccurrences())
+				{
+					for (int i = 0; i < occurrence.highlightedNotes.Count; i++)
+					{
+						double noteTime = occurrence.highlightedNotes[i].note.GetTime();
+						double noteDuration = occurrence.highlightedNotes[i].note.GetDuration();
+						double resFactor = resolution / res;
+						
+						noteTime *= resFactor;
+						noteDuration *= resFactor;
+
+						occurrence.highlightedNotes[i].note.SetTime(noteTime);
+						occurrence.highlightedNotes[i].note.SetDuration(noteTime);
+					}
+				}
+			}
 
             for (int i = 0; i < patternsIn.Count; i++)
             {
@@ -2276,14 +2269,37 @@ namespace AnnotationTool.views
 
                         foreach (NoteRect highlightedNote in currentOccurrence.highlightedNotes)
                         {
-                            foreach (NoteRect noteRect in notes[0])
+							bool found = false;
+
+							foreach (NoteRect noteRect in notes[0])
                             {
                                 if (NoteRect.AreTwoNotesEqual(noteRect.note, highlightedNote.note))
                                 {
                                     highlightedNotes.Add(noteRect);
+
+									found = true;
                                 }
                             }
-                        }
+
+							if (!found)
+							{
+								double minDist = double.MaxValue;
+								NoteRect minNote = new NoteRect();
+
+								foreach (NoteRect noteRect in notes[0])
+								{
+									double currentDist = Math.Abs(highlightedNote.note.GetTime() - noteRect.note.GetTime());
+
+									if (minDist > currentDist && highlightedNote.note.GetPitch() == noteRect.note.GetPitch())
+									{
+										minDist = currentDist;
+										minNote = noteRect;
+									}
+								}
+
+								highlightedNotes.Add(minNote);
+							}
+						}
 
                         if (highlightedNotes.Count > 0)
                         {

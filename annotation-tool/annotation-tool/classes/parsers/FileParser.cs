@@ -655,9 +655,32 @@ namespace AnnotationTool
                         if (!curatorFound)
                         {
                             curatorFound = true;
-                            Tuple<Curator, int> entryResults = ReadCurator(index);
-                            annotationMetaData.curator = entryResults.Item1;
-                            index = entryResults.Item2;
+
+							// Catering for incorrectly-formatted curators.
+
+							int tempIndex = index + 1;
+
+							while (file[tempIndex] != '{' && file[tempIndex] != '"' && file[tempIndex] != ',')
+							{
+								tempIndex++;
+							}
+
+							if (file[tempIndex] == '{')
+							{
+								Tuple<Curator, int> entryResults = ReadCurator(index);
+								annotationMetaData.curator = entryResults.Item1;
+								index = entryResults.Item2;
+							}
+							else if (file[tempIndex] == '"' || file[tempIndex] == ',')
+							{
+								Tuple<string, int> entryResults = ReadNextEntry(index);
+
+								Curator curator = new Curator();
+								curator.name = entryResults.Item1;
+								curator.email = "";
+								annotationMetaData.curator = curator;
+								index = entryResults.Item2;
+							}
                         }
                         else
                         {
@@ -684,14 +707,32 @@ namespace AnnotationTool
                         {
                             annotatorFound = true;
                             annotationMetaData.annotator = new Dictionary<string, string>();
-                            Tuple<Dictionary<string, string>, int> dictResults = ReadDictionary(index);
 
-                            foreach (KeyValuePair<string, string> dictEntry in dictResults.Item1)
-                            {
-                                annotationMetaData.annotator.Add(dictEntry.Key, dictEntry.Value);
-                            }
+							int tempIndex = index + 1;
 
-                            index = dictResults.Item2;
+							while (file[tempIndex] != '{' && file[tempIndex] != '"' && file[tempIndex] != ',')
+							{
+								tempIndex++;
+							}
+
+							if (file[tempIndex] == '{')
+							{
+								Tuple<Dictionary<string, string>, int> dictResults = ReadDictionary(index);
+
+								foreach (KeyValuePair<string, string> dictEntry in dictResults.Item1)
+								{
+									annotationMetaData.annotator.Add(dictEntry.Key, dictEntry.Value);
+								}
+
+								index = dictResults.Item2;
+							}
+							else if (file[tempIndex] == '"' || file[tempIndex] == ',')
+							{
+								Tuple<string, int> entryResults = ReadNextEntry(index);
+
+								annotationMetaData.annotator.Add("0", entryResults.Item1);
+								index = entryResults.Item2;
+							}
                         }
                         else
                         {
