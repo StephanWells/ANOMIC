@@ -498,7 +498,7 @@ namespace AnnotationTool.views
 
             if (browseDialog.ShowDialog() == true)
             {
-                FileParser fileParser = new FileParser(patterns);
+                FileParser fileParser = new FileParser(patterns, resolution);
                 fileParser.midiName = midiParse.fileName;
                 fileParser.midiDuration = "" + noteParse.midiLength;
 

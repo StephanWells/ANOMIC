@@ -109,7 +109,55 @@ namespace AnnotationTool
             Thread.CurrentThread.CurrentCulture = customCulture;
         }
 
-        public void ParseFile()
+		public FileParser(List<Pattern> patternsIn, double resolution)
+		{
+			patterns = new List<Pattern>();
+
+			foreach (Pattern pattern in patternsIn)
+			{
+				Pattern newPattern = new Pattern();
+
+				foreach (Occurrence occurrence in pattern.GetOccurrences())
+				{
+					Occurrence newOccurrence = new Occurrence();
+					newOccurrence.isNotesMode = occurrence.isNotesMode;
+					newOccurrence.SetConfidence(occurrence.GetConfidence());
+
+					if (newOccurrence.isNotesMode)
+					{
+						for (int i = 0; i < occurrence.highlightedNotes.Count; i++)
+						{
+							Note oldNote = occurrence.highlightedNotes[i].note;
+
+							NoteRect noteRect = new NoteRect();
+							noteRect.note = new Note(oldNote.GetPitch(), Math.Round(oldNote.GetTime() / resolution, 2), Math.Round(oldNote.GetDuration() / resolution, 2), oldNote.GetChannel(), oldNote.GetVelocity());
+							newOccurrence.highlightedNotes.Add(noteRect);
+						}
+					}
+					else
+					{
+						newOccurrence.SetStart(Math.Round(occurrence.GetStart() / resolution, 2));
+						newOccurrence.SetEnd(Math.Round(occurrence.GetEnd() / resolution, 2));
+					}
+
+					newPattern.AddOccurrence(newOccurrence);
+				}
+
+				patterns.Add(newPattern);
+			}
+
+			logs = new List<Log>();
+
+			nfi = new NumberFormatInfo();
+			nfi.NumberDecimalSeparator = ".";
+
+			CultureInfo customCulture = (CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
+			customCulture.NumberFormat.NumberDecimalSeparator = ".";
+
+			Thread.CurrentThread.CurrentCulture = customCulture;
+		}
+
+		public void ParseFile()
         {
             FileToJAMS();
             JAMSToPatterns();
