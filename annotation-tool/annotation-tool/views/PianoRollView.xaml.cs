@@ -470,7 +470,7 @@ namespace AnnotationTool.views
                     List<Pattern> filePatterns = fileParser.patterns;
                     
 
-                    if (fileParser.midiName != midiParse.fileName || Double.Parse(fileParser.midiDuration) != noteParse.midiLength)
+                    if (fileParser.midiName != midiParse.fileName || (Double.Parse(fileParser.midiDuration) * resolution) != noteParse.midiLength)
                     {
                         MessageBox.Show("Annotation data does not match MIDI file!", "Warning", MessageBoxButton.OK);
                     }
@@ -500,7 +500,7 @@ namespace AnnotationTool.views
             {
                 FileParser fileParser = new FileParser(patterns, resolution);
                 fileParser.midiName = midiParse.fileName;
-                fileParser.midiDuration = "" + noteParse.midiLength;
+                fileParser.midiDuration = "" + Math.Round(noteParse.midiLength / resolution, 2);
 
                 if (logging) fileParser.logs = logs;
                 if (logging) logs.Add(new Log() { logType = LogType.Session, time = sw.Elapsed, value = "Session end" });
