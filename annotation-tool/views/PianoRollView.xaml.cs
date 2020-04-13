@@ -221,6 +221,7 @@ namespace AnnotationTool.views
             noteParse = noteParseIn;
 
             timeDivRatio = resolution / midiParse.header.timeDiv;
+			noteParse.midiLength /= midiParse.header.timeDiv;
 
             foreach (Note note in noteParse.notes)
             {
@@ -500,7 +501,7 @@ namespace AnnotationTool.views
             {
                 FileParser fileParser = new FileParser(patterns, resolution);
                 fileParser.midiName = midiParse.fileName;
-                fileParser.midiDuration = "" + Math.Round(noteParse.midiLength / resolution, 2);
+                fileParser.midiDuration = "" + noteParse.midiLength;
 
                 if (logging) fileParser.logs = logs;
                 if (logging) logs.Add(new Log() { logType = LogType.Session, time = sw.Elapsed, value = "Session end" });
