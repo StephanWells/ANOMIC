@@ -95,9 +95,11 @@ namespace AnnotationTool
             Thread.CurrentThread.CurrentCulture = customCulture;
         }
 
-        public FileParser(List<Pattern> patternsIn)
+        public FileParser(List<Pattern> patternsIn, string midiName, string midiDuration)
         {
             patterns = patternsIn;
+            this.midiName = midiName;
+            this.midiDuration = midiDuration;
             logs = new List<Log>();
 
             nfi = new NumberFormatInfo();
@@ -109,11 +111,13 @@ namespace AnnotationTool
             Thread.CurrentThread.CurrentCulture = customCulture;
         }
 
-		public FileParser(List<Pattern> patternsIn, double resolution)
+		public FileParser(List<Pattern> patternsIn, double resolution, string midiName, string midiDuration)
 		{
 			patterns = new List<Pattern>();
+            this.midiName = midiName;
+            this.midiDuration = Math.Round(double.Parse(midiDuration) / resolution, 2).ToString();
 
-			foreach (Pattern pattern in patternsIn)
+            foreach (Pattern pattern in patternsIn)
 			{
 				Pattern newPattern = new Pattern();
 
